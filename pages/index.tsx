@@ -30,22 +30,28 @@ export default function Home() {
         </p>
 
         <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex">
-          <Link href="/rewire">
-            <button className="bg-amber-500 hover:bg-amber-400 text-black px-6 py-3 rounded-lg font-semibold transition">
-              🔥 7-Day Challenge
-            </button>
-          </Link>
-          <Link href="/train">
-            <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
-              🧠 Log Reps
-            </button>
-          </Link>
-          <Link href="/visualizer">
-            <button className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold transition">
-              🧬 Visualizer
-            </button>
-          </Link>
-        </div>
+  <Link href="/rewire">
+    <button className="bg-amber-500 hover:bg-amber-400 text-black px-6 py-3 rounded-lg font-semibold transition">
+      🔥 7-Day Challenge
+    </button>
+  </Link>
+  <Link href="/train">
+    <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
+      🧠 Log Reps
+    </button>
+  </Link>
+  <Link href="/visualizer">
+    <button className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold transition">
+      🧬 Visualizer
+    </button>
+  </Link>
+  <Link href="/founder">
+    <button className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-semibold transition">
+      💬 Message from the Founder
+    </button>
+  </Link>
+</div>
+
 
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">📜 The Myelin Truth</h2>
