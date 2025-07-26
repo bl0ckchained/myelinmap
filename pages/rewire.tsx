@@ -1,5 +1,3 @@
-// ✅ Rewire Challenge Page – Myelin Map ⚡️🧠
-
 import React from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
@@ -14,7 +12,6 @@ const RewirePage = () => {
           name="description"
           content="Rewire your brain in 7 days with habit loops, motivation, and visual growth."
         />
-        {/* ✅ Favicon is handled globally in _document.tsx */}
       </Head>
 
       <Header
@@ -43,9 +40,9 @@ const RewirePage = () => {
           </div>
         </section>
 
-        {/* What You'll Get */}
+        {/* What You&apos;ll Get */}
         <section>
-          <h2 className="text-3xl font-semibold text-gray-800">What You'll Get</h2>
+          <h2 className="text-3xl font-semibold text-gray-800">What You&apos;ll Get</h2>
           <div className="grid gap-6 mt-8 sm:grid-cols-2">
             {[
               {
@@ -62,7 +59,7 @@ const RewirePage = () => {
               },
               {
                 title: "✅ Bonus PDF",
-                desc: 'Download our "Top 5 Myelin-Boosting Habits" guide — free with the challenge.',
+                desc: "Download our &quot;Top 5 Myelin-Boosting Habits&quot; guide — free with the challenge.",
               },
             ].map(({ title, desc }, i) => (
               <div
@@ -94,12 +91,11 @@ const RewirePage = () => {
             What Others Are Saying
           </h2>
           <blockquote className="italic text-gray-600">
-            “The way Myelin Map helps visualize progress is next-level. I finally feel in control of my habits.”
+            &ldquo;The way Myelin Map helps visualize progress is next-level. I finally feel in control of my habits.&rdquo;
             <br />— Jordan, Beta Tester
           </blockquote>
           <blockquote className="italic text-gray-600 mt-4">
-            “This challenge gave me the momentum I’ve been needing for{" "}
-            <em>years.</em>”
+            &ldquo;This challenge gave me the momentum I&apos;ve been needing for <em>years.</em>&rdquo;
             <br />— Casey M.
           </blockquote>
         </section>
@@ -111,21 +107,27 @@ const RewirePage = () => {
           </h2>
           <p className="text-gray-700 mb-6">
             Enter your email below to start the 7-day challenge for free.
-            You'll get Day 1 immediately.
+            You&apos;ll get Day 1 immediately.
           </p>
-          <form className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="px-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition"
-            >
-              Start Now
-            </button>
-          </form>
+          <form
+  onSubmit={(e) => e.preventDefault()}
+  className="flex flex-col sm:flex-row justify-center items-center gap-4"
+>
+  <input
+    type="email"
+    name="email"
+    required
+    placeholder="Enter your email"
+    className="px-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
+  />
+  <button
+    type="submit"
+    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition"
+  >
+    Start Now
+  </button>
+</form>
+
         </section>
       </main>
 
@@ -135,6 +137,3 @@ const RewirePage = () => {
 };
 
 export default RewirePage;
-// ✅ Rewire Challenge Page – Myelin Map ⚡️ 🧠
-// ✅ Uses Next.js Head for SEO and metadata
-// ✅ Header component for title and subtitle 

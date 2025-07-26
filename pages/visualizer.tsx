@@ -36,7 +36,7 @@ export default function Visualizer() {
     <>
       <Head>
         <title>Visualizer | Myelin Map</title>
-        <meta name="description" content="Visualize your brain's myelin growth in real time." />
+        <meta name="description" content="Visualize your brain&apos;s myelin growth in real time." />
       </Head>
 
       <Header
@@ -54,14 +54,14 @@ export default function Visualizer() {
 
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
-            Our mission is to help you <strong>visualize your brain's growth</strong> and rewire it through consistent habits.
+            Our mission is to help you <strong>visualize your brain&apos;s growth</strong> and rewire it through consistent habits.
             By tracking your progress, you can reinforce positive changes and transform your life.
           </p>
 
           <h2 className="text-2xl font-semibold text-white">Our Vision</h2>
           <p>
             Every small habit contributes to a larger transformation. Myelin Map makes that process engaging and insightful,
-            allowing you to see the connections between your habits and your brain’s development.
+            allowing you to see the connections between your habits and your brain&apos;s development.
           </p>
 
           <h2 className="text-2xl font-semibold text-white">Join Us</h2>
