@@ -21,7 +21,15 @@ export default function Visualizer() {
     const ivyColor = "#8affc1";
     const magicGlow = "rgba(131, 255, 184, 0.4)";
 
-    let branches: any[] = [];
+    interface Branch {
+      x: number;
+      y: number;
+      angle: number;
+      depth: number;
+      width: number;
+    }
+    let branches: Branch[] = [];
+
     let animationFrame: number;
     let currentIndex = 0;
 
