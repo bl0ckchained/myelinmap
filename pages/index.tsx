@@ -51,6 +51,31 @@ export default function Home() {
           </Link>
         </div>
 
+        // ✅ Add this after the CTA buttons (line ~48)
+
+<section className="mt-20 w-full px-4 flex flex-col items-center bg-gray-950 text-white">
+  <h2 className="text-3xl font-bold mb-4 text-center">⚡ How Myelin Rewires the Brain</h2>
+  <p className="text-lg mb-6 max-w-2xl text-center text-gray-300">
+    This 90-second animation explains how every rep speeds up your brain's signals — and why your growth is real.
+  </p>
+  <video
+    className="w-full max-w-4xl rounded-xl shadow-2xl"
+    src="/myelinmap_video.mp4"
+    controls
+    autoPlay
+    muted
+    loop
+  />
+</section>
+        <section className="mt-20 max-w-3xl text-left space-y-6">
+          <h2 className="text-3xl font-bold text-white">🧠 Why Myelin Matters</h2>
+          <p className="text-lg text-gray-300">
+            Myelin is the brain's insulation. It speeds up signals, strengthens connections, and makes habits automatic.
+            <br />
+            Every time you take action, you build myelin. Every rep counts. This is how you change your life.
+          </p>
+        </section>
+
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">📜 The Myelin Truth</h2>
           <p className="text-lg text-gray-300">
