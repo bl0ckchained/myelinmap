@@ -24,6 +24,8 @@ export default function Resources() {
             <ul className="list-disc list-inside space-y-2 text-gray-300">
               <li><a href="https://www.brainfacts.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">BrainFacts.org</a> – Explore how the brain builds skills.</li>
               <li><a href="https://charlesduhigg.com/the-power-of-habit/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">The Power of Habit</a> – Book and tools by Charles Duhigg.</li>
+              <li><a href="https://danielcoyle.com/the-talent-code/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">The Talent Code</a> – Daniel Coyle reveals how deep practice and myelin growth unlock skill mastery.</li>
+              <li><a href="https://www.what-happened-to-you.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">What Happened to You</a> – Oprah & Dr. Perry explore trauma, healing, and brain rewiring through compassion.</li>
             </ul>
           </div>
 
