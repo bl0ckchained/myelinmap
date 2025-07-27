@@ -1,72 +1,104 @@
-// ✅ Visualizer Page – Built by Chad + Ninja 🧠⚡
-
 import Head from "next/head";
-import { useEffect } from "react";
+import { useRef, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export default function Visualizer() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   useEffect(() => {
-    const container = document.getElementById("visualizer");
-    if (!container) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const habits = [
-      { x: 100, y: 100, completed: false },
-      { x: 300, y: 120, completed: true },
-      { x: 200, y: 250, completed: false },
-      { x: 500, y: 200, completed: true },
-      { x: 400, y: 350, completed: true },
-      { x: 150, y: 400, completed: false },
-    ];
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    habits.forEach((habit) => {
-      const node = document.createElement("div");
-      node.className = `node absolute w-5 h-5 rounded-full ${
-        habit.completed
-          ? "bg-emerald-400 shadow-[0_0_20px_#34d399]"
-          : "bg-sky-400 shadow-[0_0_10px_#38bdf8]"
-      } animate-pulse z-10`;
-      node.style.left = `${habit.x}px`;
-      node.style.top = `${habit.y}px`;
-      container.appendChild(node);
-    });
+    const width = (canvas.width = canvas.offsetWidth);
+    const height = (canvas.height = canvas.offsetHeight);
+
+    const ivyColor = "#8affc1";
+    const magicGlow = "rgba(131, 255, 184, 0.4)";
+    const branches: {
+      x: number;
+      y: number;
+      angle: number;
+      depth: number;
+      width: number;
+    }[] = [];
+
+    const drawBranch = (
+      x: number,
+      y: number,
+      angle: number,
+      depth: number,
+      width: number
+    ) => {
+      if (depth === 0) return;
+      const x2 = x + Math.cos(angle) * depth * 10;
+      const y2 = y - Math.sin(angle) * depth * 10;
+
+      ctx.beginPath();
+      ctx.strokeStyle = ivyColor;
+      ctx.lineWidth = width;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = magicGlow;
+      ctx.moveTo(x, y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      branches.push({ x: x2, y: y2, angle, depth: depth - 1, width: width * 0.7 });
+    };
+
+    const drawTree = () => {
+      ctx.clearRect(0, 0, width, height);
+      branches.length = 0;
+
+      drawBranch(width / 2, height, Math.PI / 2, 8, 8);
+
+      for (let i = 0; i < branches.length; i++) {
+        const { x, y, angle, depth, width } = branches[i];
+        drawBranch(x, y, angle - 0.3, depth, width);
+        drawBranch(x, y, angle + 0.3, depth, width);
+      }
+    };
+
+    drawTree();
   }, []);
 
   return (
     <>
       <Head>
         <title>Visualizer | Myelin Map</title>
-        <meta name="description" content="Visualize your brain&apos;s myelin growth in real time." />
+        <meta name="description" content="Visualize your brain's myelin growth in real time." />
       </Head>
 
       <Header
-        title="Visualize Your Myelin Growth 🧠"
-        subtitle="Watch your neural connections light up as you build better habits"
+        title="Tree of Life Visualizer 🌱"
+        subtitle="Magical growth, one rep at a time."
       />
 
       <main className="bg-gray-900 text-slate-100 min-h-[calc(100vh-200px)] px-4 py-12 flex flex-col items-center justify-start">
-        <h1 className="text-4xl font-bold mb-6 text-center">🧠 Myelin Map Visualizer</h1>
+        <h1 className="text-4xl font-bold mb-6 text-center">
+          🧠 Watch Your Myelin Tree Grow
+        </h1>
 
-        <div
-          id="visualizer"
-          className="relative w-full max-w-3xl h-[500px] rounded-2xl bg-gradient-radial from-slate-800 to-gray-900 shadow-2xl mb-12 overflow-hidden"
-        />
+        <div className="relative w-full max-w-4xl h-[500px] mb-12 rounded-2xl overflow-hidden shadow-2xl bg-black">
+          <canvas ref={canvasRef} className="w-full h-full" />
+        </div>
 
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
-            Our mission is to help you <strong>visualize your brain&apos;s growth</strong> and rewire it through consistent habits.
-            By tracking your progress, you can reinforce positive changes and transform your life.
+            Every time you log a rep, your mystical Tree of Life grows stronger — more branches, more light, more magic.
           </p>
 
-          <h2 className="text-2xl font-semibold text-white">Our Vision</h2>
+          <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
-            Every small habit contributes to a larger transformation. Myelin Map makes that process engaging and insightful,
-            allowing you to see the connections between your habits and your brain&apos;s development.
+            The tree will evolve with you. In the future, you’ll see circuits form, energy pulse through, and the shape of your discipline come alive.
           </p>
 
-          <h2 className="text-2xl font-semibold text-white">Join Us</h2>
+          <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            Ready to start visualizing your growth? Join our community and be part of the journey toward a better you.
+            This isn’t fantasy — it’s neuroscience. Repetition wires your brain. The visualizer just lets you see it.
           </p>
         </section>
       </main>
