@@ -61,20 +61,21 @@ export default function Home() {
             controls
             preload="auto"
             className="w-full rounded-xl shadow-xl"
-          >
+            >
             <source src="/myelinmap_video.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
 
-        <section className="mt-20 max-w-3xl text-left space-y-6">
-          <h2 className="text-3xl font-bold text-white">🧠 Why Myelin Matters</h2>
-          <p className="text-lg text-gray-300">
-            Myelin is the brain's insulation. It speeds up signals, strengthens connections, and makes habits automatic.
-            <br />
-            Every time you take action, you build myelin. Every rep counts. This is how you change your life.
-          </p>
-        </section>
+<section className="mt-20 max-w-3xl text-left space-y-6">
+  <h2 className="text-3xl font-bold text-white">🧠 Why Myelin Matters</h2>
+  <p className="text-lg text-gray-300">
+    Myelin is the brain&rsquo;s insulation. It speeds up signals, strengthens connections, and makes habits automatic.
+    <br />
+    Every time you take action, you build myelin. Every rep counts. This is how you change your life.
+  </p>
+</section>
+
 
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">📜 The Myelin Truth</h2>
