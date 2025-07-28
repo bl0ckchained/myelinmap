@@ -10,7 +10,7 @@ export default function Footer() {
         © 2025 MyelinMap.com – Made with 💙 in Michigan · Powered by Quantum Step Consultants LLC
       </p>
       <p>
-        <Link href="/PrivacyPolicies" className="underline hover:text-blue-300">
+        <Link href="/privacypolicies" className="underline hover:text-blue-300">
           Privacy Policy & Terms
         </Link>
       </p>
