@@ -36,7 +36,7 @@ export default function Home() {
               🔥 7-Day Challenge
             </button>
           </Link>
-          
+
           <Link href="/visualizer">
             <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
               🧬 Visualize & Grow
@@ -108,7 +108,7 @@ export default function Home() {
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">⚡ My Story</h2>
           <p className="text-lg text-gray-300">
-            I&rsquo;m <strong>Chad Adams Drummonds</strong> — a father, husband,
+            I&rsquo;m <strong>Chad Drummonds</strong> — a father, husband,
             and computer science student who lost everything to addiction... and
             clawed my way back.
           </p>
