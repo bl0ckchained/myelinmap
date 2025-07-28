@@ -36,16 +36,13 @@ export default function Home() {
               🔥 7-Day Challenge
             </button>
           </Link>
-          <Link href="/train">
-            <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
-              🧠 Log Reps
-            </button>
-          </Link>
+          
           <Link href="/visualizer">
-            <button className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold transition">
-              🧬 Visualizer
+            <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
+              🧬 Visualize & Grow
             </button>
           </Link>
+          
           <Link href="/resources">
             <button className="bg-lime-500 hover:bg-lime-400 text-black px-6 py-3 rounded-lg font-semibold transition">
               📚 Resources

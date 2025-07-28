@@ -1,13 +1,15 @@
-// ✅ Visualizer Page – Tree of Life Growth Animation 🌱🧠✨
+// ✅ Grow Page – Train + Visualizer Combo 🌱🧠✨
 
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HabitLoop from "@/components/HabitLoop";
+import RepCounter from "@/components/RepCounter";
 
-export default function Visualizer() {
+export default function Grow() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [repCount, setRepCount] = useState(0); // future: fetch from user log
+  const [repCount, setRepCount] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -69,17 +71,25 @@ export default function Visualizer() {
   return (
     <>
       <Head>
-        <title>Visualizer | Myelin Map</title>
-        <meta name="description" content="Visualize your brain's myelin growth in real time." />
+        <title>Myelin Map – Grow 🌱</title>
+        <meta name="description" content="Train your brain and watch your myelin tree grow with every rep." />
       </Head>
 
       <Header
-        title="Tree of Life Visualizer 🌱"
-        subtitle="Magical growth, one rep at a time."
+        title="Grow Your Mind 🌳"
+        subtitle="Train with reps. Visualize your progress."
       />
 
-      <main className="bg-gray-900 text-slate-100 min-h-[calc(100vh-200px)] px-4 py-12 flex flex-col items-center justify-start">
-        <h1 className="text-4xl font-bold mb-6 text-center">🧠 Watch Your Myelin Tree Grow</h1>
+      <main className="flex flex-col items-center justify-start px-4 py-16 min-h-[calc(100vh-200px)] bg-gray-900 text-white">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">🧠 Rewire with Action</h1>
+        <p className="text-lg max-w-2xl mb-10 text-gray-300 text-center">
+          One click. One rep. One branch at a time. This is how myelin grows.
+        </p>
+
+        <div className="w-full max-w-2xl space-y-8 mb-16">
+          <HabitLoop />
+          <RepCounter />
+        </div>
 
         <div className="relative w-full max-w-4xl h-[500px] mb-12 rounded-2xl overflow-hidden shadow-2xl bg-black">
           <canvas ref={canvasRef} className="w-full h-full" />
@@ -106,3 +116,9 @@ export default function Visualizer() {
     </>
   );
 }
+// ✅ This page combines training and visualization features for a holistic brain growth experience
+// ✅ Uses a canvas to draw a dynamic myelin tree that grows with each rep
+// ✅ Responsive design with Tailwind CSS
+// ✅ Includes habit tracking components for user engagement
+// ✅ Head component for SEO and metadata
+// ✅ Footer component is imported and used at the bottom
