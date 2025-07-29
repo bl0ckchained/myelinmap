@@ -13,14 +13,14 @@ export default function Support() {
         </p>
 
         <p className="mb-4">
-          If you’d like to support the mission, thank you 🙏 Your encouragement is just as valuable as your dollars.
+          If you&apos;d like to support the mission, thank you 🙏 Your encouragement is just as valuable as your dollars.
         </p>
 
         <p className="mb-4">
           <strong>Ways to support:</strong>
         </p>
         <ul className="list-disc list-inside mb-6">
-          <li>Share Myelin Map with friends & community</li>
+          <li>Share Myelin Map with friends &amp; community</li>
           <li>Send kind feedback or a testimonial</li>
           <li>Request a feature or report a bug</li>
           <li>
@@ -28,7 +28,7 @@ export default function Support() {
             <a href="mailto:support@myelinmap.com" className="text-blue-600 underline">
               email us
             </a>{" "}
-            and we’ll set it up!
+            and we&apos;ll set it up!
           </li>
         </ul>
 
