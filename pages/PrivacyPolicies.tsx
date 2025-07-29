@@ -18,7 +18,6 @@ export default function PrivacyPolicies() {
           </Link>
         </p>
 
-        {/* 🎯 Intro */}
         <section className="space-y-2">
           <h1 className="text-3xl font-bold">Privacy Policy</h1>
           <p className="text-sm text-gray-500">Effective Date: July 27, 2025</p>
@@ -27,7 +26,6 @@ export default function PrivacyPolicies() {
           </p>
         </section>
 
-        {/* 🔐 Privacy Policy Sections */}
         <section className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold">🔍 What We Collect</h2>
@@ -72,21 +70,20 @@ export default function PrivacyPolicies() {
 
           <div>
             <h2 className="text-xl font-semibold">🔐 Security</h2>
-            <p>We use modern security practices to keep your data safe — though no system is ever 100% perfect.</p>
+            <p>We use modern security practices to keep your data safe. Though no system is ever 100 percent perfect, we strive to protect your information.</p>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold">👶 Children’s Privacy</h2>
+            <h2 className="text-xl font-semibold">👶 Children Privacy</h2>
             <p>Myelin Map is not for users under 13. We do not knowingly collect info from children.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">📝 Changes</h2>
-            <p>If this policy changes, we’ll let you know on the site or via email if you’re subscribed.</p>
+            <p>If this policy changes, we will let you know on the site or via email if you are subscribed.</p>
           </div>
         </section>
 
-        {/* 📩 Contact */}
         <section className="space-y-2 border-t border-gray-300 pt-6">
           <h2 className="text-xl font-semibold">📬 Contact Us</h2>
           <p>
@@ -95,7 +92,6 @@ export default function PrivacyPolicies() {
           </p>
         </section>
 
-        {/* 📘 Terms of Service */}
         <section className="space-y-6 border-t border-gray-300 pt-10">
           <h1 className="text-3xl font-bold">Terms of Service</h1>
           <p className="text-sm text-gray-500">Effective Date: July 27, 2025</p>
@@ -109,7 +105,7 @@ export default function PrivacyPolicies() {
             <h2 className="text-xl font-semibold">💡 Usage Guidelines</h2>
             <ul className="list-disc list-inside">
               <li>Use for personal growth only, unless given explicit permission</li>
-              <li>Don’t copy, clone, or reverse engineer our work</li>
+              <li>Do not copy, clone, or reverse engineer our work</li>
               <li>Provide honest information when signing up</li>
             </ul>
           </div>
@@ -121,27 +117,27 @@ export default function PrivacyPolicies() {
 
           <div>
             <h2 className="text-xl font-semibold">🧠 Intellectual Property</h2>
-            <p>Everything on Myelin Map is protected. Don’t use our content, code, or visuals without permission.</p>
+            <p>Everything on Myelin Map is protected. Do not use our content, code, or visuals without permission.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">🚫 Disclaimers</h2>
-            <p>Myelin Map is provided “as-is” — we can’t promise perfect uptime or outcomes, though we always strive for both.</p>
+            <p>Myelin Map is provided as-is and as-available. We do not guarantee perfect uptime or accuracy, though we always strive for both.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">⚠️ Limitations of Liability</h2>
-            <p>We’re not liable for indirect or consequential damages from using the platform.</p>
+            <p>We are not liable for indirect or consequential damages from using the platform.</p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold">🔚 Termination</h2>
-            <p>We may suspend accounts that violate these terms or harm others through misuse of the platform.</p>
+            <p>We may suspend accounts that violate these terms or misuse the platform in any way.</p>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold">⚖️ Legal Stuff</h2>
-            <p>These terms are governed by Michigan law, United States.</p>
+            <h2 className="text-xl font-semibold">⚖️ Legal</h2>
+            <p>These terms are governed by the laws of the State of Michigan, United States.</p>
           </div>
 
           <div>
