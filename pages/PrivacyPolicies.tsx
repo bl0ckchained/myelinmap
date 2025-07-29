@@ -82,8 +82,7 @@ export default function PrivacyPolicies() {
 
           <h2 className="text-xl font-semibold">9. Contact Us</h2>
           <p>
-            Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a>
-            <br />
+            Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a><br />
             Myelin Map, N6890 Henry H Drive, Engadine, MI. 49827
           </p>
         </section>
@@ -124,8 +123,7 @@ export default function PrivacyPolicies() {
 
           <h2 className="text-xl font-semibold">9. Contact</h2>
           <p>
-            Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a>
-            <br />
+            Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a><br />
             Myelin Map, N6890 Henry H Drive, Engadine, MI. 49827
           </p>
         </section>
