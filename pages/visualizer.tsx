@@ -102,12 +102,12 @@ export default function Grow() {
 
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
-            The tree will evolve with you. In the future, you'll see circuits form, energy pulse through, and the shape of your discipline come alive.
+            The tree will evolve with you. In the future, you&rsquo;ll see circuits form, energy pulse through, and the shape of your discipline come alive.
           </p>
 
           <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            This isn't fantasy — it's neuroscience. Repetition wires your brain. The visualizer just lets you witness it.
+            This isn&rsquo;t fantasy — it&rsquo;s neuroscience. Repetition wires your brain. The visualizer just lets you witness it.
           </p>
         </section>
       </main>
