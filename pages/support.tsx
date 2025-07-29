@@ -33,7 +33,7 @@ export default function Support() {
         </ul>
 
         <p className="text-sm text-gray-500">
-          Stripe donations coming soon — we're building with love and transparency ❤️
+          Stripe donations coming soon — we&apos;re building with love and transparency ❤️
         </p>
 
         <p className="mt-8">
