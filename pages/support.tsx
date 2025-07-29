@@ -37,7 +37,7 @@ export default function Support() {
         <section className="max-w-2xl mx-auto space-y-8 text-center">
           <p className="text-lg text-gray-300">
             Myelin Map is a labor of love — built to help people rewire their brains, one rep at a time.
-            If you believe in what we're building, you can support development in a few small but powerful ways.
+            If you believe in what we&rsquo;re building, you can support development in a few small but powerful ways.
           </p>
 
           <div className="bg-gray-800 p-6 rounded-xl shadow-md">
