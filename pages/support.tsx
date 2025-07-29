@@ -1,75 +1,47 @@
 // pages/support.tsx
-
-import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 export default function Support() {
-    const handleDonate = async () => {
-  const res = await fetch("/api/create-checkout-session", {
-    method: "POST",
-  });
-
-  const data = await res.json();
-  if (data.url) {
-    window.location.href = data.url;
-  } else {
-    alert("Something went wrong. Please try again.");
-  }
-};
-
   return (
     <>
-      <Head>
-        <title>Support Us – Myelin Map</title>
-        <meta
-          name="description"
-          content="Help support Myelin Map and empower transformation through habit science."
-        />
-      </Head>
+      <Header title="Support Myelin Map 🧠" subtitle="Help us grow the world's greatest skill-building tool" />
+      <main className="max-w-3xl mx-auto p-6 text-gray-800">
+        <p className="mb-4">
+          Myelin Map is a passion project built to help people rewire their brains, habits, and lives. 💪
+        </p>
 
-      <Header
-        title="Support the Mission 💖"
-        subtitle="If this project helps you grow, consider helping it grow too."
-      />
+        <p className="mb-4">
+          If you’d like to support the mission, thank you 🙏 Your encouragement is just as valuable as your dollars.
+        </p>
 
-      <main className="bg-gray-900 text-white px-6 py-20 min-h-screen">
-        <section className="max-w-2xl mx-auto space-y-8 text-center">
-          <p className="text-lg text-gray-300">
-            Myelin Map is a labor of love — built to help people rewire their brains, one rep at a time.
-            If you believe in what we&rsquo;re building, you can support development in a few small but powerful ways.
-          </p>
+        <p className="mb-4">
+          <strong>Ways to support:</strong>
+        </p>
+        <ul className="list-disc list-inside mb-6">
+          <li>Share Myelin Map with friends & community</li>
+          <li>Send kind feedback or a testimonial</li>
+          <li>Request a feature or report a bug</li>
+          <li>
+            If you really want to help financially,{" "}
+            <a href="mailto:support@myelinmap.com" className="text-blue-600 underline">
+              email us
+            </a>{" "}
+            and we’ll set it up!
+          </li>
+        </ul>
 
-          <div className="bg-gray-800 p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-semibold text-emerald-400 mb-4">Crypto Tips</h2>
-            <p className="mb-2 text-gray-300">ETH (Ethereum):</p>
-            <code className="block break-all text-sm text-emerald-300">
-              0x1990c29B1190184dE1Ed6C667f128CEb257b7BD9
-            </code>
-            <p className="mt-4 mb-2 text-gray-300">SOL (Solana):</p>
-            <code className="block break-all text-sm text-cyan-300">
-              F3KyAdfwXSawLuWumvdjFxXcERYSYQDD4dwZHghXHPgL
-            </code>
-          </div>
+        <p className="text-sm text-gray-500">
+          Stripe donations coming soon — we're building with love and transparency ❤️
+        </p>
 
-          <div className="bg-gray-800 p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-semibold text-amber-400 mb-4">Buy Me a Coffee ☕</h2>
-            <a
-              href="https://www.buymeacoffee.com/chaddrummonds"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-amber-500 text-black font-bold py-2 px-4 rounded-lg hover:bg-amber-400"
-            >
-              Tip with Card / PayPal
-            </a>
-          </div>
-
-          <p className="text-gray-500 italic">
-            Thank you for believing in the vision. Every little bit helps this tree grow. 🌱
-          </p>
-        </section>
+        <p className="mt-8">
+          <Link href="/" className="text-blue-600 hover:underline">
+            ← Back to Home
+          </Link>
+        </p>
       </main>
-
       <Footer />
     </>
   );
