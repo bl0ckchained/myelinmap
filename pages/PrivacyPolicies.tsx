@@ -6,126 +6,151 @@ import Footer from "@/components/Footer";
 export default function PrivacyPolicies() {
   return (
     <>
-      <Header title="Legal & Policies 📜" subtitle="Understand your rights, data, and trust" />
+      <Header
+        title="Privacy & Terms 📜"
+        subtitle="We respect your trust and are committed to protecting it"
+      />
 
-      <main
-        className="max-w-4xl mx-auto p-6 bg-white text-gray-800"
-        style={{ fontFamily: "Arial, sans-serif" }}
-      >
-        <p className="text-sm text-right mb-4">
+      <main className="max-w-4xl mx-auto p-6 bg-white text-gray-800 space-y-10">
+        <p className="text-sm text-right">
           <Link href="/" className="text-blue-600 hover:underline">
             ← Back to Home
           </Link>
         </p>
 
-        <h1 className="text-3xl font-bold mb-2">Privacy Policy for Myelin Map</h1>
-        <p><strong>Effective Date:</strong> July 27, 2025</p>
-
-        <section className="space-y-4 mt-4">
+        {/* 🎯 Intro */}
+        <section className="space-y-2">
+          <h1 className="text-3xl font-bold">Privacy Policy</h1>
+          <p className="text-sm text-gray-500">Effective Date: July 27, 2025</p>
           <p>
-            Myelin Map (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your
-            privacy. This Privacy Policy explains how we collect, use, disclose,
-            and safeguard your information when you visit our website{" "}
-            <a href="https://myelinmap.com" className="text-blue-600 hover:underline">https://myelinmap.com</a> and use our services.
-          </p>
-
-          <h2 className="text-xl font-semibold">1. Information We Collect</h2>
-          <ul className="list-disc list-inside">
-            <li><strong>Personal Information</strong>: Name, email address, and any other data you provide when signing up or contacting us.</li>
-            <li><strong>Usage Data</strong>: Pages visited, time on site, and user behavior through analytics tools.</li>
-            <li><strong>Device Information</strong>: Browser type, IP address, device identifiers.</li>
-          </ul>
-
-          <h2 className="text-xl font-semibold">2. How We Use Your Information</h2>
-          <ul className="list-disc list-inside">
-            <li>Provide and maintain our services</li>
-            <li>Send updates, newsletters, or promotional material (if opted in)</li>
-            <li>Improve our platform and user experience</li>
-            <li>Monitor usage trends and detect fraud or abuse</li>
-          </ul>
-
-          <h2 className="text-xl font-semibold">3. Sharing Your Information</h2>
-          <p>
-            We do <strong>not</strong> sell your personal data. We may share
-            information with:
-          </p>
-          <ul className="list-disc list-inside">
-            <li>Service providers that help us operate (e.g., hosting, email, analytics)</li>
-            <li>Authorities if required by law or in defense of legal claims</li>
-          </ul>
-
-          <h2 className="text-xl font-semibold">4. Cookies and Tracking Technologies</h2>
-          <p>
-            We use cookies to improve your experience, remember preferences, and
-            gather analytics. You can disable cookies in your browser settings.
-          </p>
-
-          <h2 className="text-xl font-semibold">5. Your Rights and Choices</h2>
-          <ul className="list-disc list-inside">
-            <li>Access or update your personal data</li>
-            <li>Opt out of communications</li>
-            <li>Request deletion of your information</li>
-          </ul>
-          <p>
-            To make a request, email us at:{" "}
-            <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a>
-          </p>
-
-          <h2 className="text-xl font-semibold">6. Data Security</h2>
-          <p>We use industry-standard security measures to protect your data. However, no method of transmission over the Internet is 100% secure.</p>
-
-          <h2 className="text-xl font-semibold">7. Children&apos;s Privacy</h2>
-          <p>Myelin Map is not intended for individuals under the age of 13. We do not knowingly collect personal data from children.</p>
-
-          <h2 className="text-xl font-semibold">8. Changes to This Policy</h2>
-          <p>We may update this Privacy Policy. We&apos;ll notify you of any significant changes via the site or email.</p>
-
-          <h2 className="text-xl font-semibold">9. Contact Us</h2>
-          <p>
-            Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a><br />
-            Myelin Map, N6890 Henry H Drive, Engadine, MI. 49827
+            Your trust means everything to us. This page outlines what data we collect, how we use it, and what your rights are as a valued member of the Myelin Map community.
           </p>
         </section>
 
-        <hr className="my-8" />
+        {/* 🔐 Privacy Policy Sections */}
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-xl font-semibold">🔍 What We Collect</h2>
+            <ul className="list-disc list-inside">
+              <li><strong>Personal Info</strong> * Like your name, email, or anything you share with us directly</li>
+              <li><strong>Usage Data</strong> * Pages visited, time on site, actions taken</li>
+              <li><strong>Device Info</strong> * Browser, IP address, and device type</li>
+            </ul>
+          </div>
 
-        <h1 className="text-3xl font-bold mb-2">Terms of Service for Myelin Map</h1>
-        <p><strong>Effective Date:</strong> July 27, 2025</p>
+          <div>
+            <h2 className="text-xl font-semibold">📦 How We Use It</h2>
+            <ul className="list-disc list-inside">
+              <li>To power the tools and experience you came here for</li>
+              <li>To send helpful updates (only if you opted in)</li>
+              <li>To make Myelin Map better for everyone</li>
+            </ul>
+          </div>
 
-        <section className="space-y-4 mt-4">
-          <h2 className="text-xl font-semibold">1. Acceptance of Terms</h2>
-          <p>By using Myelin Map, you agree to comply with and be legally bound by these Terms of Service.</p>
+          <div>
+            <h2 className="text-xl font-semibold">🤝 Who We Share It With</h2>
+            <p>Never sold. Only shared with:</p>
+            <ul className="list-disc list-inside">
+              <li>Trusted service providers (like hosting or analytics)</li>
+              <li>Authorities, but only if required by law</li>
+            </ul>
+          </div>
 
-          <h2 className="text-xl font-semibold">2. Use of the Platform</h2>
-          <ul className="list-disc list-inside">
-            <li>Use the service for personal, non-commercial use only unless authorized</li>
-            <li>Not misuse, copy, or reverse-engineer any part of our platform</li>
-            <li>Provide accurate information when registering</li>
-          </ul>
+          <div>
+            <h2 className="text-xl font-semibold">🍪 Cookies</h2>
+            <p>We use cookies to personalize and improve your experience. You can disable them in your browser at any time.</p>
+          </div>
 
-          <h2 className="text-xl font-semibold">3. User Accounts</h2>
-          <p>You&apos;re responsible for maintaining the confidentiality of your account and password. Notify us immediately if you suspect unauthorized use.</p>
+          <div>
+            <h2 className="text-xl font-semibold">🧭 Your Choices</h2>
+            <ul className="list-disc list-inside">
+              <li>Request, update, or delete your info</li>
+              <li>Opt out of emails and tracking</li>
+            </ul>
+            <p>Just email us at <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a>.</p>
+          </div>
 
-          <h2 className="text-xl font-semibold">4. Intellectual Property</h2>
-          <p>All content on Myelin Map (logos, text, visuals) is our intellectual property. You may not reproduce, distribute, or create derivative works without written permission.</p>
+          <div>
+            <h2 className="text-xl font-semibold">🔐 Security</h2>
+            <p>We use modern security practices to keep your data safe — though no system is ever 100% perfect.</p>
+          </div>
 
-          <h2 className="text-xl font-semibold">5. Disclaimer of Warranties</h2>
-          <p>Myelin Map is provided &quot;as is&quot; and &quot;as available.&quot; We do not guarantee accuracy or availability at all times.</p>
+          <div>
+            <h2 className="text-xl font-semibold">👶 Children’s Privacy</h2>
+            <p>Myelin Map is not for users under 13. We do not knowingly collect info from children.</p>
+          </div>
 
-          <h2 className="text-xl font-semibold">6. Limitation of Liability</h2>
-          <p>We are not liable for indirect, incidental, or consequential damages arising from your use of the service.</p>
+          <div>
+            <h2 className="text-xl font-semibold">📝 Changes</h2>
+            <p>If this policy changes, we’ll let you know on the site or via email if you’re subscribed.</p>
+          </div>
+        </section>
 
-          <h2 className="text-xl font-semibold">7. Termination</h2>
-          <p>We may suspend or terminate your account if you violate these terms or misuse the platform.</p>
-
-          <h2 className="text-xl font-semibold">8. Governing Law</h2>
-          <p>These terms are governed by the laws of the State of Michigan, United States.</p>
-
-          <h2 className="text-xl font-semibold">9. Contact</h2>
+        {/* 📩 Contact */}
+        <section className="space-y-2 border-t border-gray-300 pt-6">
+          <h2 className="text-xl font-semibold">📬 Contact Us</h2>
           <p>
             Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a><br />
-            Myelin Map, N6890 Henry H Drive, Engadine, MI. 49827
+            Address: Myelin Map, N6890 Henry H Drive, Engadine, MI 49827
           </p>
+        </section>
+
+        {/* 📘 Terms of Service */}
+        <section className="space-y-6 border-t border-gray-300 pt-10">
+          <h1 className="text-3xl font-bold">Terms of Service</h1>
+          <p className="text-sm text-gray-500">Effective Date: July 27, 2025</p>
+
+          <div>
+            <h2 className="text-xl font-semibold">✅ Acceptance</h2>
+            <p>By using Myelin Map, you agree to the following terms. If you disagree with any part, please do not use the platform.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">💡 Usage Guidelines</h2>
+            <ul className="list-disc list-inside">
+              <li>Use for personal growth only, unless given explicit permission</li>
+              <li>Don’t copy, clone, or reverse engineer our work</li>
+              <li>Provide honest information when signing up</li>
+            </ul>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">🔐 Account Responsibilities</h2>
+            <p>You are responsible for keeping your login credentials safe. Notify us immediately if your account is compromised.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">🧠 Intellectual Property</h2>
+            <p>Everything on Myelin Map is protected. Don’t use our content, code, or visuals without permission.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">🚫 Disclaimers</h2>
+            <p>Myelin Map is provided “as-is” — we can’t promise perfect uptime or outcomes, though we always strive for both.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">⚠️ Limitations of Liability</h2>
+            <p>We’re not liable for indirect or consequential damages from using the platform.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">🔚 Termination</h2>
+            <p>We may suspend accounts that violate these terms or harm others through misuse of the platform.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">⚖️ Legal Stuff</h2>
+            <p>These terms are governed by Michigan law, United States.</p>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold">📬 Contact</h2>
+            <p>
+              Email: <a href="mailto:support@myelinmap.com" className="text-blue-600 hover:underline">support@myelinmap.com</a><br />
+              Address: Myelin Map, N6890 Henry H Drive, Engadine, MI 49827
+            </p>
+          </div>
         </section>
       </main>
 
