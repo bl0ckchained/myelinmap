@@ -125,7 +125,7 @@ export default function Grow() {
   return (
     <>
       <Head>
-        <title>Myelin Map – Grow 🌱</title>
+        <title>Myelin Map * Grow 🌱</title>
         <meta
           name="description"
           content="Train your brain and watch your myelin tree grow with every rep."

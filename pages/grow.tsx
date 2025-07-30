@@ -95,14 +95,13 @@ export default function GrowPage() {
   return (
     <>
       <Head>
-        <title>Myelin Map – Grow 🌱</title>
+        <title>Myelin Map - Grow 🌱</title>
         <meta name="description" content="Train your brain and grow your myelin tree with each rep." />
       </Head>
 
       <Header title="Grow Your Mind 🌳" subtitle="Train with reps. Visualize your progress." />
 
       <main className="flex flex-col items-center justify-start px-4 py-16 min-h-[calc(100vh-200px)] bg-gray-900 text-white">
-        
         {/* 🌳 Animated Tree at Top */}
         <div className="relative w-full max-w-4xl h-[500px] mb-16 rounded-2xl overflow-hidden shadow-2xl bg-black">
           <canvas ref={canvasRef} className="w-full h-full" />
@@ -126,17 +125,17 @@ export default function GrowPage() {
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
             Every time you log a rep, your mystical Tree of Life grows stronger
-            &mdash; more branches, more light, more magic.
+            — more branches, more light, more magic.
           </p>
 
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
-            The tree will evolve with you. Soon, you’ll see leaves, glowing ivy, and even little fruit that reflect your consistency.
+            The tree will evolve with you. Soon, you will see leaves, glowing ivy, and even little fruit that reflect your consistency.
           </p>
 
           <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            This isn’t fantasy — it’s neuroscience. Repetition wires your brain. This visualizer lets you witness it.
+            This is not fantasy — it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
           </p>
         </section>
       </main>
