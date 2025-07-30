@@ -154,7 +154,7 @@ export default function Grow() {
         {/* 🔁 Habit Components */}
         <div className="w-full max-w-2xl space-y-8 mb-16">
           <HabitLoop />
-          <RepCounter />
+          <RepCounter count={repCount} onRep={() => setRepCount(repCount + 1)} />
         </div>
 
         {/* 🌌 Educational Section */}
