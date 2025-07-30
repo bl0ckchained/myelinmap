@@ -108,46 +108,52 @@ export default function Grow() {
       />
 
       <main className="flex flex-col items-center justify-start px-4 py-16 min-h-[calc(100vh-200px)] bg-gray-900 text-white">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">
-          🧠 Rewire with Action
-        </h1>
-        <p className="text-lg max-w-2xl mb-10 text-gray-300 text-center">
-          One click. One rep. One branch at a time. This is how myelin grows.
-        </p>
 
-        <div className="w-full max-w-2xl space-y-8 mb-16">
-          <HabitLoop />
-          <RepCounter />
-        </div>
+  {/* 🌳 Animated Tree at Top */}
+  <div className="relative w-full max-w-4xl h-[500px] mb-16 rounded-2xl overflow-hidden shadow-2xl bg-black">
+    <canvas ref={canvasRef} className="w-full h-full" />
+  </div>
 
-        <div className="relative w-full max-w-4xl h-[500px] mb-12 rounded-2xl overflow-hidden shadow-2xl bg-black">
-          <canvas ref={canvasRef} className="w-full h-full" />
-        </div>
+  {/* 🧠 Headline & Intro */}
+  <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">
+    🧠 Rewire with Action
+  </h1>
+  <p className="text-lg max-w-2xl mb-10 text-gray-300 text-center">
+    One click. One rep. One branch at a time. This is how myelin grows.
+  </p>
 
-        <section className="max-w-3xl space-y-6 text-center text-slate-200">
-          <p>
-            Every time you log a rep, your mystical Tree of Life grows stronger
-            &mdash; more branches, more light, more magic.
-          </p>
+  {/* 🔁 Habit Components */}
+  <div className="w-full max-w-2xl space-y-8 mb-16">
+    <HabitLoop />
+    <RepCounter />
+  </div>
 
-          <h2 className="text-2xl font-semibold text-white">
-            This Is Only the Beginning
-          </h2>
-          <p>
-            The tree will evolve with you. In the future, you&rsquo;ll see
-            circuits form, energy pulse through, and the shape of your
-            discipline come alive.
-          </p>
+  {/* 🌌 Educational Section */}
+  <section className="max-w-3xl space-y-6 text-center text-slate-200">
+    <p>
+      Every time you log a rep, your mystical Tree of Life grows stronger
+      &mdash; more branches, more light, more magic.
+    </p>
 
-          <h2 className="text-2xl font-semibold text-white">
-            Built on Science. Fueled by You.
-          </h2>
-          <p>
-            This isn&rsquo;t fantasy &mdash; it&rsquo;s neuroscience. Repetition
-            wires your brain. The visualizer just lets you witness it.
-          </p>
-        </section>
-      </main>
+    <h2 className="text-2xl font-semibold text-white">
+      This Is Only the Beginning
+    </h2>
+    <p>
+      The tree will evolve with you. In the future, you&rsquo;ll see circuits
+      form, energy pulse through, and the shape of your discipline come alive.
+    </p>
+
+    <h2 className="text-2xl font-semibold text-white">
+      Built on Science. Fueled by You.
+    </h2>
+    <p>
+      This isn&rsquo;t fantasy &mdash; it&rsquo;s neuroscience. Repetition
+      wires your brain. The visualizer just lets you witness it.
+    </p>
+  </section>
+
+</main>
+
 
       <Footer />
     </>
