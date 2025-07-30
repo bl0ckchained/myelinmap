@@ -2,14 +2,12 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 
-// ✅ Mock memory for now (replace with real user context later)
 const mockUserMemory = {
   recentReps: 12,
   lastAffirmation: "I am stronger than my past.",
-  lastMood: "anxious", // examples: motivated, low, anxious, peaceful
+  lastMood: "anxious",
 };
 
-// ✅ System prompt with user memory baked in
 const systemPrompt = `
 You are a calm, grounded, mystical AI Coach on a mission to help the user rewire their brain.
 
@@ -29,22 +27,25 @@ const openai = new OpenAI({
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method not allowed" });
+  }
 
   try {
-    const { prompt } = req.body;
+    const { messages } = req.body;
 
-    const chat = await openai.chat.completions.create({
-      model: "gpt-4o", // You can use "gpt-4" if needed
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
+        ...messages,
       ],
     });
 
-    res.status(200).json({ reply: chat.choices[0].message.content });
+    const reply = response.choices[0].message.content;
+    res.status(200).json({ message: reply });
   } catch (error) {
     console.error("OpenAI error:", error);
-    res.status(500).json({ error: "Something went wrong." });
+    res.status(500).json({ message: "Something went wrong." });
   }
 }
