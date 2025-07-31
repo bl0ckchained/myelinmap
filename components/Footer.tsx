@@ -16,15 +16,24 @@ export default function Footer() {
         © 2025 MyelinMap.com Made with 💙 in Michigan · Powered by Quantum Step
         Consultants LLC
       </p>
-      
+
       <p>
         <Link href="/legalpage" className="underline hover:text-blue-300">
           Privacy Policy & Terms
         </Link>
-      
       </p>
-    
+
+      <p>
+        🌩️ Join our journey on{" "}
+        <a
+          href="https://www.youtube.com/@myelinmap"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-cyan-400 hover:text-cyan-300 underline"
+        >
+          YouTube
+        </a>
+      </p>
     </footer>
-    
   );
 }
