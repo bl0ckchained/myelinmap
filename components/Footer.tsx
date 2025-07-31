@@ -23,15 +23,24 @@ export default function Footer() {
         </Link>
       </p>
 
-      <p>
-        🌩️ Join our journey on{" "}
+      <p className="flex justify-center items-center gap-2">
+        🌩️ Join our journey
         <a
           href="https://www.youtube.com/@myelinmap"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-cyan-400 hover:text-cyan-300 underline"
+          className="hover:opacity-80 transition"
         >
-          YouTube
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="text-red-500"
+          >
+            <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
+          </svg>
         </a>
       </p>
     </footer>
