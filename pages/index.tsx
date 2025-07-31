@@ -10,13 +10,13 @@ export default function Home() {
         <title>Myelin Map – Rewire Your Brain, One Habit at a Time</title>
         <meta
           name="description"
-          content="This isn&rsquo;t just a habit tracker — it&rsquo;s a myelin visualizer. Build new pathways. Change your life."
+          content="This isn’t just a habit tracker — it’s a myelin visualizer. Build new pathways. Change your life."
         />
       </Head>
 
       <Header
         title="Train Your Brain, One Rep at a Time 🧠"
-        subtitle="This isn&rsquo;t just a habit tracker — it&rsquo;s a myelin visualizer"
+        subtitle="This isn’t just a habit tracker — it’s a myelin visualizer"
       />
 
       <main className="bg-gray-900 text-white px-6 py-20 text-center min-h-screen flex flex-col items-center justify-center">
@@ -26,31 +26,31 @@ export default function Home() {
         </h1>
         <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300">
           Welcome to <strong>Myelin Map</strong> — a tool for transformation
-          built on the neuroscience of action and repetition. This isn&rsquo;t
+          built on the neuroscience of action and repetition. This isn’t
           motivation. This is wiring.
         </p>
 
         <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex">
           <Link href="/rewire">
-            <button className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-400 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-amber-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
+            <button className="bg-amber-500 text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md">
               🔥 7-Day Challenge
             </button>
           </Link>
 
           <Link href="/visualizer">
-            <button className="relative overflow-hidden bg-gradient-to-br from-cyan-600 to-teal-500 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-cyan-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
+            <button className="bg-cyan-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md">
               🧬 Visualize & Grow
             </button>
           </Link>
 
           <Link href="/resources">
-            <button className="relative overflow-hidden bg-gradient-to-br from-lime-500 to-green-400 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-lime-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
+            <button className="bg-lime-500 text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md">
               📚 Resources
             </button>
           </Link>
 
           <Link href="/founder">
-            <button className="relative overflow-hidden bg-gradient-to-br from-yellow-400 to-yellow-300 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-yellow-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
+            <button className="bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md">
               💬 Message from the Founder
             </button>
           </Link>
@@ -80,7 +80,7 @@ export default function Home() {
             🧠 Why Myelin Matters
           </h2>
           <p className="text-lg text-gray-300">
-            Myelin is the brain&rsquo;s insulation. It speeds up signals,
+            Myelin is the brain’s insulation. It speeds up signals,
             strengthens connections, and makes habits automatic.
             <br />
             Every time you take action, you build myelin. Every rep counts. This
@@ -91,8 +91,8 @@ export default function Home() {
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">📜 The Myelin Truth</h2>
           <p className="text-lg text-gray-300">
-            <strong>Myelin doesn&rsquo;t care about your intentions.</strong> It
-            doesn&rsquo;t respond to promises, motivation, or positive thinking.
+            <strong>Myelin doesn’t care about your intentions.</strong> It
+            doesn’t respond to promises, motivation, or positive thinking.
             <br />
             It only cares about what you do — and how often you do it.
           </p>
@@ -108,12 +108,12 @@ export default function Home() {
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">⚡ My Story</h2>
           <p className="text-lg text-gray-300">
-            I&rsquo;m <strong>Chad Drummonds</strong> — a father, husband,
+            I’m <strong>Chad Drummonds</strong> — a father, husband,
             and computer science student who lost everything to addiction... and
             clawed my way back.
           </p>
           <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn&rsquo;t break, I
+            After nearly 20 years stuck in cycles I couldn’t break, I
             found the truth in neuroscience: The brain can change. But only
             through action.
           </p>
@@ -127,7 +127,7 @@ export default function Home() {
 
         <section className="mt-20 max-w-3xl text-left space-y-6">
           <h2 className="text-3xl font-bold text-white">
-            💡 What You&rsquo;ll Find Here
+            💡 What You’ll Find Here
           </h2>
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
@@ -144,7 +144,7 @@ export default function Home() {
             Are You Ready to See Your Growth?
           </h2>
           <Link href="/rewire">
-            <button className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-400 text-black font-bold px-8 py-4 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-emerald-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
+            <button className="bg-emerald-500 text-black px-8 py-4 rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md">
               🔁 Join the 7-Day Rewire Challenge
             </button>
           </Link>
