@@ -32,25 +32,25 @@ export default function Home() {
 
         <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex">
           <Link href="/rewire">
-            <button className="bg-amber-500 hover:bg-amber-400 text-black px-6 py-3 rounded-lg font-semibold transition">
+            <button className="relative overflow-hidden bg-gradient-to-br from-amber-500 to-orange-400 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-amber-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
               🔥 7-Day Challenge
             </button>
           </Link>
 
           <Link href="/visualizer">
-            <button className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-3 rounded-lg font-semibold transition">
+            <button className="relative overflow-hidden bg-gradient-to-br from-cyan-600 to-teal-500 text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-cyan-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
               🧬 Visualize & Grow
             </button>
           </Link>
-          
+
           <Link href="/resources">
-            <button className="bg-lime-500 hover:bg-lime-400 text-black px-6 py-3 rounded-lg font-semibold transition">
+            <button className="relative overflow-hidden bg-gradient-to-br from-lime-500 to-green-400 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-lime-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
               📚 Resources
             </button>
           </Link>
 
           <Link href="/founder">
-            <button className="bg-yellow-400 hover:bg-yellow-300 text-black px-6 py-3 rounded-lg font-semibold transition">
+            <button className="relative overflow-hidden bg-gradient-to-br from-yellow-400 to-yellow-300 text-black font-bold px-6 py-3 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-yellow-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
               💬 Message from the Founder
             </button>
           </Link>
@@ -144,7 +144,7 @@ export default function Home() {
             Are You Ready to See Your Growth?
           </h2>
           <Link href="/rewire">
-            <button className="bg-emerald-500 hover:bg-emerald-400 text-black px-8 py-4 rounded-lg font-semibold transition">
+            <button className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-400 text-black font-bold px-8 py-4 rounded-xl shadow-md transition-all duration-300 hover:scale-105 hover:shadow-xl ring-2 ring-transparent hover:ring-emerald-300 before:absolute before:inset-0 before:bg-white/10 before:opacity-0 hover:before:opacity-10 before:transition-opacity before:duration-300">
               🔁 Join the 7-Day Rewire Challenge
             </button>
           </Link>
