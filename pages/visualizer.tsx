@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
+// This is a self-contained version of the Grow page, combining the main
+// page logic with the Header and Footer components to resolve import issues.
+
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
@@ -108,13 +111,10 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
 
 
 // --- Main Grow Page Component ---
-// This component uses a Canvas to render a dynamic, animated "Tree of Life"
-// that visually represents the user's progress.
 export default function GrowPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
 
-  // A more specific type for the branch object to avoid 'any'
   interface Branch {
     x: number;
     y: number;
@@ -123,137 +123,115 @@ export default function GrowPage() {
     width: number;
   }
   
-  // State to store the canvas context
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-  
-  // State to manage a queue of new branches to be drawn, creating an animated growth effect
   const [branchQueue, setBranchQueue] = useState<Branch[]>([]);
+  const [particles, setParticles] = useState<any[]>([]); // Using 'any' for particles for simplicity for now
 
-  // Function to initialize the canvas and context when the component mounts
+  // Effect to initialize canvas and set up resize listener
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const context = canvas.getContext("2d");
     if (context) {
       setCtx(context);
     }
-    
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      if (ctx) { // Check if ctx exists before drawing
-        growTree(ctx, canvas);
+      // Re-initialize the tree on resize to keep it centered
+      if (context) {
+        growTree(context, canvas);
       }
     };
     window.addEventListener("resize", resizeCanvas);
-    resizeCanvas(); // Initial call to set size
-
+    resizeCanvas();
     return () => window.removeEventListener("resize", resizeCanvas);
   }, [ctx]);
 
-  // Main drawing and animation loop
+  // Effect to handle the tree growing and animation
   useEffect(() => {
     if (!ctx) return;
+    let animationFrame: number;
 
-    let animationFrameId: number;
+    const createParticles = (x: number, y: number) => {
+      const newParticles = [];
+      for (let i = 0; i < 10; i++) {
+        newParticles.push({
+          x: x,
+          y: y,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2 - 1,
+          life: 50,
+          color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
+        });
+      }
+      setParticles(prev => [...prev, ...newParticles]);
+    };
 
-    // Drawing a single, magical branch
+    const drawParticles = () => {
+      setParticles(prevParticles => {
+        const updatedParticles = [];
+        for (const p of prevParticles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life--;
+          if (p.life > 0) {
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life / 50;
+            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+            ctx.fill();
+            updatedParticles.push(p);
+          }
+        }
+        ctx.globalAlpha = 1;
+        return updatedParticles;
+      });
+    };
+
     const drawBranch = (x: number, y: number, angle: number, depth: number, width: number) => {
       if (depth === 0) return;
-
-      const branchLength = depth * (10 + repCount * 0.5); // Branch length increases with reps
-      const x2 = x + Math.cos(angle) * branchLength;
-      const y2 = y - Math.sin(angle) * branchLength;
-
+      const x2 = x + Math.cos(angle) * depth * (10 + repCount * 0.2);
+      const y2 = y - Math.sin(angle) * depth * (10 + repCount * 0.2);
       ctx.beginPath();
-      ctx.strokeStyle = `hsl(140, 100%, ${60 - depth * 3}%)`; // Green color with depth variation
+      ctx.strokeStyle = `hsl(140, 100%, ${60 - depth * 3}%)`;
       ctx.lineWidth = width;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = `hsl(140, 100%, ${60 - depth * 2}%)`; // Glowing effect
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(140, 100%, ${60 - depth * 2}%)`;
       ctx.lineCap = 'round';
       ctx.moveTo(x, y);
       ctx.lineTo(x2, y2);
       ctx.stroke();
-
-      // Add new branches to the queue for the next frame
       if (depth > 1) {
         setBranchQueue(prevQueue => [
           ...prevQueue,
-          { x: x2, y: y2, angle: angle - (0.3 + repCount * 0.01), depth: depth - 1, width: width * 0.75 },
-          { x: x2, y: y2, angle: angle + (0.3 + repCount * 0.01), depth: depth - 1, width: width * 0.75 },
+          { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
+          { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 },
         ]);
       }
     };
-
-    // Particles for a "myelin" effect
-    interface Particle {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      life: number;
-      color: string;
-    }
-
-    const particles: Particle[] = [];
-    const createParticles = (x: number, y: number) => {
-      for (let i = 0; i < 5; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2,
-          life: 50,
-          color: `hsl(140, 100%, 75%)`,
-        });
-      }
-    };
-
-    // Main animation loop
+    
     const animate = () => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.shadowBlur = 0; // Reset shadow for background
-
-      // Draw the tree from the branches array
+      ctx.shadowBlur = 0;
       if (branchQueue.length > 0) {
-        const nextBranchesToDraw = branchQueue.splice(0, 2); // Draw a few at a time for animation
-        nextBranchesToDraw.forEach(b => {
-          drawBranch(b.x, b.y, b.angle, b.depth, b.width);
-        });
-        setBranchQueue(prev => [...prev]); // Force a state update to trigger next frame
+        const nextBranchesToDraw = branchQueue.splice(0, 2);
+        nextBranchesToDraw.forEach(b => drawBranch(b.x, b.y, b.angle, b.depth, b.width));
+        setBranchQueue([...branchQueue]); // Re-trigger state for next frame
       }
-
-      // Draw and update particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-        } else {
-          ctx.beginPath();
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = p.life / 50;
-          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      ctx.globalAlpha = 1;
-
-      animationFrameId = requestAnimationFrame(animate);
+      drawParticles();
+      animationFrame = requestAnimationFrame(animate);
     };
 
     const growTree = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
       setBranchQueue([]);
       const width = canvas.width;
       const height = canvas.height;
-      drawBranch(width / 2, height, Math.PI / 2, 6, 12);
+      drawBranch(width / 2, height, Math.PI / 2, 8 + repCount * 0.2, 8);
       createParticles(width / 2, height);
     };
-    
-    // Start the animation loop when a rep is logged
+
+    // Trigger the tree grow and particle burst when repCount changes
     if (repCount > 0) {
       const canvas = canvasRef.current;
       if (ctx && canvas) {
@@ -263,8 +241,8 @@ export default function GrowPage() {
     
     animate();
 
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [ctx, repCount, branchQueue]); // Added branchQueue to dependencies
+    return () => cancelAnimationFrame(animationFrame);
+  }, [ctx, repCount]);
 
   return (
     <>
