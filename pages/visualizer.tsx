@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -115,6 +115,8 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
 export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
 
   interface Branch {
     x: number;
@@ -124,46 +126,27 @@ export default function Visualizer() {
     width: number;
   }
   
-  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
-  const [branchQueue, setBranchQueue] = useState<Branch[]>([]);
-  const [particles, setParticles] = useState<any[]>([]);
+  const branchQueueRef = useRef<Branch[]>([]);
+  const particlesRef = useRef<any[]>([]);
 
-  // Function to draw the tree, memoized with useCallback
-  const drawTree = useCallback(() => {
-    if (!ctx || !canvasRef.current) return;
+  // Function to initialize the tree with particles
+  const initializeTree = () => {
+    const ctx = ctxRef.current;
     const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
 
-    const drawBranch = (x: number, y: number, angle: number, depth: number, width: number) => {
-      if (depth === 0) return;
-      const x2 = x + Math.cos(angle) * depth * (10 + repCount * 0.2);
-      const y2 = y - Math.sin(angle) * depth * (10 + repCount * 0.2);
-      ctx.beginPath();
-      ctx.strokeStyle = `hsl(140, 100%, ${60 - depth * 3}%)`;
-      ctx.lineWidth = width;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(140, 100%, ${60 - depth * 2}%)`;
-      ctx.lineCap = 'round';
-      ctx.moveTo(x, y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-      if (depth > 1) {
-        setBranchQueue(prevQueue => [
-          ...prevQueue,
-          { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
-          { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 },
-        ]);
-      }
-    };
-    
-    setBranchQueue([]);
+    branchQueueRef.current = [];
+    particlesRef.current = [];
     const width = canvas.width;
     const height = canvas.height;
-    drawBranch(width / 2, height, Math.PI / 2, 8 + repCount * 0.2, 8);
-    
+
+    // Root branch
+    const rootBranch = { x: width / 2, y: height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
+    branchQueueRef.current.push(rootBranch);
+
     // Initial particle burst
-    const newParticles = [];
     for (let i = 0; i < 10; i++) {
-      newParticles.push({
+      particlesRef.current.push({
         x: width / 2,
         y: height,
         vx: (Math.random() - 0.5) * 2,
@@ -172,93 +155,83 @@ export default function Visualizer() {
         color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
       });
     }
-    setParticles(prev => [...prev, ...newParticles]);
+  };
 
-  }, [ctx, repCount]);
+  // The main animation loop
+  const animate = () => {
+    const ctx = ctxRef.current;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.shadowBlur = 0;
 
-  // Effect for canvas initialization and resize listener
+    // Draw branches from the queue
+    const nextBranchesToDraw = branchQueueRef.current.splice(0, 2);
+    nextBranchesToDraw.forEach(b => {
+      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+      ctx.beginPath();
+      ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
+      ctx.lineWidth = b.width;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
+      ctx.lineCap = 'round';
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      if (b.depth > 1) {
+        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+      }
+    });
+
+    // Draw and update particles
+    for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+      const p = particlesRef.current[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+      if (p.life <= 0) {
+        particlesRef.current.splice(i, 1);
+      } else {
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 50;
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+  };
+
+  // Effect to handle canvas initialization and animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    if (context) {
-      setCtx(context);
-    }
+    if (!context) return;
+    ctxRef.current = context;
+
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      drawTree(); // Call the memoized drawTree function on resize
+      initializeTree();
     };
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
-    return () => window.removeEventListener("resize", resizeCanvas);
-  }, [drawTree]);
+    initializeTree();
+    animationFrameIdRef.current = requestAnimationFrame(animate);
 
-  // Effect for the continuous animation loop
-  useEffect(() => {
-    if (!ctx) return;
-    let animationFrame: number;
-
-    const drawParticles = () => {
-      setParticles(prevParticles => {
-        const updatedParticles = [];
-        for (const p of prevParticles) {
-          p.x += p.vx;
-          p.y += p.vy;
-          p.life--;
-          if (p.life > 0) {
-            ctx.beginPath();
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = p.life / 50;
-            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-            ctx.fill();
-            updatedParticles.push(p);
-          }
-        }
-        ctx.globalAlpha = 1;
-        return updatedParticles;
-      });
-    };
-
-    const drawBranch = (x: number, y: number, angle: number, depth: number, width: number) => {
-      if (depth === 0) return;
-      const x2 = x + Math.cos(angle) * depth * (10 + repCount * 0.2);
-      const y2 = y - Math.sin(angle) * depth * (10 + repCount * 0.2);
-      ctx.beginPath();
-      ctx.strokeStyle = `hsl(140, 100%, ${60 - depth * 3}%)`;
-      ctx.lineWidth = width;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(140, 100%, ${60 - depth * 2}%)`;
-      ctx.lineCap = 'round';
-      ctx.moveTo(x, y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-      if (depth > 1) {
-        setBranchQueue(prevQueue => [
-          ...prevQueue,
-          { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
-          { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 },
-        ]);
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-    
-    const animate = () => {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.shadowBlur = 0;
-      if (branchQueue.length > 0) {
-        const nextBranchesToDraw = branchQueue.splice(0, 2);
-        nextBranchesToDraw.forEach(b => drawBranch(b.x, b.y, b.angle, b.depth, b.width));
-        setBranchQueue([...branchQueue]);
-      }
-      drawParticles();
-      animationFrame = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => cancelAnimationFrame(animationFrame);
-  }, [ctx, repCount, branchQueue]);
+  }, [repCount]); // Re-initialize animation when repCount changes
 
   return (
     <>
@@ -311,4 +284,3 @@ export default function Visualizer() {
     </>
   );
 }
-// --- End of Visualizer Component ---
