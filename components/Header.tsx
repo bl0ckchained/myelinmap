@@ -1,4 +1,3 @@
-// components/Header.tsx
 import Link from "next/link";
 import React from 'react';
 
@@ -9,6 +8,8 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
 export default function Header({
@@ -27,7 +28,7 @@ export default function Header({
       {/* Navigation */}
       <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
         {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href}>
+          <Link key={href} href={href} legacyBehavior>
             <a
               className={`
                 px-4 py-2 rounded-full bg-gray-800 text-white
@@ -44,5 +45,3 @@ export default function Header({
     </header>
   );
 }
-// This component can be used in any page to provide a consistent header with navigation links.
-// The links are styled with Tailwind CSS for a modern look and feel, with hover effects
