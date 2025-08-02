@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, User } from "@supabase/supabase-js";
 
 // This file is a self-contained, full-featured user dashboard.
 // It handles authentication, real-time data from Supabase, and
@@ -103,7 +103,7 @@ const Footer = () => {
 
 // --- Main Dashboard Component ---
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null); // Fixed type here
   const [userData, setUserData] = useState({ reps: 0, lastRep: null });
   const [loading, setLoading] = useState(false);
 
