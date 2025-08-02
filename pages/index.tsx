@@ -1,6 +1,10 @@
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import React from 'react';
+
+// This is a self-contained version of the Visualizer page.
+// It combines the visualizer logic with the Header and Footer components
+// to resolve import errors.
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -25,7 +29,7 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
               className={`
                 px-4 py-2 rounded-full bg-gray-800 text-white
                 ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md 
+                transition-all duration-300 shadow-md
                 transform hover:-translate-y-1 hover:scale-105
               `}
             >
@@ -88,165 +92,207 @@ const Footer = () => {
   );
 };
 
+// Placeholder components to make the code compile and run.
+const HabitLoop = () => (
+  <div className="bg-gray-800 text-center p-6 rounded-xl shadow-lg">
+    <h3 className="text-xl font-bold mb-2 text-white">Habit Loop</h3>
+    <p className="text-gray-400">Placeholder for your Habit Loop component.</p>
+  </div>
+);
 
-// --- Placeholder Components ---
-const MyelinButton = ({ href, color, size = 'normal', children }: any) => { // 'any' for simplicity
-  const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
-  return (
-    <Link href={href} legacyBehavior>
-      <a
-        className={`${color} text-black rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md ${sizeClasses}`}
-      >
-        {children}
-      </a>
-    </Link>
-  );
-};
+const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
+  <div className="bg-emerald-600 text-center p-6 rounded-xl shadow-lg">
+    <h3 className="text-xl font-bold mb-2 text-white">Rep Counter</h3>
+    <p className="text-2xl font-extrabold text-white">{count}</p>
+    <button onClick={onRep} className="mt-4 bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+      Log Rep
+    </button>
+  </div>
+);
 
-const HomeSection = ({ title, children }: any) => { // 'any' for simplicity
-  return (
-    <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto text-left space-y-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-white">
-        {title}
-      </h2>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </section>
-  );
-};
 
-export default function Home() {
+// --- Main Visualizer Page Component ---
+export default function Visualizer() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [repCount, setRepCount] = useState(0);
+
+  // Define types for the animation data
+  interface Branch {
+    x: number;
+    y: number;
+    angle: number;
+    depth: number;
+    width: number;
+  }
+  
+  interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
+  }
+
+  // Use refs to hold animation state to prevent re-renders
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const branchQueueRef = useRef<Branch[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
+
+  // Function to initialize the tree and particles
+  const initializeTree = useCallback(() => {
+    const ctx = ctxRef.current;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
+
+    branchQueueRef.current = [];
+    particlesRef.current = [];
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Root branch
+    const rootBranch = { x: width / 2, y: height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
+    branchQueueRef.current.push(rootBranch);
+
+    // Initial particle burst
+    for (let i = 0; i < 10; i++) {
+      particlesRef.current.push({
+        x: width / 2,
+        y: height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2 - 1,
+        life: 50,
+        color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
+      });
+    }
+  }, [repCount]);
+
+
+  // The main animation loop logic
+  const animate = useCallback(() => {
+    const ctx = ctxRef.current;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.shadowBlur = 0;
+
+    // Draw branches from the queue
+    const nextBranchesToDraw = branchQueueRef.current.splice(0, 2);
+    nextBranchesToDraw.forEach(b => {
+      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+      ctx.beginPath();
+      ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
+      ctx.lineWidth = b.width;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
+      ctx.lineCap = 'round';
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      if (b.depth > 1) {
+        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+      }
+    });
+
+    // Draw and update particles
+    for (let i = particlesRef.current.length - 1; i >= 0; i--) {
+      const p = particlesRef.current[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life--;
+      if (p.life <= 0) {
+        particlesRef.current.splice(i, 1);
+      } else {
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 50;
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+  }, [repCount]);
+
+
+  // Effect for canvas initialization and the animation loop itself
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+    ctxRef.current = context;
+
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      initializeTree();
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    
+    // Start the initial animation and re-run on repCount changes
+    initializeTree();
+    animationFrameIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (animationFrameIdRef.current) {
+        cancelAnimationFrame(animationFrameIdRef.current);
+      }
+    };
+  }, [animate, initializeTree]);
+
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Rewire Your Brain, One Habit at a Time</title>
-        <meta
-          name="description"
-          content="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer. Build new pathways. Change your life."
-        />
+        <title>Myelin Map &ndash; Visualize 🌱</title>
+        <meta name="description" content="Watch your myelin tree grow with every rep." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <Header
-        title="Train Your Brain, One Rep at a Time 🧠"
-        subtitle="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer"
-      />
+      <Header title="Visualize Your Growth 🌳" subtitle="Train with reps. Witness your progress." />
 
-      <main className="bg-gray-900 text-white min-h-screen">
-        {/* Main hero section with improved visuals */}
-        <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
-          {/* Background element for a more dynamic feel */}
-          <div className="absolute inset-0 bg-black opacity-40"></div>
-          {/* Content with higher z-index to be on top of the background */}
-          <div className="relative z-10 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
-              Rewire Your Brain.
-              <br />
-              One Rep at a Time 🧠
-            </h1>
-            <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300 animate-slide-up delay-200">
-              Welcome to <strong>Myelin Map</strong> &mdash; a tool for transformation
-              built on the neuroscience of action and repetition. This isn&apos;t
-              motivation. This is wiring.
-            </p>
+      <main className="flex flex-col items-center justify-start px-4 py-16 min-h-screen bg-gray-900 text-white">
+        {/* 🌳 Animated Tree at Top */}
+        <div className="relative w-full max-w-4xl h-[500px] mb-16 rounded-2xl overflow-hidden shadow-2xl bg-black">
+          <canvas ref={canvasRef} className="w-full h-full" />
+        </div>
 
-            <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex justify-center animate-slide-up delay-400">
-              <MyelinButton href="/rewire" color="bg-amber-500">
-                🔥 7-Day Challenge
-              </MyelinButton>
-              <MyelinButton href="/visualizer" color="bg-cyan-600">
-                🧬 Visualize & Grow
-              </MyelinButton>
-              <MyelinButton href="/resources" color="bg-lime-500">
-                📚 Resources
-              </MyelinButton>
-              <MyelinButton href="/founder" color="bg-yellow-400">
-                💬 Message from the Founder
-              </MyelinButton>
-            </div>
-          </div>
-        </section>
+        {/* 🧠 Headline */}
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">
+          <span role="img" aria-label="brain emoji">🧠</span> Rewire with Action
+        </h1>
+        <p className="text-lg max-w-2xl mb-10 text-gray-300 text-center">
+          One click. One rep. One branch at a time. This is how myelin grows.
+        </p>
 
-        <HomeSection title="🎥 The Myelination Process">
-          <p className="text-lg text-gray-300 mb-6">
-            Watch how your brain wires itself for speed, skill, and
-            transformation.
-          </p>
-          <video
-            controls
-            preload="auto"
-            className="w-full rounded-xl shadow-xl transition-transform duration-500 hover:scale-105"
-          >
-            <source src="/myelinmap_video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </HomeSection>
+        {/* 🔁 Habit Tracking Components */}
+        <div className="w-full max-w-2xl space-y-8 mb-16">
+          <HabitLoop />
+          <RepCounter count={repCount} onRep={() => setRepCount((r) => r + 1)} />
+        </div>
 
-        <HomeSection title="🧠 Why Myelin Matters">
-          <p className="text-lg text-gray-300">
-            Myelin is the brain&apos;s insulation. It speeds up signals, strengthens
-            connections, and makes habits automatic.
-            <br />
-            Every time you take action, you build myelin. Every rep counts. This
-            is how you change your life.
+        {/* 📘 Explanation */}
+        <section className="max-w-3xl space-y-6 text-center text-slate-200">
+          <p>
+            Every time you log a rep, your mystical Tree of Life grows stronger
+            &mdash; more branches, more light, more magic.
           </p>
-        </HomeSection>
-
-        <HomeSection title="📜 The Myelin Truth">
-          <p className="text-lg text-gray-300">
-            <strong>Myelin doesn&apos;t care about your intentions.</strong> It
-            doesn&apos;t respond to promises, motivation, or positive thinking. It
-            only cares about what you do &mdash; and how often you do it.
+          <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
+          <p>
+            The tree will evolve with you. Soon, you will see leaves, glowing ivy, and even little fruit that reflect your consistency.
           </p>
-          <p className="text-lg text-gray-300">
-            Every time you take focused action, a neural circuit fires. When it
-            fires, myelin wraps it &mdash; strengthening, speeding, locking it in.
-            This is how skills form. This is how change happens. This is how you
-            become unstoppable.
+          <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
+          <p>
+            This is not fantasy &mdash; it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
           </p>
-        </HomeSection>
-
-        <HomeSection title="⚡ My Story">
-          <p className="text-lg text-gray-300">
-            I&apos;m <strong>Chad Drummonds</strong> &mdash; a father, husband, and
-            computer science student who lost everything to addiction... and
-            clawed my way back.
-          </p>
-          <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
-            truth in neuroscience: The brain can change. But only through
-            action.
-          </p>
-          <p className="text-lg text-gray-300">
-            I built Myelin Map to help people like me &mdash; people who are sick of
-            failing silently &mdash; finally <em>see</em> their growth. Not with empty
-            checkmarks, but with real, visual feedback grounded in how the brain
-            works.
-          </p>
-        </HomeSection>
-
-        <HomeSection title="💡 What You&apos;ll Find Here">
-          <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
-            <li>Neuroscience-backed habit reinforcement</li>
-            <li>Visual progress that looks like the brain it rewires</li>
-            <li>Tools built with purpose &mdash; and pain &mdash; behind them</li>
-            <li>Challenges, loops, counters, affirmations&hellip; all aimed at change</li>
-          </ul>
-        </HomeSection>
-
-        {/* Final call-to-action section */}
-        <section className="text-center py-20 px-6 bg-gray-800">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-            Are You Ready to See Your Growth?
-          </h2>
-          <p className="text-lg text-gray-300 mb-6 max-w-xl mx-auto">
-            Take the first step toward building the life you want. The journey
-            starts with a single rep.
-          </p>
-          <MyelinButton href="/rewire" color="bg-emerald-500" size="large">
-            🔁 Join the 7-Day Rewire Challenge
-          </MyelinButton>
         </section>
       </main>
 
@@ -254,4 +300,3 @@ export default function Home() {
     </>
   );
 }
-// --- End of Home Component ---
