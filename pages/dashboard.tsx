@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
 
 // This file is a self-contained, full-featured user dashboard.
@@ -7,8 +8,6 @@ import { createClient, User } from "@supabase/supabase-js";
 // provides a user-friendly interface to log reps and track progress.
 
 // --- Supabase Client Initialization ---
-// These keys are directly embedded for this self-contained example.
-// In a real application, they should be loaded from environment variables.
 const SUPABASE_URL = "https://fmikgqlqdbxsufqgfilz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtaWtncWxxZGJ4c3VmcWdmaWx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4ODM5OTksImV4cCI6MjA2OTQ1OTk5OX0.7_x0oMmyW4syPBT_zysyzEL5BGMjxKVRTx1zByDzQh8";
 
@@ -103,30 +102,24 @@ const Footer = () => {
 
 // --- Main Dashboard Component ---
 export default function Dashboard() {
-  const [user, setUser] = useState<User | null>(null); // Fixed type here
-  const [userData, setUserData] = useState({ reps: 0, lastRep: null });
+  const [user, setUser] = useState<User | null>(null);
+  const [userData, setUserData] = useState({ reps: 0, last_rep: null });
   const [loading, setLoading] = useState(false);
 
   // Initialize the session listener
   useEffect(() => {
-    // Listen for changes in the Supabase auth state
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
-    // Get the initial user session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-
-    // Clean up the subscription on component unmount
     return () => subscription.unsubscribe();
   }, []);
 
   // Subscribe to user data from Supabase in real-time
   useEffect(() => {
     if (user) {
-      // Create a function to fetch user data and set up real-time updates
       const fetchUserData = async () => {
         let { data, error } = await supabase
           .from("user_reps")
@@ -134,7 +127,7 @@ export default function Dashboard() {
           .eq("user_id", user.id)
           .single();
 
-        if (error && error.code === "PGRST116") { // No data found, initialize
+        if (error && error.code === "PGRST116") {
           const { data: initialData, error: insertError } = await supabase
             .from("user_reps")
             .insert({ user_id: user.id, reps: 0, last_rep: null })
@@ -150,14 +143,14 @@ export default function Dashboard() {
 
       fetchUserData();
 
-      // Real-time subscription to user-specific data
       const subscription = supabase
         .channel(`user_reps:${user.id}`)
         .on(
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'user_reps', filter: `user_id=eq.${user.id}` },
           (payload) => {
-            setUserData(payload.new);
+            // Updated to be more type-safe
+            setUserData(prevData => ({ ...prevData, ...payload.new }));
           }
         )
         .subscribe();
@@ -188,8 +181,6 @@ export default function Dashboard() {
   };
 
   const handleLogin = async () => {
-    // For simplicity, we'll use a GitHub login here.
-    // You can customize this to any provider you like (e.g., Google, email/password).
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
     });
@@ -207,7 +198,6 @@ export default function Dashboard() {
     setUserData({ reps: 0, lastRep: null });
   };
 
-  // --- UI Rendering ---
   const repText = userData.reps === 1 ? "rep" : "reps";
 
   return (
@@ -298,3 +288,4 @@ export default function Dashboard() {
     </>
   );
 }
+// --- End of Dashboard Component ---
