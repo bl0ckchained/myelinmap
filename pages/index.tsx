@@ -2,6 +2,7 @@ import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import MyelinButton from "@/components/MyelinButton";
 
 // Using a custom component for the main section for better readability and reusability
 import HomeSection from "@/components/HomeSection";
@@ -10,10 +11,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Myelin Map – Rewire Your Brain, One Habit at a Time</title>
+        <title>Myelin Map &ndash; Rewire Your Brain, One Habit at a Time</title>
         <meta
           name="description"
-          content="This isn’t just a habit tracker — it’s a myelin visualizer. Build new pathways. Change your life."
+          content="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer. Build new pathways. Change your life."
         />
         {/* Optional: Add a viewport meta tag for better mobile responsiveness */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,7 +22,7 @@ export default function Home() {
 
       <Header
         title="Train Your Brain, One Rep at a Time 🧠"
-        subtitle="This isn’t just a habit tracker — it’s a myelin visualizer"
+        subtitle="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer"
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
@@ -37,8 +38,8 @@ export default function Home() {
               One Rep at a Time 🧠
             </h1>
             <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300 animate-slide-up delay-200">
-              Welcome to <strong>Myelin Map</strong> — a tool for transformation
-              built on the neuroscience of action and repetition. This isn’t
+              Welcome to <strong>Myelin Map</strong> &mdash; a tool for transformation
+              built on the neuroscience of action and repetition. This isn&apos;t
               motivation. This is wiring.
             </p>
 
@@ -78,7 +79,7 @@ export default function Home() {
 
         <HomeSection title="🧠 Why Myelin Matters">
           <p className="text-lg text-gray-300">
-            Myelin is the brain’s insulation. It speeds up signals, strengthens
+            Myelin is the brain&apos;s insulation. It speeds up signals, strengthens
             connections, and makes habits automatic.
             <br />
             Every time you take action, you build myelin. Every rep counts. This
@@ -88,13 +89,13 @@ export default function Home() {
 
         <HomeSection title="📜 The Myelin Truth">
           <p className="text-lg text-gray-300">
-            <strong>Myelin doesn’t care about your intentions.</strong> It
-            doesn’t respond to promises, motivation, or positive thinking. It
-            only cares about what you do — and how often you do it.
+            <strong>Myelin doesn&apos;t care about your intentions.</strong> It
+            doesn&apos;t respond to promises, motivation, or positive thinking. It
+            only cares about what you do &mdash; and how often you do it.
           </p>
           <p className="text-lg text-gray-300">
             Every time you take focused action, a neural circuit fires. When it
-            fires, myelin wraps it — strengthening, speeding, locking it in.
+            fires, myelin wraps it &mdash; strengthening, speeding, locking it in.
             This is how skills form. This is how change happens. This is how you
             become unstoppable.
           </p>
@@ -102,18 +103,18 @@ export default function Home() {
 
         <HomeSection title="⚡ My Story">
           <p className="text-lg text-gray-300">
-            I’m <strong>Chad Drummonds</strong> — a father, husband, and
+            I&apos;m <strong>Chad Drummonds</strong> &mdash; a father, husband, and
             computer science student who lost everything to addiction... and
             clawed my way back.
           </p>
           <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn’t break, I found the
+            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
             truth in neuroscience: The brain can change. But only through
             action.
           </p>
           <p className="text-lg text-gray-300">
-            I built Myelin Map to help people like me — people who are sick of
-            failing silently — finally <em>see</em> their growth. Not with empty
+            I built Myelin Map to help people like me &mdash; people who are sick of
+            failing silently &mdash; finally <em>see</em> their growth. Not with empty
             checkmarks, but with real, visual feedback grounded in how the brain
             works.
           </p>
@@ -123,8 +124,8 @@ export default function Home() {
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
             <li>Visual progress that looks like the brain it rewires</li>
-            <li>Tools built with purpose — and pain — behind them</li>
-            <li>Challenges, loops, counters, affirmations… all aimed at change</li>
+            <li>Tools built with purpose &mdash; and pain &mdash; behind them</li>
+            <li>Challenges, loops, counters, affirmations&hellip; all aimed at change</li>
           </ul>
         </HomeSection>
 
@@ -147,9 +148,3 @@ export default function Home() {
     </>
   );
 }
-
-// ---------------------------------------------------------------------------------------------------
-// New components to be added to your components/ directory
-// ---------------------------------------------------------------------------------------------------
-
-
