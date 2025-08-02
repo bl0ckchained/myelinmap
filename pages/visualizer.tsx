@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -9,7 +9,7 @@ import Link from "next/link";
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  { href: "/rewire", label: "� 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
@@ -128,31 +128,9 @@ export default function Visualizer() {
   const [branchQueue, setBranchQueue] = useState<Branch[]>([]);
   const [particles, setParticles] = useState<any[]>([]);
 
-  // Effect to initialize canvas and set up resize listener
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const context = canvas.getContext("2d");
-    if (context) {
-      setCtx(context);
-    }
-    const resizeCanvas = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-      if (context) {
-        growTree(context, canvas);
-      }
-    };
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-    return () => window.removeEventListener("resize", resizeCanvas);
-  }, [ctx]);
-
-  // Effect to handle the tree growing and animation
-  useEffect(() => {
-    if (!ctx) return;
-    let animationFrame: number;
-
+  // Memoized function for drawing the tree
+  const drawTree = useCallback((context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
+    // This function will be re-created only when repCount changes, thanks to useCallback
     const createParticles = (x: number, y: number) => {
       const newParticles = [];
       for (let i = 0; i < 10; i++) {
@@ -167,6 +145,61 @@ export default function Visualizer() {
       }
       setParticles(prev => [...prev, ...newParticles]);
     };
+    
+    const drawBranch = (x: number, y: number, angle: number, depth: number, width: number) => {
+      if (depth === 0) return;
+      const x2 = x + Math.cos(angle) * depth * (10 + repCount * 0.2);
+      const y2 = y - Math.sin(angle) * depth * (10 + repCount * 0.2);
+      context.beginPath();
+      context.strokeStyle = `hsl(140, 100%, ${60 - depth * 3}%)`;
+      context.lineWidth = width;
+      context.shadowBlur = 15;
+      context.shadowColor = `hsl(140, 100%, ${60 - depth * 2}%)`;
+      context.lineCap = 'round';
+      context.moveTo(x, y);
+      context.lineTo(x2, y2);
+      context.stroke();
+      if (depth > 1) {
+        setBranchQueue(prevQueue => [
+          ...prevQueue,
+          { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
+          { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 },
+        ]);
+      }
+    };
+    
+    setBranchQueue([]);
+    const width = canvas.width;
+    const height = canvas.height;
+    drawBranch(width / 2, height, Math.PI / 2, 8 + repCount * 0.2, 8);
+    createParticles(width / 2, height);
+  }, [repCount, setParticles, setBranchQueue]);
+
+
+  // Effect to initialize canvas and set up resize listener
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (context) {
+      setCtx(context);
+    }
+    const resizeCanvas = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      if (context) {
+        drawTree(context, canvas);
+      }
+    };
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [drawTree]);
+
+  // Effect to handle the animation loop
+  useEffect(() => {
+    if (!ctx) return;
+    let animationFrame: number;
 
     const drawParticles = () => {
       setParticles(prevParticles => {
@@ -203,6 +236,7 @@ export default function Visualizer() {
       ctx.lineTo(x2, y2);
       ctx.stroke();
       if (depth > 1) {
+        // We're updating the queue here, so this will trigger the next frame
         setBranchQueue(prevQueue => [
           ...prevQueue,
           { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
@@ -210,7 +244,7 @@ export default function Visualizer() {
         ]);
       }
     };
-    
+
     const animate = () => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.shadowBlur = 0;
@@ -223,21 +257,6 @@ export default function Visualizer() {
       animationFrame = requestAnimationFrame(animate);
     };
 
-    const growTree = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
-      setBranchQueue([]);
-      const width = canvas.width;
-      const height = canvas.height;
-      drawBranch(width / 2, height, Math.PI / 2, 8 + repCount * 0.2, 8);
-      createParticles(width / 2, height);
-    };
-
-    if (repCount > 0) {
-      const canvas = canvasRef.current;
-      if (ctx && canvas) {
-        growTree(ctx, canvas);
-      }
-    }
-    
     animate();
 
     return () => cancelAnimationFrame(animationFrame);
@@ -294,3 +313,4 @@ export default function Visualizer() {
     </>
   );
 }
+�
