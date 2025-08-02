@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-// This is a self-contained version of the Grow page, combining the main
-// page logic with the Header and Footer components to resolve import issues.
+// This is a self-contained version of the Visualizer page.
+// It combines the visualizer logic with the Header and Footer components
+// to resolve import errors.
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -110,8 +111,8 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
 );
 
 
-// --- Main Grow Page Component ---
-export default function GrowPage() {
+// --- Main Visualizer Page Component ---
+export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
 
@@ -125,7 +126,7 @@ export default function GrowPage() {
   
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [branchQueue, setBranchQueue] = useState<Branch[]>([]);
-  const [particles, setParticles] = useState<any[]>([]); // Using 'any' for particles for simplicity for now
+  const [particles, setParticles] = useState<any[]>([]);
 
   // Effect to initialize canvas and set up resize listener
   useEffect(() => {
@@ -138,7 +139,6 @@ export default function GrowPage() {
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      // Re-initialize the tree on resize to keep it centered
       if (context) {
         growTree(context, canvas);
       }
@@ -217,7 +217,7 @@ export default function GrowPage() {
       if (branchQueue.length > 0) {
         const nextBranchesToDraw = branchQueue.splice(0, 2);
         nextBranchesToDraw.forEach(b => drawBranch(b.x, b.y, b.angle, b.depth, b.width));
-        setBranchQueue([...branchQueue]); // Re-trigger state for next frame
+        setBranchQueue([...branchQueue]);
       }
       drawParticles();
       animationFrame = requestAnimationFrame(animate);
@@ -231,7 +231,6 @@ export default function GrowPage() {
       createParticles(width / 2, height);
     };
 
-    // Trigger the tree grow and particle burst when repCount changes
     if (repCount > 0) {
       const canvas = canvasRef.current;
       if (ctx && canvas) {
@@ -242,17 +241,17 @@ export default function GrowPage() {
     animate();
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [ctx, repCount]);
+  }, [ctx, repCount, branchQueue]);
 
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Grow 🌱</title>
-        <meta name="description" content="Train your brain and grow your myelin tree with each rep." />
+        <title>Myelin Map &ndash; Visualize 🌱</title>
+        <meta name="description" content="Watch your myelin tree grow with every rep." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <Header title="Grow Your Mind 🌳" subtitle="Train with reps. Visualize your progress." />
+      <Header title="Visualize Your Growth 🌳" subtitle="Train with reps. Witness your progress." />
 
       <main className="flex flex-col items-center justify-start px-4 py-16 min-h-screen bg-gray-900 text-white">
         {/* 🌳 Animated Tree at Top */}
