@@ -105,7 +105,7 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState<any[]>([]); // Using 'any' for simplicity
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const feedEndRef = useRef(null);
+  const feedEndRef = useRef<HTMLDivElement>(null); // Use a more specific type for the ref
 
   // Initialize the session listener
   useEffect(() => {
@@ -119,7 +119,7 @@ export default function CommunityPage() {
 
   // Real-time subscription to the community feed
   useEffect(() => {
-    // We fetch initial posts once and then listen for new changes
+    // Fetch initial posts and then listen for new changes
     const fetchPosts = async () => {
       const { data, error } = await supabase
         .from('community_posts')
@@ -129,7 +129,7 @@ export default function CommunityPage() {
       if (error) {
         console.error("Error fetching initial posts:", error);
       } else {
-        setPosts(data);
+        setPosts(data || []);
       }
     };
 
@@ -153,7 +153,7 @@ export default function CommunityPage() {
   }, []);
 
   // Handle new post submission
-  const handlePostSubmit = async (e) => {
+  const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => { // Correctly typed the event
     e.preventDefault();
     if (!postContent.trim() || !user) return;
 
@@ -178,7 +178,10 @@ export default function CommunityPage() {
 
   // Scroll to the bottom of the feed when new posts are added
   useEffect(() => {
-    feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Add a conditional check to ensure feedEndRef.current exists
+    if (feedEndRef.current) {
+      feedEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [posts]);
 
   return (
@@ -267,3 +270,4 @@ export default function CommunityPage() {
     </>
   );
 }
+// --- End of Community Component ---
