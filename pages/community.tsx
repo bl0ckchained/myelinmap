@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, User } from "@supabase/supabase-js";
 
 // This file is a self-contained, full-featured community page.
 // It uses Supabase for user authentication and real-time post updates.
 
 // --- Supabase Client Initialization ---
-const SUPABASE_URL = "https://fmikgqlqdbxsufqgfilz.supabase.com";
+const SUPABASE_URL = "https://fmikgqlqdbxsufqgfilz.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtaWtncWxxZGJ4c3VmcWdmaWx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4ODM5OTksImV4cCI6MjA2OTQ1OTk5OX0.7_x0oMmyW4syPBT_zysyzEL5BGMjxKVRTx1zByDzQh8";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -101,8 +101,8 @@ const Footer = () => {
 
 // --- Main Community Component ---
 export default function CommunityPage() {
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [posts, setPosts] = useState<any[]>([]); // Using 'any' for simplicity
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
   const feedEndRef = useRef(null);
@@ -119,25 +119,38 @@ export default function CommunityPage() {
 
   // Real-time subscription to the community feed
   useEffect(() => {
-    if (user) {
-      const subscription = supabase
-        .channel('community_channel')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'community_posts' },
-          (payload) => {
-            // Sort posts by created_at to ensure proper order
-            const newPosts = [...posts, payload.new].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            setPosts(newPosts);
-          }
-        )
-        .subscribe();
+    // We fetch initial posts once and then listen for new changes
+    const fetchPosts = async () => {
+      const { data, error } = await supabase
+        .from('community_posts')
+        .select('*')
+        .order('created_at', { ascending: true }); // Fetching in ascending order for the feed
       
-      return () => {
-        supabase.removeChannel(subscription);
-      };
-    }
-  }, [user, posts]);
+      if (error) {
+        console.error("Error fetching initial posts:", error);
+      } else {
+        setPosts(data);
+      }
+    };
+
+    fetchPosts();
+
+    // Real-time subscription to new community posts
+    const channel = supabase.channel('community_channel');
+
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'community_posts' },
+      (payload) => {
+        setPosts(prevPosts => [...prevPosts, payload.new]);
+      }
+    )
+    .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   // Handle new post submission
   const handlePostSubmit = async (e) => {
@@ -167,24 +180,6 @@ export default function CommunityPage() {
   useEffect(() => {
     feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [posts]);
-
-  // Fetch initial posts on component mount
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const { data, error } = await supabase
-        .from('community_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching initial posts:", error);
-      } else {
-        setPosts(data);
-      }
-    };
-
-    fetchPosts();
-  }, []);
 
   return (
     <>
