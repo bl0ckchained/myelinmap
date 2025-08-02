@@ -103,7 +103,8 @@ const Footer = () => {
 // --- Main Dashboard Component ---
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState({ reps: 0, last_rep: null });
+  // Corrected the type for last_rep
+  const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({ reps: 0, last_rep: null });
   const [loading, setLoading] = useState(false);
 
   // Initialize the session listener
@@ -195,7 +196,7 @@ export default function Dashboard() {
       console.error("Error signing out:", error);
     }
     setUser(null);
-    setUserData({ reps: 0, lastRep: null });
+    setUserData({ reps: 0, last_rep: null });
   };
 
   const repText = userData.reps === 1 ? "rep" : "reps";
