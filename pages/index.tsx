@@ -1,11 +1,120 @@
 import Head from "next/head";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import Link from "next/link";
-import MyelinButton from "@/components/MyelinButton";
+import React from 'react';
 
-// Using a custom component for the main section for better readability and reusability
-import HomeSection from "@/components/HomeSection";
+// --- Embedded Header Component ---
+const navLinks = [
+  { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
+  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
+  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
+  { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
+];
+
+const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
+  return (
+    <header className="bg-gray-900 text-white text-center py-12 px-4">
+      <h1 className="text-4xl font-bold">{title}</h1>
+      {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
+      <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+        {navLinks.map(({ href, label, hoverColor }) => (
+          <Link key={href} href={href} legacyBehavior>
+            <a
+              className={`
+                px-4 py-2 rounded-full bg-gray-800 text-white
+                ${hoverColor} hover:text-black
+                transition-all duration-300 shadow-md 
+                transform hover:-translate-y-1 hover:scale-105
+              `}
+            >
+              {label}
+            </a>
+          </Link>
+        ))}
+      </nav>
+    </header>
+  );
+};
+
+// --- Embedded Footer Component ---
+const Footer = () => {
+  return (
+    <footer className="text-center p-8 bg-gray-900 text-white text-sm">
+      <div className="space-y-2 mb-4">
+        <p className="text-gray-400 mt-2">
+          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+        </p>
+        <p>
+          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
+        </p>
+      </div>
+      <div className="space-y-2 mb-4">
+        <p>
+          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          Consultants LLC
+        </p>
+        <p>
+          <Link href="/legalpage" legacyBehavior>
+            <a className="underline hover:text-blue-300">
+              Privacy Policy & Terms
+            </a>
+          </Link>
+        </p>
+      </div>
+      <div className="flex justify-center items-center gap-2">
+        <span className="text-gray-400">Join our journey</span>
+        <a
+          href="https://www.youtube.com/@myelinmap"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:opacity-80 transition"
+          aria-label="YouTube Channel"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="text-red-500"
+          >
+            <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
+          </svg>
+        </a>
+      </div>
+    </footer>
+  );
+};
+
+
+// --- Placeholder Components ---
+const MyelinButton = ({ href, color, size = 'normal', children }: any) => { // 'any' for simplicity
+  const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
+  return (
+    <Link href={href} legacyBehavior>
+      <a
+        className={`${color} text-black rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md ${sizeClasses}`}
+      >
+        {children}
+      </a>
+    </Link>
+  );
+};
+
+const HomeSection = ({ title, children }: any) => { // 'any' for simplicity
+  return (
+    <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto text-left space-y-6">
+      <h2 className="text-3xl md:text-4xl font-bold text-white">
+        {title}
+      </h2>
+      <div className="space-y-4">
+        {children}
+      </div>
+    </section>
+  );
+};
 
 export default function Home() {
   return (
@@ -16,7 +125,6 @@ export default function Home() {
           name="description"
           content="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer. Build new pathways. Change your life."
         />
-        {/* Optional: Add a viewport meta tag for better mobile responsiveness */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
@@ -44,7 +152,6 @@ export default function Home() {
             </p>
 
             <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex justify-center animate-slide-up delay-400">
-              {/* Added a custom component for buttons to make them reusable and consistent */}
               <MyelinButton href="/rewire" color="bg-amber-500">
                 🔥 7-Day Challenge
               </MyelinButton>
@@ -61,7 +168,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Use a consistent component for sections to keep the design clean */}
         <HomeSection title="🎥 The Myelination Process">
           <p className="text-lg text-gray-300 mb-6">
             Watch how your brain wires itself for speed, skill, and
@@ -148,3 +254,4 @@ export default function Home() {
     </>
   );
 }
+// --- End of Home Component ---
