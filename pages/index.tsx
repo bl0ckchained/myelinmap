@@ -120,7 +120,7 @@ export default function Home() {
           </p>
         </HomeSection>
 
-        <HomeSection title="💡 What You’ll Find Here">
+        <HomeSection title="💡 What You&apos;ll Find Here">
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
             <li>Visual progress that looks like the brain it rewires</li>
