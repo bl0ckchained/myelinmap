@@ -1,4 +1,3 @@
-/ HomeSection.tsx (To be placed in components/HomeSection.tsx)
 import React from 'react';
 
 interface HomeSectionProps {
