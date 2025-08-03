@@ -3,18 +3,18 @@ import Link from "next/link";
 import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
 
-// This file is a self-contained, full-featured community page.
-// It uses Supabase for user authentication and real-time post updates.
-
-// --- Supabase Client Initialization ---
-// IMPORTANT: Secrets are now loaded from environment variables
-// These MUST be prefixed with NEXT_PUBLIC_ to be available on the client-side
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- Embedded Header Component ---
+interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
+
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
@@ -50,7 +50,6 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
-// --- Embedded Footer Component ---
 const Footer = () => {
   return (
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
@@ -101,15 +100,13 @@ const Footer = () => {
 };
 
 
-// --- Main Community Component ---
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<any[]>([]); // Using 'any' for simplicity
+  const [posts, setPosts] = useState<Post[]>([]);
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
-  const feedEndRef = useRef<HTMLDivElement>(null); // Use a more specific type for the ref
+  const feedEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialize the session listener
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -119,14 +116,12 @@ export default function CommunityPage() {
     });
   }, []);
 
-  // Real-time subscription to the community feed
   useEffect(() => {
-    // Fetch initial posts and then listen for new changes
     const fetchPosts = async () => {
       const { data, error } = await supabase
         .from('community_posts')
         .select('*')
-        .order('created_at', { ascending: true }); // Fetching in ascending order for the feed
+        .order('created_at', { ascending: true });
       
       if (error) {
         console.error("Error fetching initial posts:", error);
@@ -137,14 +132,13 @@ export default function CommunityPage() {
 
     fetchPosts();
 
-    // Real-time subscription to new community posts
     const channel = supabase.channel('community_channel');
 
     channel.on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'community_posts' },
       (payload) => {
-        setPosts(prevPosts => [...prevPosts, payload.new]);
+        setPosts(prevPosts => [...prevPosts, payload.new as Post]);
       }
     )
     .subscribe();
@@ -154,8 +148,7 @@ export default function CommunityPage() {
     };
   }, []);
 
-  // Handle new post submission
-  const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => { // Correctly typed the event
+  const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!postContent.trim() || !user) return;
 
@@ -178,9 +171,7 @@ export default function CommunityPage() {
     }
   };
 
-  // Scroll to the bottom of the feed when new posts are added
   useEffect(() => {
-    // Add a conditional check to ensure feedEndRef.current exists
     if (feedEndRef.current) {
       feedEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -205,7 +196,6 @@ export default function CommunityPage() {
       <main className="bg-gray-900 text-white px-4 py-16 min-h-screen">
         <div className="max-w-3xl mx-auto space-y-12">
           
-          {/* Post Submission Form */}
           <section className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-white/10">
             {user ? (
               <>
@@ -241,7 +231,6 @@ export default function CommunityPage() {
             )}
           </section>
 
-          {/* Community Feed */}
           <section>
             <h2 className="text-3xl font-bold text-white mb-6">Community Feed</h2>
             <div className="space-y-6">
@@ -272,4 +261,3 @@ export default function CommunityPage() {
     </>
   );
 }
-// --- End of Community Component ---

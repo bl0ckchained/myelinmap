@@ -13,6 +13,8 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
@@ -46,7 +48,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -54,7 +56,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -113,6 +115,24 @@ export default function GrowPage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
 
+  // Defining the new types for our canvas objects
+  interface Branch {
+    x: number;
+    y: number;
+    angle: number;
+    depth: number;
+    width: number;
+  }
+  
+  interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
+  }
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -130,8 +150,8 @@ export default function GrowPage() {
 
     const ivyColor = "hsl(140, 100%, 65%)";
     const magicGlow = "rgba(131, 255, 184, 0.4)";
-    const particles: any[] = [];
-    let branchQueue: any[] = [];
+    const particles: Particle[] = []; // Corrected the type here
+    let branchQueue: Branch[] = []; // Corrected the type here
     let animationFrame: number;
 
     const createParticles = (x: number, y: number) => {
@@ -228,12 +248,12 @@ export default function GrowPage() {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [repCount]);
+  }, [repCount]); // The repCount dependency is correct because the tree's growth depends on it
 
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Grow 🌱</title>
+        <title>Myelin Map – Grow 🌱</title>
         <meta name="description" content="Train your brain and grow your myelin tree with each rep." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -264,7 +284,7 @@ export default function GrowPage() {
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
             Every time you log a rep, your mystical Tree of Life grows stronger
-            &mdash; more branches, more light, more magic.
+            — more branches, more light, more magic.
           </p>
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
@@ -272,7 +292,7 @@ export default function GrowPage() {
           </p>
           <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            This is not fantasy &mdash; it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
+            This is not fantasy — it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
           </p>
         </section>
       </main>

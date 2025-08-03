@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from 'react';
+import React from 'react';
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -25,7 +25,7 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
               className={`
                 px-4 py-2 rounded-full bg-gray-800 text-white
                 ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md 
+                transition-all duration-300 shadow-md
                 transform hover:-translate-y-1 hover:scale-105
               `}
             >
@@ -44,7 +44,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -52,7 +52,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -89,41 +89,7 @@ const Footer = () => {
 };
 
 
-// --- The Self-Love Accordion Component (now embedded) ---
-const SelfLoveAccordion = ({ title, content }: any) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
-      >
-        <span>{title}</span>
-        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          ▼
-        </span>
-      </button>
-      <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-96 opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
-        }`}
-      >
-        <div className="space-y-4">
-          {content.map((item: any, index: number) => (
-            <div key={index}>
-              <h3 className="font-semibold text-emerald-300">{item.title}</h3>
-              <p className="text-gray-300 mt-1">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Placeholder Components ---
-const MyelinButton = ({ href, color, size = 'normal', children }: any) => {
+const MyelinButton = ({ href, color, size = 'normal', children }: { href: string; color: string; size?: 'normal' | 'large'; children: React.ReactNode; }) => {
   const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
   return (
     <Link href={href} legacyBehavior>
@@ -136,7 +102,7 @@ const MyelinButton = ({ href, color, size = 'normal', children }: any) => {
   );
 };
 
-const HomeSection = ({ title, children }: any) => {
+const HomeSection = ({ title, children }: { title: string; children: React.ReactNode; }) => {
   return (
     <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto text-left space-y-6">
       <h2 className="text-3xl md:text-4xl font-bold text-white">
@@ -149,52 +115,34 @@ const HomeSection = ({ title, children }: any) => {
   );
 };
 
-
 export default function Home() {
-  const selfLoveContent = [
-    { title: "Forgive Yourself", description: "Acknowledge past behaviors as an outgrowth of illness, not a moral failing. Focus on staying well and moving forward without dwelling on past mistakes." },
-    { title: "Develop Self-Compassion", description: "Practice treating oneself as a best friend—with gentler language and objective self-assessment. Challenge negative self-talk by asking how one would advise a loved one in the same situation." },
-    { title: "Set Humble Goals", description: "Begin with achievable, narrow recovery goals (e.g., one day sober). Break larger goals into small, manageable action steps to build a sense of accomplishment and positive momentum." },
-    { title: "Engage in Daily Reflection/Introspection", description: "Prioritize activities like meditating, taking walks, journaling, or writing daily gratitude lists. These practices focus thoughts, foster positive self-regard, process emotions, and help identify and replace negative self-talk." },
-    { title: "Embrace Self-Care", description: "Prioritize physical health (healthy eating, regular exercise, adequate sleep) and mental well-being (engaging in enjoyable activities, relaxation). Self-care can include simple pleasures like sharing meals with friends or engaging in creative arts." },
-    { title: "Be Mindful of Thoughts and Emotions", description: "Practice mindfulness to pay attention to the present moment without judgment, observing thoughts and feelings with kindness and understanding." },
-    { title: "Focus on Strengths", description: "Consciously shift focus from past mistakes and shortcomings to current achievements and inherent strengths." },
-    { title: "Practice Gratitude", description: "Regularly identify and appreciate the positive aspects of one's life, fostering a more positive mindset and self-compassionate outlook." },
-    { title: "Connect with Others", description: "Actively combat isolation by connecting with supportive individuals through group therapy, discussions with a therapist or counselor, or spending time with friends and family." },
-    { title: "Spend Time in Nature", description: "Engage with natural environments (e.g., walking in the woods, watching a sunset) to promote a sense of connection, calmness, and self-compassion during recovery." },
-  ];
-
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Rewire Your Brain, One Habit at a Time</title>
+        <title>Myelin Map – Rewire Your Brain, One Habit at a Time</title>
         <meta
           name="description"
-          content="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer. Build new pathways. Change your life."
+          content="This isn't just a habit tracker — it's a myelin visualizer. Build new pathways. Change your life."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header
         title="Train Your Brain, One Rep at a Time 🧠"
-        subtitle="This isn&apos;t just a habit tracker &mdash; it&apos;s a myelin visualizer"
+        subtitle="This isn't just a habit tracker — it's a myelin visualizer"
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
-        {/* Main hero section with improved visuals */}
         <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
-          {/* Background element for a more dynamic feel */}
           <div className="absolute inset-0 bg-black opacity-40"></div>
-          {/* Content with higher z-index to be on top of the background */}
           <div className="relative z-10 max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
-              Rewire Your Brain.
-              <br />
+              Rewire Your Brain.<br />
               One Rep at a Time 🧠
             </h1>
             <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300 animate-slide-up delay-200">
-              Welcome to <strong>Myelin Map</strong> &mdash; a tool for transformation
-              built on the neuroscience of action and repetition. This isn&apos;t
+              Welcome to <strong>Myelin Map</strong> — a tool for transformation
+              built on the neuroscience of action and repetition. This isn't
               motivation. This is wiring.
             </p>
 
@@ -215,12 +163,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* New Accordion Section */}
-        <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto space-y-6">
-          <SelfLoveAccordion title="Actionable Self-Love & Self-Compassion Practices" content={selfLoveContent} />
-        </section>
-
-
         <HomeSection title="🎥 The Myelination Process">
           <p className="text-lg text-gray-300 mb-6">
             Watch how your brain wires itself for speed, skill, and
@@ -238,7 +180,7 @@ export default function Home() {
 
         <HomeSection title="🧠 Why Myelin Matters">
           <p className="text-lg text-gray-300">
-            Myelin is the brain&apos;s insulation. It speeds up signals, strengthens
+            Myelin is the brain's insulation. It speeds up signals, strengthens
             connections, and makes habits automatic.
             <br />
             Every time you take action, you build myelin. Every rep counts. This
@@ -248,13 +190,13 @@ export default function Home() {
 
         <HomeSection title="📜 The Myelin Truth">
           <p className="text-lg text-gray-300">
-            <strong>Myelin doesn&apos;t care about your intentions.</strong> It
-            doesn&apos;t respond to promises, motivation, or positive thinking. It
-            only cares about what you do &mdash; and how often you do it.
+            <strong>Myelin doesn't care about your intentions.</strong> It
+            doesn't respond to promises, motivation, or positive thinking. It
+            only cares about what you do — and how often you do it.
           </p>
           <p className="text-lg text-gray-300">
             Every time you take focused action, a neural circuit fires. When it
-            fires, myelin wraps it &mdash; strengthening, speeding, locking it in.
+            fires, myelin wraps it — strengthening, speeding, locking it in.
             This is how skills form. This is how change happens. This is how you
             become unstoppable.
           </p>
@@ -262,33 +204,32 @@ export default function Home() {
 
         <HomeSection title="⚡ My Story">
           <p className="text-lg text-gray-300">
-            I&apos;m <strong>Chad Drummonds</strong> &mdash; a father, husband, and
+            I'm <strong>Chad Drummonds</strong> — a father, husband, and
             computer science student who lost everything to addiction... and
             clawed my way back.
           </p>
           <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
+            After nearly 20 years stuck in cycles I couldn't break, I found the
             truth in neuroscience: The brain can change. But only through
             action.
           </p>
           <p className="text-lg text-gray-300">
-            I built Myelin Map to help people like me &mdash; people who are sick of
-            failing silently &mdash; finally <em>see</em> their growth. Not with empty
+            I built Myelin Map to help people like me — people who are sick of
+            failing silently — finally <em>see</em> their growth. Not with empty
             checkmarks, but with real, visual feedback grounded in how the brain
             works.
           </p>
         </HomeSection>
 
-        <HomeSection title="💡 What You&apos;ll Find Here">
+        <HomeSection title="💡 What You'll Find Here">
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
             <li>Visual progress that looks like the brain it rewires</li>
-            <li>Tools built with purpose &mdash; and pain &mdash; behind them</li>
-            <li>Challenges, loops, counters, affirmations&hellip; all aimed at change</li>
+            <li>Tools built with purpose — and pain — behind them</li>
+            <li>Challenges, loops, counters, affirmations… all aimed at change</li>
           </ul>
         </HomeSection>
 
-        {/* Final call-to-action section */}
         <section className="text-center py-20 px-6 bg-gray-800">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
             Are You Ready to See Your Growth?
