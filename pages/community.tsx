@@ -109,7 +109,7 @@ interface Post {
 // --- Main Community Component ---
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]); // Using the new Post type
+  const [posts, setPosts] = useState<Post[]>([]);
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
   const feedEndRef = useRef<HTMLDivElement>(null);
@@ -122,6 +122,10 @@ export default function CommunityPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
+    return () => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {});
+      subscription.unsubscribe();
+    }
   }, []);
 
   // Real-time subscription to the community feed
@@ -135,7 +139,7 @@ export default function CommunityPage() {
       if (error) {
         console.error("Error fetching initial posts:", error);
       } else {
-        setPosts(data || []);
+        setPosts(data as Post[] || []);
       }
     };
     fetchPosts();
@@ -262,3 +266,5 @@ export default function CommunityPage() {
     </>
   );
 }
+// --- End of Community Component --- 
+// --- Dashboard Component ---
