@@ -9,7 +9,7 @@ import Link from "next/link";
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "� 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
@@ -115,7 +115,6 @@ export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
 
-  // Define types for the animation data
   interface Branch {
     x: number;
     y: number;
@@ -123,7 +122,7 @@ export default function Visualizer() {
     depth: number;
     width: number;
   }
-  
+
   interface Particle {
     x: number;
     y: number;
@@ -138,38 +137,38 @@ export default function Visualizer() {
   const branchesRef = useRef<Branch[]>([]);
   const particlesRef = useRef<Particle[]>([]);
 
-  // Function to draw a single branch
-  const drawBranch = useCallback((b: Branch) => {
-    const ctx = ctxRef.current;
-    if (!ctx) return;
-    
-    const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
-    const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
-    ctx.beginPath();
-    ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
-    ctx.lineWidth = b.width;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
-    ctx.lineCap = 'round';
-    ctx.moveTo(b.x, b.y);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-  }, [repCount]);
-
-  // Function to draw a single particle
-  const drawParticle = useCallback((p: Particle) => {
-    const ctx = ctxRef.current;
-    if (!ctx) return;
-
-    ctx.beginPath();
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.life / 50;
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-    ctx.fill();
+  // Function to create a particle burst at a given location
+  const createParticles = useCallback((x: number, y: number) => {
+    for (let i = 0; i < 10; i++) {
+      particlesRef.current.push({
+        x: x,
+        y: y,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2 - 1,
+        life: 50,
+        color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
+      });
+    }
   }, []);
 
+  // Function to generate new branches from existing ones (the "growth" logic)
+  const growNewBranches = useCallback(() => {
+    const newBranches = branchesRef.current.flatMap(b => {
+      if (b.depth > 0) {
+        const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+        const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+        return [
+          { x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 },
+          { x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 },
+        ];
+      }
+      return [];
+    });
+    // Add the new branches to the persistent list
+    branchesRef.current.push(...newBranches);
+  }, [repCount]);
 
-  // The main animation loop logic
+  // The main animation loop, responsible for drawing the scene
   const animate = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
@@ -178,16 +177,32 @@ export default function Visualizer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 0;
 
-    // Draw all existing branches
-    branchesRef.current.forEach(drawBranch);
+    // Draw all persistent branches
+    branchesRef.current.forEach(b => {
+      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+      ctx.beginPath();
+      ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
+      ctx.lineWidth = b.width;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
+      ctx.lineCap = 'round';
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    });
 
-    // Update and draw particles
+    // Draw and update particles
     particlesRef.current = particlesRef.current.filter(p => {
       p.x += p.vx;
       p.y += p.vy;
       p.life--;
       if (p.life > 0) {
-        drawParticle(p);
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 50;
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
         return true;
       }
       return false;
@@ -195,48 +210,9 @@ export default function Visualizer() {
 
     ctx.globalAlpha = 1;
     animationFrameIdRef.current = requestAnimationFrame(animate);
-  }, [drawBranch, drawParticle]);
-
-
-  // Function to add new growth to the tree
-  const addNewGrowth = useCallback(() => {
-    const ctx = ctxRef.current;
-    const canvas = canvasRef.current;
-    if (!ctx || !canvas) return;
-    
-    // Find the end points of the current branches
-    const endPoints = branchesRef.current.flatMap(b => {
-      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
-      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
-      if (b.depth > 1) {
-        return [{ x: x2, y: y2, angle: b.angle, depth: b.depth - 1, width: b.width * 0.7 }];
-      }
-      return [];
-    });
-    
-    // Add new branches from these end points
-    const newBranches = endPoints.flatMap(b => [
-      { x: b.x, y: b.y, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 },
-      { x: b.x, y: b.y, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 },
-    ]);
-    
-    branchesRef.current.push(...newBranches);
-    
-    // Create new particles at the base of the tree
-    for (let i = 0; i < 5; i++) {
-      particlesRef.current.push({
-        x: canvas.width / 2,
-        y: canvas.height,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2 - 1,
-        life: 50,
-        color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
-      });
-    }
   }, [repCount]);
 
-
-  // Effect for initial setup and animation loop
+  // This effect handles the canvas setup and animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -244,17 +220,18 @@ export default function Visualizer() {
     if (!context) return;
     ctxRef.current = context;
 
-    // Initial draw of the root tree
+    // Initial tree setup
     const rootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8, width: 8 };
-    branchesRef.current.push(rootBranch);
-
+    branchesRef.current = [rootBranch];
+    
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      // Re-initialize the tree on resize to keep it centered and visible
-      initializeTree();
+      // Re-initialize the tree to be centered on resize
+      const newRootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
+      branchesRef.current = [newRootBranch];
     };
-
+    
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
     
@@ -266,14 +243,23 @@ export default function Visualizer() {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-  }, [animate, initializeTree]);
+  }, [animate, repCount]);
 
-  // Effect to handle rep count change, triggering new growth
+  // This effect listens for repCount changes and triggers new growth
   useEffect(() => {
     if (repCount > 0) {
-      addNewGrowth();
+      growNewBranches();
+      const canvas = canvasRef.current;
+      if (canvas) {
+        createParticles(canvas.width / 2, canvas.height);
+      }
     }
-  }, [repCount, addNewGrowth]);
+  }, [repCount, growNewBranches, createParticles]);
+
+  // Handle logging a rep
+  const handleLogRep = () => {
+    setRepCount(prev => prev + 1);
+  };
 
   return (
     <>
@@ -302,7 +288,7 @@ export default function Visualizer() {
         {/* 🔁 Habit Tracking Components */}
         <div className="w-full max-w-2xl space-y-8 mb-16">
           <HabitLoop />
-          <RepCounter count={repCount} onRep={() => setRepCount((r) => r + 1)} />
+          <RepCounter count={repCount} onRep={handleLogRep} />
         </div>
 
         {/* 📘 Explanation */}
@@ -326,3 +312,4 @@ export default function Visualizer() {
     </>
   );
 }
+// --- End of Visualizer Page Component ---
