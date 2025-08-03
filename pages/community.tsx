@@ -7,7 +7,6 @@ import { createClient, User } from "@supabase/supabase-js";
 // It uses Supabase for user authentication and real-time post updates.
 
 // --- Supabase Client Initialization ---
-// The URL and Key are now retrieved from Vercel's environment variables.
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
@@ -99,11 +98,18 @@ const Footer = () => {
   );
 };
 
+// --- Type Definition for a Community Post ---
+interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+}
 
 // --- Main Community Component ---
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<any[]>([]); // Using 'any' for simplicity
+  const [posts, setPosts] = useState<Post[]>([]); // Using the new Post type
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
   const feedEndRef = useRef<HTMLDivElement>(null);
@@ -138,7 +144,7 @@ export default function CommunityPage() {
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'community_posts' },
       (payload) => {
-        setPosts(prevPosts => [...prevPosts, payload.new]);
+        setPosts(prevPosts => [...prevPosts, payload.new as Post]);
       }
     ).subscribe();
     return () => {

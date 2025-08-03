@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
@@ -124,7 +124,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       const fetchUserData = async () => {
-        let { data, error } = await supabase
+        const { data, error } = await supabase
           .from("user_reps")
           .select("*")
           .eq("user_id", user.id)
@@ -199,8 +199,6 @@ export default function Dashboard() {
     setUser(null);
     setUserData({ reps: 0, last_rep: null });
   };
-
-  const repText = userData.reps === 1 ? "rep" : "reps";
 
   return (
     <>
