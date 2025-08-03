@@ -19,7 +19,7 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/community", label: "🤝 Myelin Nation", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
@@ -185,16 +185,16 @@ export default function CommunityPage() {
   return (
     <>
       <Head>
-        <title>Myelination &mdash; A Community of Growth</title>
+        <title>Myelin Nation &mdash; A Community of Growth</title>
         <meta
           name="description"
-          content="Join the Myelination community to share your journey, offer support, and connect with others on a path of growth."
+          content="Join the Myelin Nation to share your journey, offer support, and connect with others on a path of growth."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header
-        title="Myelination 🤝"
+        title="Myelin Nation 🤝"
         subtitle="A community built on repetition, support, and growth."
       />
 
@@ -218,13 +218,13 @@ export default function CommunityPage() {
                     className="w-full bg-emerald-500 text-white px-6 py-3 rounded-lg font-bold shadow-md hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={!postContent.trim() || loading}
                   >
-                    {loading ? "Sharing..." : "Share with Myelination"}
+                    {loading ? "Sharing..." : "Share with Myelin Nation"}
                   </button>
                 </form>
               </>
             ) : (
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-yellow-300">Join the Community to Post</h2>
+                <h2 className="text-2xl font-bold text-yellow-300">Join Myelin Nation to Post</h2>
                 <p className="mt-2 text-gray-400">Sign in to share your journey with others.</p>
                 <button
                   onClick={() => supabase.auth.signInWithOAuth({ provider: "github" })}
@@ -237,7 +237,7 @@ export default function CommunityPage() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold text-white mb-6">Community Feed</h2>
+            <h2 className="text-3xl font-bold text-white mb-6">Myelin Nation Feed</h2>
             <div className="space-y-6">
               {posts.length > 0 ? (
                 posts.map((post) => (
@@ -266,5 +266,4 @@ export default function CommunityPage() {
     </>
   );
 }
-// --- End of Community Component --- 
-// --- Dashboard Component ---
+// --- End of Community Component ---
