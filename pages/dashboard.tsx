@@ -8,8 +8,10 @@ import { createClient, User } from "@supabase/supabase-js";
 // provides a user-friendly interface to log reps and track progress.
 
 // --- Supabase Client Initialization ---
-const SUPABASE_URL = "https://fmikgqlqdbxsufqgfilz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZtaWtncWxxZGJ4c3VmcWdmaWx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4ODM5OTksImV4cCI6MjA2OTQ1OTk5OX0.7_x0oMmyW4syPBT_zysyzEL5BGMjxKVRTx1zByDzQh8";
+// IMPORTANT: Secrets are now loaded from environment variables
+// These MUST be prefixed with NEXT_PUBLIC_ to be available on the client-side
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -55,7 +57,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -63,7 +65,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -279,7 +281,7 @@ export default function Dashboard() {
 
           <section className="text-center text-gray-300">
             <p className="italic">
-              &ldquo;You are not broken. You are becoming.&rdquo;
+              “You are not broken. You are becoming.”
             </p>
           </section>
         </div>
