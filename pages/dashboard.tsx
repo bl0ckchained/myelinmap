@@ -11,19 +11,36 @@ import { createClient, User } from "@supabase/supabase-js";
 // IMPORTANT: Secrets are now loaded from environment variables
 // These MUST be prefixed with NEXT_PUBLIC_ to be available on the client-side
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const SUPABASE_PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  {
+    href: "/rewire",
+    label: "🔥 7-Day Challenge",
+    hoverColor: "hover:bg-amber-400",
+  },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
-  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
+  {
+    href: "/visualizer",
+    label: "🧬 Visualizer",
+    hoverColor: "hover:bg-cyan-500",
+  },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
-  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
+  {
+    href: "/community",
+    label: "🤝 Myelination",
+    hoverColor: "hover:bg-rose-400",
+  },
+  {
+    href: "/dashboard",
+    label: "📈 Dashboard",
+    hoverColor: "hover:bg-blue-400",
+  },
 ];
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
@@ -60,13 +77,22 @@ const Footer = () => {
           Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
+          <span role="img" aria-label="brain emoji">
+            🧠
+          </span>{" "}
+          Designed to wire greatness into your day{" "}
+          <span role="img" aria-label="brain emoji">
+            🧠
+          </span>
         </p>
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
-          Consultants LLC
+          © 2025 MyelinMap.com Made with{" "}
+          <span role="img" aria-label="blue heart emoji">
+            💙
+          </span>{" "}
+          in Michigan · Powered by Quantum Step Consultants LLC
         </p>
         <p>
           <Link href="/legalpage" legacyBehavior>
@@ -101,17 +127,21 @@ const Footer = () => {
   );
 };
 
-
 // --- Main Dashboard Component ---
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   // Corrected the type for last_rep
-  const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({ reps: 0, last_rep: null });
+  const [userData, setUserData] = useState<{
+    reps: number;
+    last_rep: string | null;
+  }>({ reps: 0, last_rep: null });
   const [loading, setLoading] = useState(false);
 
   // Initialize the session listener
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -149,11 +179,16 @@ export default function Dashboard() {
       const subscription = supabase
         .channel(`user_reps:${user.id}`)
         .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'user_reps', filter: `user_id=eq.${user.id}` },
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "user_reps",
+            filter: `user_id=eq.${user.id}`,
+          },
           (payload) => {
             // Updated to be more type-safe
-            setUserData(prevData => ({ ...prevData, ...payload.new }));
+            setUserData((prevData) => ({ ...prevData, ...payload.new }));
           }
         )
         .subscribe();
@@ -210,11 +245,13 @@ export default function Dashboard() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
-      <Header title="Your Dashboard 📈" subtitle="A visual record of your comeback" />
+      <Header
+        title="Your Dashboard 📈"
+        subtitle="A visual record of your comeback"
+      />
 
       <main className="bg-gray-900 text-white min-h-screen">
         <div className="max-w-4xl mx-auto p-6 space-y-10">
-          
           {user ? (
             <>
               <section className="bg-gray-800 rounded-3xl p-8 shadow-2xl text-center border border-white/10">
@@ -222,22 +259,32 @@ export default function Dashboard() {
                   Welcome Back, Resilient Soul.
                 </h1>
                 <p className="text-gray-400 text-lg mb-6">
-                  Your user ID is: <span className="font-mono text-sm text-yellow-300 break-all">{user.id}</span>
+                  Your user ID is:{" "}
+                  <span className="font-mono text-sm text-yellow-300 break-all">
+                    {user.id}
+                  </span>
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row justify-around items-center gap-6">
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Total Reps Logged</p>
-                    <p className="text-6xl font-extrabold text-white mt-2">{userData.reps}</p>
+                    <div className="flex flex-col items-center">
+                      <p className="text-6xl font-extrabold text-white mt-2">
+                        {userData.reps}
+                      </p>
+                      <p className="text-sm text-gray-400 mt-2">{repText}</p>
+                    </div>
                   </div>
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Last Rep Logged</p>
                     <p className="text-xl font-bold text-white mt-2">
-                      {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "Never"}
+                      {userData.last_rep
+                        ? new Date(userData.last_rep).toLocaleDateString()
+                        : "Never"}
                     </p>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={handleLogout}
                   className="mt-8 bg-red-600 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-red-700 transition-colors"
@@ -251,7 +298,8 @@ export default function Dashboard() {
                   Log Your Rep for Today
                 </h2>
                 <p className="text-lg text-emerald-100 mb-6">
-                  This is the single action that builds myelin and rewires your brain.
+                  This is the single action that builds myelin and rewires your
+                  brain.
                 </p>
                 <button
                   onClick={logRep}
@@ -280,9 +328,7 @@ export default function Dashboard() {
           )}
 
           <section className="text-center text-gray-300">
-            <p className="italic">
-              “You are not broken. You are becoming.”
-            </p>
+            <p className="italic">“You are not broken. You are becoming.”</p>
           </section>
         </div>
       </main>

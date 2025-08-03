@@ -13,6 +13,8 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
@@ -46,7 +48,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -54,7 +56,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -94,7 +96,7 @@ const Footer = () => {
 export default function Coach() {
   const [userInput, setUserInput] = useState("");
   const [chatLog, setChatLog] = useState([
-    { role: "assistant", content: "Welcome, brave soul. I'm here to listen and support you on your journey. What's on your mind today?" },
+    { role: "assistant", content: "Greetings, my friend. I am the Sensei. Together, we will navigate the pathways of the mind. How can I guide your journey today?" },
   ]);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -114,29 +116,15 @@ export default function Coach() {
     setLoading(true);
 
     try {
-      // Prompt for the AI to ensure a compassionate and supportive persona
-      const prompt = `You are a deeply compassionate, empathetic, and positive AI coach. Your purpose is to provide support, encouragement, and guidance to someone who is a survivor of trauma and is on a path to recovery from addiction. Your responses should be non-judgmental, kind, and focus on reinforcing their strength and resilience. Always maintain a gentle, hopeful, and understanding tone. When providing advice, frame it as suggestions or reflections, not commands.
-
-      Here is the conversation so far:
-      ${newLog.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-      Your turn:
-      assistant:`;
-
-      let chatHistory = [];
-      chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-      const payload = { contents: chatHistory };
-      const apiKey = ""; // Canvas will provide this at runtime
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-      const response = await fetch(apiUrl, {
+      // Securely call our server-side API route
+      const response = await fetch("/api/chat-with-coach", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ chatLog: newLog })
       });
       
       const result = await response.json();
-      const assistantMessage = result?.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having a little trouble connecting right now. Please try again in a moment.";
+      const assistantMessage = result.assistantMessage || "I'm having a little trouble connecting right now. Please try again in a moment.";
 
       setChatLog([...newLog, { role: "assistant", content: assistantMessage }]);
     } catch (error) {

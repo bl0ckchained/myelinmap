@@ -8,7 +8,11 @@ export default function FloatingCoach() {
   const [open, setOpen] = useState(false);
   // State for the chat log, including messages from both the user and the coach
   const [chatLog, setChatLog] = useState([
-    { role: "assistant", content: "Welcome, brave soul. I'm here to listen and support you on your journey. How are you feeling today?" },
+    {
+      role: "assistant",
+      content:
+        "Welcome, brave soul. I'm here to listen and support you on your journey. How are you feeling today?",
+    },
   ]);
   // State for the user's input in the text box
   const [input, setInput] = useState("");
@@ -39,40 +43,21 @@ export default function FloatingCoach() {
     setLoading(true);
 
     try {
-      // Craft the prompt to ensure a compassionate and positive tone
-      const prompt = `You are a deeply compassionate, empathetic, and positive AI coach. Your purpose is to provide support, encouragement, and guidance to someone who is a survivor of trauma and is on a path to recovery from addiction. Your responses should be non-judgmental, kind, and focus on reinforcing their strength and resilience. Always maintain a gentle, hopeful, and understanding tone. When providing advice, frame it as suggestions or reflections, not commands.
-
-      Here is the conversation so far:
-      ${newLog.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-      Your turn:
-      assistant:`;
-      
-      // Prepare the payload for the Gemini API call
-      let chatHistory = [];
-      chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-      const payload = { contents: chatHistory };
-      const apiKey = ""; // Canvas will provide this at runtime
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-      // Make the API call
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      // We now call a secure API route on our server instead of the public Gemini API
+      const response = await fetch("/api/chat-with-coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatLog: newLog }),
       });
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
-      
+
       const result = await response.json();
-      
-      // Extract the response text
-      const assistantMessage = result?.candidates?.[0]?.content?.parts?.[0]?.text || "I'm having a little trouble connecting right now. Please try again in a moment.";
 
       // Update the chat log with the coach's response
-      setChatLog([...newLog, { role: "assistant", content: assistantMessage }]);
+      setChatLog([...newLog, { role: "assistant", content: result.assistantMessage }]);
     } catch (error) {
       console.error("API call failed:", error);
       // Provide a compassionate error message on failure
@@ -80,7 +65,8 @@ export default function FloatingCoach() {
         ...newLog,
         {
           role: "assistant",
-          content: "I sensed a disturbance in the signal, but I am still here for you. Let's try again shortly.",
+          content:
+            "I sensed a disturbance in the signal, but I am still here for you. Let's try again shortly.",
         },
       ]);
     } finally {
@@ -88,7 +74,7 @@ export default function FloatingCoach() {
       setLoading(false);
     }
   };
-  
+
   // Component JSX
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -106,7 +92,9 @@ export default function FloatingCoach() {
             {chatLog.map((msg, i) => (
               <div
                 key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
               >
                 <div
                   className={`max-w-[75%] px-4 py-2 rounded-xl text-sm break-words shadow-sm transition-all duration-300 ${

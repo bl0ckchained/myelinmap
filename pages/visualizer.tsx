@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -48,7 +48,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -56,7 +56,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -126,11 +126,22 @@ export default function Visualizer() {
     width: number;
   }
   
-  const branchQueueRef = useRef<Branch[]>([]);
-  const particlesRef = useRef<any[]>([]);
+  // New interface for Particle to remove 'any'
+  interface Particle {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    color: string;
+  }
 
-  // Function to initialize the tree with particles
-  const initializeTree = () => {
+  const branchQueueRef = useRef<Branch[]>([]);
+  const particlesRef = useRef<Particle[]>([]); // Corrected type here
+
+  // We use useCallback to memoize the functions,
+  // preventing the useEffect hook from running infinitely.
+  const initializeTree = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
     if (!ctx || !canvas) return;
@@ -155,10 +166,9 @@ export default function Visualizer() {
         color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
       });
     }
-  };
+  }, [repCount]); // repCount is a dependency because the depth changes with it
 
-  // The main animation loop
-  const animate = () => {
+  const animate = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
     if (!ctx || !canvas) return;
@@ -205,7 +215,7 @@ export default function Visualizer() {
     ctx.globalAlpha = 1;
 
     animationFrameIdRef.current = requestAnimationFrame(animate);
-  };
+  }, [repCount]); // repCount is a dependency because the branch size depends on it
 
   // Effect to handle canvas initialization and animation loop
   useEffect(() => {
@@ -222,7 +232,6 @@ export default function Visualizer() {
     };
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
-    initializeTree();
     animationFrameIdRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -231,12 +240,12 @@ export default function Visualizer() {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-  }, [repCount]); // Re-initialize animation when repCount changes
+  }, [animate, initializeTree]); // Corrected dependency array here
 
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Visualize 🌱</title>
+        <title>Myelin Map – Visualize 🌱</title>
         <meta name="description" content="Watch your myelin tree grow with every rep." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -267,7 +276,7 @@ export default function Visualizer() {
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
             Every time you log a rep, your mystical Tree of Life grows stronger
-            &mdash; more branches, more light, more magic.
+            — more branches, more light, more magic.
           </p>
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
@@ -275,7 +284,7 @@ export default function Visualizer() {
           </p>
           <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            This is not fantasy &mdash; it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
+            This is not fantasy — it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
           </p>
         </section>
       </main>
