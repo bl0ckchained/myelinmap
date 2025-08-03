@@ -13,7 +13,7 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/community", label: "🤝 Myelin Nation", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
@@ -48,7 +48,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart — your belief helped light this path.
+          Special thanks to Matt Stewart &mdash; your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -56,7 +56,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
+          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -115,9 +115,8 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
 export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [repCount, setRepCount] = useState(0);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const animationFrameIdRef = useRef<number | null>(null);
 
+  // Define types for the animation data
   interface Branch {
     x: number;
     y: number;
@@ -126,7 +125,6 @@ export default function Visualizer() {
     width: number;
   }
   
-  // New interface for Particle to remove 'any'
   interface Particle {
     x: number;
     y: number;
@@ -136,24 +134,26 @@ export default function Visualizer() {
     color: string;
   }
 
-  const branchQueueRef = useRef<Branch[]>([]);
-  const particlesRef = useRef<Particle[]>([]); // Corrected type here
+  // Use refs to hold animation state to prevent re-renders
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const branchesRef = useRef<Branch[]>([]); // Ref to hold the persistent branches
+  const particlesRef = useRef<Particle[]>([]);
 
-  // We use useCallback to memoize the functions,
-  // preventing the useEffect hook from running infinitely.
+  // Function to initialize the tree and particles
   const initializeTree = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
     if (!ctx || !canvas) return;
 
-    branchQueueRef.current = [];
-    particlesRef.current = [];
+    branchesRef.current = []; // Clear old branches
+    particlesRef.current = []; // Clear old particles
     const width = canvas.width;
     const height = canvas.height;
 
     // Root branch
     const rootBranch = { x: width / 2, y: height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
-    branchQueueRef.current.push(rootBranch);
+    branchesRef.current.push(rootBranch);
 
     // Initial particle burst
     for (let i = 0; i < 10; i++) {
@@ -166,8 +166,10 @@ export default function Visualizer() {
         color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
       });
     }
-  }, [repCount]); // repCount is a dependency because the depth changes with it
+  }, [repCount]); // Depend on repCount to regenerate the tree when it changes
 
+
+  // The main animation loop logic
   const animate = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
@@ -176,8 +178,10 @@ export default function Visualizer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 0;
 
-    // Draw branches from the queue
-    const nextBranchesToDraw = branchQueueRef.current.splice(0, 2);
+    // Draw and expand branches from the queue
+    const nextBranchesToDraw = branchesRef.current.filter(b => b.depth > 0);
+    branchesRef.current = []; // Clear the old branches
+    
     nextBranchesToDraw.forEach(b => {
       const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
       const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
@@ -190,9 +194,11 @@ export default function Visualizer() {
       ctx.moveTo(b.x, b.y);
       ctx.lineTo(x2, y2);
       ctx.stroke();
+      
+      // Add new branches for the next frame
       if (b.depth > 1) {
-        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 });
-        branchQueueRef.current.push({ x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+        branchesRef.current.push({ x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 });
+        branchesRef.current.push({ x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 });
       }
     });
 
@@ -215,9 +221,10 @@ export default function Visualizer() {
     ctx.globalAlpha = 1;
 
     animationFrameIdRef.current = requestAnimationFrame(animate);
-  }, [repCount]); // repCount is a dependency because the branch size depends on it
+  }, [repCount]);
 
-  // Effect to handle canvas initialization and animation loop
+
+  // Effect for canvas initialization and the animation loop itself
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -230,8 +237,12 @@ export default function Visualizer() {
       canvas.height = canvas.offsetHeight;
       initializeTree();
     };
+
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
+    
+    // Start the initial animation and re-run on repCount changes
+    initializeTree();
     animationFrameIdRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -240,12 +251,12 @@ export default function Visualizer() {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-  }, [animate, initializeTree]); // Corrected dependency array here
+  }, [initializeTree, animate]);
 
   return (
     <>
       <Head>
-        <title>Myelin Map – Visualize 🌱</title>
+        <title>Myelin Map &ndash; Visualize 🌱</title>
         <meta name="description" content="Watch your myelin tree grow with every rep." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -276,7 +287,7 @@ export default function Visualizer() {
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
             Every time you log a rep, your mystical Tree of Life grows stronger
-            — more branches, more light, more magic.
+            &mdash; more branches, more light, more magic.
           </p>
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
@@ -284,7 +295,7 @@ export default function Visualizer() {
           </p>
           <h2 className="text-2xl font-semibold text-white">Built on Science. Fueled by You.</h2>
           <p>
-            This is not fantasy — it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
+            This is not fantasy &mdash; it is neuroscience. Repetition wires your brain. This visualizer lets you witness it.
           </p>
         </section>
       </main>
@@ -293,3 +304,4 @@ export default function Visualizer() {
     </>
   );
 }
+// This is the end of the Visualizer page component.
