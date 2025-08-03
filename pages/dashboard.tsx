@@ -1,13 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// This file is a self-contained, full-featured user dashboard.
+// It handles authentication, real-time data from Supabase, and
+// provides a user-friendly interface to log reps and track progress.
+
+// --- Supabase Client Initialization ---
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
@@ -43,12 +49,13 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
+// --- Embedded Footer Component ---
 const Footer = () => {
   return (
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart — your belief helped light this path.
+          Special thanks to Matt Stewart &mdash; your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -56,7 +63,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
+          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -93,25 +100,31 @@ const Footer = () => {
 };
 
 
+// --- Main Dashboard Component ---
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({ reps: 0, last_rep: null });
   const [loading, setLoading] = useState(false);
 
+  // Initialize the session listener
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {});
+      subscription.unsubscribe();
+    }
   }, []);
 
+  // Subscribe to user data from Supabase in real-time
   useEffect(() => {
     if (user) {
       const fetchUserData = async () => {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from("user_reps")
           .select("*")
           .eq("user_id", user.id)
@@ -150,6 +163,7 @@ export default function Dashboard() {
     }
   }, [user]);
 
+  // Log a new rep to Supabase
   const logRep = async () => {
     if (!user) return;
     setLoading(true);
@@ -214,7 +228,6 @@ export default function Dashboard() {
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Total Reps Logged</p>
                     <p className="text-6xl font-extrabold text-white mt-2">{userData.reps}</p>
-                    <p className="text-sm text-gray-400">{repText}</p>
                   </div>
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Last Rep Logged</p>
@@ -267,7 +280,7 @@ export default function Dashboard() {
 
           <section className="text-center text-gray-300">
             <p className="italic">
-              “You are not broken. You are becoming.”
+              &ldquo;You are not broken. You are becoming.&rdquo;
             </p>
           </section>
         </div>
@@ -277,3 +290,4 @@ export default function Dashboard() {
     </>
   );
 }
+// --- End of Dashboard Component ---

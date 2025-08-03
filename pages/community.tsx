@@ -3,18 +3,17 @@ import Link from "next/link";
 import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// This file is a self-contained, full-featured community page.
+// It uses Supabase for user authentication and real-time post updates.
+
+// --- Supabase Client Initialization ---
+// The URL and Key are now retrieved from Vercel's environment variables.
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-interface Post {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}
-
+// --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
@@ -50,12 +49,13 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
+// --- Embedded Footer Component ---
 const Footer = () => {
   return (
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart — your belief helped light this path.
+          Special thanks to Matt Stewart &mdash; your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -63,7 +63,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
+          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -100,13 +100,15 @@ const Footer = () => {
 };
 
 
+// --- Main Community Component ---
 export default function CommunityPage() {
   const [user, setUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<any[]>([]); // Using 'any' for simplicity
   const [postContent, setPostContent] = useState("");
   const [loading, setLoading] = useState(false);
   const feedEndRef = useRef<HTMLDivElement>(null);
 
+  // Initialize the session listener
   useEffect(() => {
     supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -116,6 +118,7 @@ export default function CommunityPage() {
     });
   }, []);
 
+  // Real-time subscription to the community feed
   useEffect(() => {
     const fetchPosts = async () => {
       const { data, error } = await supabase
@@ -129,20 +132,15 @@ export default function CommunityPage() {
         setPosts(data || []);
       }
     };
-
     fetchPosts();
-
     const channel = supabase.channel('community_channel');
-
     channel.on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'community_posts' },
       (payload) => {
-        setPosts(prevPosts => [...prevPosts, payload.new as Post]);
+        setPosts(prevPosts => [...prevPosts, payload.new]);
       }
-    )
-    .subscribe();
-
+    ).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
@@ -151,14 +149,11 @@ export default function CommunityPage() {
   const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!postContent.trim() || !user) return;
-
     setLoading(true);
-    
     try {
       const { error } = await supabase
         .from("community_posts")
         .insert({ user_id: user.id, content: postContent });
-
       if (error) {
         console.error("Error adding post:", error);
       } else {
@@ -180,7 +175,7 @@ export default function CommunityPage() {
   return (
     <>
       <Head>
-        <title>Myelination — A Community of Growth</title>
+        <title>Myelination &mdash; A Community of Growth</title>
         <meta
           name="description"
           content="Join the Myelination community to share your journey, offer support, and connect with others on a path of growth."
