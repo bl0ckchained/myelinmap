@@ -110,6 +110,7 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
   </div>
 );
 
+
 // --- Main Visualizer Page Component ---
 export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -157,6 +158,7 @@ export default function Visualizer() {
       if (b.depth > 0) {
         const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
         const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+        
         return [
           { x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 },
           { x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 },
@@ -164,11 +166,49 @@ export default function Visualizer() {
       }
       return [];
     });
-    // Add the new branches to the persistent list
+    
     branchesRef.current.push(...newBranches);
   }, [repCount]);
 
-  // The main animation loop, responsible for drawing the scene
+  // Function to draw a single branch
+  const drawBranch = useCallback((b: Branch) => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+    
+    const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+    const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+    ctx.beginPath();
+    ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
+    ctx.lineWidth = b.width;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
+    ctx.lineCap = 'round';
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+
+    if (b.depth === 1 && repCount > 100) {
+      ctx.fillStyle = "#FFD700";
+      ctx.font = "24px 'Apple Color Emoji'";
+      ctx.fillText("🧘", x2, y2);
+    }
+  }, [repCount]);
+
+
+  // Function to draw a single particle
+  const drawParticle = useCallback((p: Particle) => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+
+    ctx.beginPath();
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life / 50;
+    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }, []);
+
+
+  // The main animation loop logic
   const animate = useCallback(() => {
     const ctx = ctxRef.current;
     const canvas = canvasRef.current;
@@ -177,32 +217,14 @@ export default function Visualizer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 0;
 
-    // Draw all persistent branches
-    branchesRef.current.forEach(b => {
-      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
-      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
-      ctx.beginPath();
-      ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
-      ctx.lineWidth = b.width;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
-      ctx.lineCap = 'round';
-      ctx.moveTo(b.x, b.y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    });
+    branchesRef.current.forEach(drawBranch);
 
-    // Draw and update particles
     particlesRef.current = particlesRef.current.filter(p => {
       p.x += p.vx;
       p.y += p.vy;
       p.life--;
       if (p.life > 0) {
-        ctx.beginPath();
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life / 50;
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fill();
+        drawParticle(p);
         return true;
       }
       return false;
@@ -210,9 +232,10 @@ export default function Visualizer() {
 
     ctx.globalAlpha = 1;
     animationFrameIdRef.current = requestAnimationFrame(animate);
-  }, [repCount]);
+  }, [drawBranch, drawParticle]);
 
-  // This effect handles the canvas setup and animation loop
+
+  // Effect for canvas initialization and animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -220,20 +243,18 @@ export default function Visualizer() {
     if (!context) return;
     ctxRef.current = context;
 
-    // Initial tree setup
-    const rootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8, width: 8 };
-    branchesRef.current = [rootBranch];
-    
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
-      // Re-initialize the tree to be centered on resize
-      const newRootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
+      const newRootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8 + Math.floor(repCount / 20) * 1.5, width: 8 };
       branchesRef.current = [newRootBranch];
     };
     
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
+    
+    const rootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8, width: 8 };
+    branchesRef.current = [rootBranch];
     
     animationFrameIdRef.current = requestAnimationFrame(animate);
 
@@ -245,20 +266,12 @@ export default function Visualizer() {
     };
   }, [animate, repCount]);
 
-  // This effect listens for repCount changes and triggers new growth
-  useEffect(() => {
-    if (repCount > 0) {
-      growNewBranches();
-      const canvas = canvasRef.current;
-      if (canvas) {
-        createParticles(canvas.width / 2, canvas.height);
-      }
-    }
-  }, [repCount, growNewBranches, createParticles]);
-
-  // Handle logging a rep
   const handleLogRep = () => {
     setRepCount(prev => prev + 1);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      createParticles(canvas.width / 2, canvas.height);
+    }
   };
 
   return (
@@ -312,4 +325,4 @@ export default function Visualizer() {
     </>
   );
 }
-// --- End of Visualizer Page Component ---
+// End of Visualizer Page Component
