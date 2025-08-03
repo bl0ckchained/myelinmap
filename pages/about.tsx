@@ -140,9 +140,9 @@ export default function AboutPage() {
           <p>
             But in 2019, I made a choice to start my comeback. I learned to be kind to myself, embraced daily
             affirmations, and began a journey of self-discovery. I found powerful insights in books like
-            <a href="https://www.google.com/search?q=what+happened+to+you+oprah" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">"What Happened to You?"</a>
+            <a href="https://www.google.com/search?q=what+happened+to+you+oprah" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">&quot;What Happened to You?&quot;</a>
             and
-            <a href="https://www.google.com/search?q=the+talent+code" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">"The Talent Code"</a>.
+            <a href="https://www.google.com/search?q=the+talent+code" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">&quot;The Talent Code&quot;</a>.
             I returned to school, dove into neuroscience, and discovered something extraordinary: the brain can heal.
             It can change. It can <em>re-map</em> itself &mdash; with effort, time, and repetition.
           </p>
