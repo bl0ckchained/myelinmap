@@ -16,7 +16,7 @@ export default function Support() {
         </p>
 
         <p className="mb-4">
-          If you'd like to support the mission, thank you 🙏 Your encouragement is just as valuable as your dollars.
+          If you&apos;d like to support the mission, thank you 🙏 Your encouragement is just as valuable as your dollars.
         </p>
 
         <p className="mb-4">
@@ -31,12 +31,12 @@ export default function Support() {
             <a href="mailto:support@myelinmap.com" className="text-blue-600 underline">
               email us
             </a>{" "}
-            and we'll set it up!
+            and we&apos;ll set it up!
           </li>
         </ul>
 
         <p className="text-sm text-gray-500">
-          Stripe donations coming soon — we're building with love and transparency ❤️
+          Stripe donations coming soon — we&apos;re building with love and transparency ❤️
         </p>
 
         <p className="mt-8">

@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import React from "react";
-
-// This is the main Coach page, providing a full-screen, dedicated chat interface
-// with a compassionate AI. The Header and Footer components are embedded here
-// to ensure the component is self-contained and avoids import-related errors.
+import Head from "next/head"; // Correct import
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -124,7 +121,7 @@ export default function Coach() {
       });
       
       const result = await response.json();
-      const assistantMessage = result.assistantMessage || "I'm having a little trouble connecting right now. Please try again in a moment.";
+      const assistantMessage = result.assistantMessage || "I&apos;m having a little trouble connecting right now. Please try again in a moment.";
 
       setChatLog([...newLog, { role: "assistant", content: assistantMessage }]);
     } catch (error) {
@@ -133,7 +130,7 @@ export default function Coach() {
         ...newLog,
         {
           role: "assistant",
-          content: "I sensed a disturbance in the signal, but I am still here for you. Let's try again shortly.",
+          content: "I sensed a disturbance in the signal, but I am still here for you. Let&apos;s try again shortly.",
         },
       ]);
     } finally {
@@ -143,10 +140,10 @@ export default function Coach() {
 
   return (
     <>
-      <head>
+      <Head>
         <title>Coach | Myelin Map</title>
         <meta name="description" content="Chat with your calm, kind mental health AI Coach." />
-      </head>
+      </Head>
 
       <Header title="Mental Health Coach 🤝" subtitle="Talk. Reflect. Grow." />
 

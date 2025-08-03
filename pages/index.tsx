@@ -88,7 +88,6 @@ const Footer = () => {
   );
 };
 
-
 const MyelinButton = ({ href, color, size = 'normal', children }: { href: string; color: string; size?: 'normal' | 'large'; children: React.ReactNode; }) => {
   const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
   return (
@@ -122,14 +121,14 @@ export default function Home() {
         <title>Myelin Map – Rewire Your Brain, One Habit at a Time</title>
         <meta
           name="description"
-          content="This isn't just a habit tracker — it's a myelin visualizer. Build new pathways. Change your life."
+          content="This isn&apos;t just a habit tracker — it&apos;s a myelin visualizer. Build new pathways. Change your life."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header
         title="Train Your Brain, One Rep at a Time 🧠"
-        subtitle="This isn't just a habit tracker — it's a myelin visualizer"
+        subtitle="This isn&apos;t just a habit tracker — it&apos;s a myelin visualizer"
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
@@ -142,7 +141,7 @@ export default function Home() {
             </h1>
             <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300 animate-slide-up delay-200">
               Welcome to <strong>Myelin Map</strong> — a tool for transformation
-              built on the neuroscience of action and repetition. This isn't
+              built on the neuroscience of action and repetition. This isn&apos;t
               motivation. This is wiring.
             </p>
 
@@ -180,7 +179,7 @@ export default function Home() {
 
         <HomeSection title="🧠 Why Myelin Matters">
           <p className="text-lg text-gray-300">
-            Myelin is the brain's insulation. It speeds up signals, strengthens
+            Myelin is the brain&apos;s insulation. It speeds up signals, strengthens
             connections, and makes habits automatic.
             <br />
             Every time you take action, you build myelin. Every rep counts. This
@@ -190,8 +189,8 @@ export default function Home() {
 
         <HomeSection title="📜 The Myelin Truth">
           <p className="text-lg text-gray-300">
-            <strong>Myelin doesn't care about your intentions.</strong> It
-            doesn't respond to promises, motivation, or positive thinking. It
+            <strong>Myelin doesn&apos;t care about your intentions.</strong> It
+            doesn&apos;t respond to promises, motivation, or positive thinking. It
             only cares about what you do — and how often you do it.
           </p>
           <p className="text-lg text-gray-300">
@@ -204,12 +203,12 @@ export default function Home() {
 
         <HomeSection title="⚡ My Story">
           <p className="text-lg text-gray-300">
-            I'm <strong>Chad Drummonds</strong> — a father, husband, and
+            I&apos;m <strong>Chad Drummonds</strong> — a father, husband, and
             computer science student who lost everything to addiction... and
             clawed my way back.
           </p>
           <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn't break, I found the
+            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
             truth in neuroscience: The brain can change. But only through
             action.
           </p>
@@ -221,7 +220,7 @@ export default function Home() {
           </p>
         </HomeSection>
 
-        <HomeSection title="💡 What You'll Find Here">
+        <HomeSection title="💡 What You&apos;ll Find Here">
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
             <li>Visual progress that looks like the brain it rewires</li>

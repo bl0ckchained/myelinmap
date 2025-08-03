@@ -214,6 +214,7 @@ export default function Dashboard() {
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Total Reps Logged</p>
                     <p className="text-6xl font-extrabold text-white mt-2">{userData.reps}</p>
+                    <p className="text-sm text-gray-400">{repText}</p>
                   </div>
                   <div className="bg-gray-700 p-6 rounded-2xl shadow-inner">
                     <p className="text-sm text-gray-400">Last Rep Logged</p>
