@@ -9,7 +9,7 @@ import Link from "next/link";
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  { href: "/rewire", label: "� 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
@@ -110,7 +110,6 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
   </div>
 );
 
-
 // --- Main Visualizer Page Component ---
 export default function Visualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -134,39 +133,40 @@ export default function Visualizer() {
     color: string;
   }
 
-  // Use refs to hold animation state to prevent re-renders
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
-  const branchesRef = useRef<Branch[]>([]); // Ref to hold the persistent branches
+  const branchesRef = useRef<Branch[]>([]);
   const particlesRef = useRef<Particle[]>([]);
 
-  // Function to initialize the tree and particles
-  const initializeTree = useCallback(() => {
+  // Function to draw a single branch
+  const drawBranch = useCallback((b: Branch) => {
     const ctx = ctxRef.current;
-    const canvas = canvasRef.current;
-    if (!ctx || !canvas) return;
+    if (!ctx) return;
+    
+    const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+    const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+    ctx.beginPath();
+    ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
+    ctx.lineWidth = b.width;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
+    ctx.lineCap = 'round';
+    ctx.moveTo(b.x, b.y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }, [repCount]);
 
-    branchesRef.current = []; // Clear old branches
-    particlesRef.current = []; // Clear old particles
-    const width = canvas.width;
-    const height = canvas.height;
+  // Function to draw a single particle
+  const drawParticle = useCallback((p: Particle) => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
 
-    // Root branch
-    const rootBranch = { x: width / 2, y: height, angle: Math.PI / 2, depth: 8 + repCount * 0.2, width: 8 };
-    branchesRef.current.push(rootBranch);
-
-    // Initial particle burst
-    for (let i = 0; i < 10; i++) {
-      particlesRef.current.push({
-        x: width / 2,
-        y: height,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2 - 1,
-        life: 50,
-        color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
-      });
-    }
-  }, [repCount]); // Depend on repCount to regenerate the tree when it changes
+    ctx.beginPath();
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = p.life / 50;
+    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+    ctx.fill();
+  }, []);
 
 
   // The main animation loop logic
@@ -178,53 +178,65 @@ export default function Visualizer() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.shadowBlur = 0;
 
-    // Draw and expand branches from the queue
-    const nextBranchesToDraw = branchesRef.current.filter(b => b.depth > 0);
-    branchesRef.current = []; // Clear the old branches
-    
-    nextBranchesToDraw.forEach(b => {
-      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
-      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
-      ctx.beginPath();
-      ctx.strokeStyle = `hsl(140, 100%, ${60 - b.depth * 3}%)`;
-      ctx.lineWidth = b.width;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(140, 100%, ${60 - b.depth * 2}%)`;
-      ctx.lineCap = 'round';
-      ctx.moveTo(b.x, b.y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-      
-      // Add new branches for the next frame
-      if (b.depth > 1) {
-        branchesRef.current.push({ x: x2, y: y2, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 });
-        branchesRef.current.push({ x: x2, y: y2, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 });
-      }
-    });
+    // Draw all existing branches
+    branchesRef.current.forEach(drawBranch);
 
-    // Draw and update particles
-    for (let i = particlesRef.current.length - 1; i >= 0; i--) {
-      const p = particlesRef.current[i];
+    // Update and draw particles
+    particlesRef.current = particlesRef.current.filter(p => {
       p.x += p.vx;
       p.y += p.vy;
       p.life--;
-      if (p.life <= 0) {
-        particlesRef.current.splice(i, 1);
-      } else {
-        ctx.beginPath();
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.life / 50;
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fill();
+      if (p.life > 0) {
+        drawParticle(p);
+        return true;
       }
-    }
-    ctx.globalAlpha = 1;
+      return false;
+    });
 
+    ctx.globalAlpha = 1;
     animationFrameIdRef.current = requestAnimationFrame(animate);
+  }, [drawBranch, drawParticle]);
+
+
+  // Function to add new growth to the tree
+  const addNewGrowth = useCallback(() => {
+    const ctx = ctxRef.current;
+    const canvas = canvasRef.current;
+    if (!ctx || !canvas) return;
+    
+    // Find the end points of the current branches
+    const endPoints = branchesRef.current.flatMap(b => {
+      const x2 = b.x + Math.cos(b.angle) * b.depth * (10 + repCount * 0.2);
+      const y2 = b.y - Math.sin(b.angle) * b.depth * (10 + repCount * 0.2);
+      if (b.depth > 1) {
+        return [{ x: x2, y: y2, angle: b.angle, depth: b.depth - 1, width: b.width * 0.7 }];
+      }
+      return [];
+    });
+    
+    // Add new branches from these end points
+    const newBranches = endPoints.flatMap(b => [
+      { x: b.x, y: b.y, angle: b.angle - 0.3, depth: b.depth - 1, width: b.width * 0.7 },
+      { x: b.x, y: b.y, angle: b.angle + 0.3, depth: b.depth - 1, width: b.width * 0.7 },
+    ]);
+    
+    branchesRef.current.push(...newBranches);
+    
+    // Create new particles at the base of the tree
+    for (let i = 0; i < 5; i++) {
+      particlesRef.current.push({
+        x: canvas.width / 2,
+        y: canvas.height,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2 - 1,
+        life: 50,
+        color: `hsl(${140 + Math.random() * 20}, 100%, 75%)`,
+      });
+    }
   }, [repCount]);
 
 
-  // Effect for canvas initialization and the animation loop itself
+  // Effect for initial setup and animation loop
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -232,17 +244,20 @@ export default function Visualizer() {
     if (!context) return;
     ctxRef.current = context;
 
+    // Initial draw of the root tree
+    const rootBranch = { x: canvas.width / 2, y: canvas.height, angle: Math.PI / 2, depth: 8, width: 8 };
+    branchesRef.current.push(rootBranch);
+
     const resizeCanvas = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
+      // Re-initialize the tree on resize to keep it centered and visible
       initializeTree();
     };
 
     window.addEventListener("resize", resizeCanvas);
     resizeCanvas();
     
-    // Start the initial animation and re-run on repCount changes
-    initializeTree();
     animationFrameIdRef.current = requestAnimationFrame(animate);
 
     return () => {
@@ -251,7 +266,14 @@ export default function Visualizer() {
         cancelAnimationFrame(animationFrameIdRef.current);
       }
     };
-  }, [initializeTree, animate]);
+  }, [animate, initializeTree]);
+
+  // Effect to handle rep count change, triggering new growth
+  useEffect(() => {
+    if (repCount > 0) {
+      addNewGrowth();
+    }
+  }, [repCount, addNewGrowth]);
 
   return (
     <>
@@ -304,4 +326,3 @@ export default function Visualizer() {
     </>
   );
 }
-// This is the end of the Visualizer page component.
