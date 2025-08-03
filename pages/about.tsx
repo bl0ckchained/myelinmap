@@ -1,23 +1,26 @@
-import Link from "next/link";
 import React from "react";
+import Head from "next/head";
+import Link from "next/link";
 
-// Use a lookup table to provide Tailwind with full, static class names
+// This is a self-contained version of the About page, combining the main
+// page logic with the Header and Footer components to resolve import issues.
+
+// --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <header className="bg-gray-900 text-white text-center py-12 px-4">
-      {/* Dynamic Title and Subtitle */}
       <h1 className="text-4xl font-bold">{title}</h1>
       {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
-
-      {/* Navigation */}
       <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
         {navLinks.map(({ href, label, hoverColor }) => (
           <Link key={href} href={href} legacyBehavior>
@@ -25,7 +28,7 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
               className={`
                 px-4 py-2 rounded-full bg-gray-800 text-white
                 ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md 
+                transition-all duration-300 shadow-md
                 transform hover:-translate-y-1 hover:scale-105
               `}
             >
@@ -38,10 +41,10 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
+// --- Embedded Footer Component ---
 const Footer = () => {
   return (
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
-      {/* Dedication and Mission */}
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
           Special thanks to Matt Stewart &mdash; your belief helped light this path.
@@ -50,8 +53,6 @@ const Footer = () => {
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
         </p>
       </div>
-
-      {/* Copyright and Legal */}
       <div className="space-y-2 mb-4">
         <p>
           &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
@@ -65,8 +66,6 @@ const Footer = () => {
           </Link>
         </p>
       </div>
-
-      {/* Social Media Link */}
       <div className="flex justify-center items-center gap-2">
         <span className="text-gray-400">Join our journey</span>
         <a
@@ -92,18 +91,18 @@ const Footer = () => {
   );
 };
 
-
+// --- Main About Page Component ---
 export default function AboutPage() {
   return (
     <>
-      <head>
+      <Head>
         <title>About Us | Myelin Map</title>
         <meta
           name="description"
           content="Learn the story behind Myelin Map, our mission, and how we&apos;re helping people rewire their brains through habit-driven growth."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      </head>
+      </Head>
 
       <Header
         title="About Myelin Map 🧠"
@@ -126,10 +125,6 @@ export default function AboutPage() {
           </p>
         </section>
         
-        {/*
-          This section has been rewritten to be more emotionally resonant and to include
-          the details of your full journey, from childhood trauma to recovery.
-        */}
         <section className="space-y-4">
           <h2 className="text-3xl font-bold text-white">The Story Behind the Map</h2>
           <p>
