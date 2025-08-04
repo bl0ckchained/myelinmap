@@ -325,25 +325,6 @@ export default function Home() {
           </p>
         </HomeSection>
 
-        <HomeSection title="⚡ My Story">
-          <p className="text-lg text-gray-300">
-            I&apos;m <strong>Chad Drummonds</strong> &mdash; a father, husband, and
-            computer science student who lost everything to addiction... and
-            clawed my way back.
-          </p>
-          <p className="text-lg text-gray-300">
-            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
-            truth in neuroscience: The brain can change. But only through
-            action.
-          </p>
-          <p className="text-lg text-gray-300">
-            I built Myelin Map to help people like me &mdash; people who are sick of
-            failing silently &mdash; finally <em>see</em> their growth. Not with empty
-            checkmarks, but with real, visual feedback grounded in how the brain
-            works.
-          </p>
-        </HomeSection>
-
         <HomeSection title="💡 What You&apos;ll Find Here">
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
