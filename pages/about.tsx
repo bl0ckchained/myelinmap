@@ -107,36 +107,40 @@ export default function AboutPage() {
       />
 
       <main className="px-6 py-12 max-w-4xl mx-auto text-gray-100 space-y-16">
+        {/* New Mission Statement */}
         <section className="space-y-4">
           <h2 className="text-3xl font-bold text-white">Our Mission</h2>
-          <p>
+          <p className="text-lg leading-relaxed text-gray-300">
             Myelin Map exists to help people reclaim their lives through consistent, meaningful
             practice. Rooted in the science of myelination &mdash; the biological process that wires habits
             into the brain &mdash; our platform is a visual, interactive, and radically empowering system
             for personal transformation.
           </p>
-          <p>
-            We believe growth shouldn&apos;t be reserved for the privileged few. We believe that no
-            matter your past, you can shape your future. And we&apos;re building the greatest growth tool
-            in the world to prove it.
+          <p className="text-lg leading-relaxed text-gray-300">
+            We believe that every action, thought, and habit you repeat is shaping who you&apos;re becoming &mdash; and that change is possible for anyone, no matter their past.
+          </p>
+          <p className="text-lg leading-relaxed text-gray-300">
+            This isn&apos;t about perfection. It&apos;s about <strong>progress.</strong>
+            You&apos;re not broken &mdash; you&apos;re mid-build. Let&apos;s grow forward.
+          </p>
+        </section>
+
+        {/* New Myelin Nation Mission Statement */}
+        <section className="space-y-4">
+          <h2 className="text-3xl font-bold text-white">Myelin Nation Mission</h2>
+          <p className="text-lg leading-relaxed text-gray-300">
+            Myelin Nation is a community for doers, dreamers, rebuilders, and overcomers.
+            We welcome anyone who&apos;s fighting to become their best self &mdash; whether you&apos;re escaping addiction, healing from trauma, or simply trying to build better habits.
+          </p>
+          <p className="text-lg leading-relaxed text-gray-300">
+            Our mission is to create a supportive, stigma-free space where daily reps lead to lifelong change. No shame. No judgment. Just growth &mdash; one wrap at a time.
+            Together, we celebrate every step, every stumble, every comeback.
+          </p>
+          <p className="text-lg leading-relaxed text-gray-300">
+            This is more than a movement. It&apos;s a <strong>rewiring revolution.</strong> Everyone&apos;s invited. Especially you.
           </p>
         </section>
         
-        {/* The story section has been removed to keep the focus on the mission */}
-
-        <section className="space-y-4">
-          <h2 className="text-3xl font-bold text-white">What Makes Us Different</h2>
-          <p>
-            While most self-help tools shout &quot;just do it,&quot; we ask: <em>how does the brain actually change?</em> Then we build from there.
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-left text-gray-300">
-            <li><span role="img" aria-label="check mark emoji">✅</span> Neuroscience-backed habit tracking</li>
-            <li><span role="img" aria-label="check mark emoji">✅</span> Beautiful visualizations of growth and streaks</li>
-            <li><span role="img" aria-label="check mark emoji">✅</span> Mantras, missions, and daily loops designed for rewiring</li>
-            <li><span role="img" aria-label="check mark emoji">✅</span> Created by someone who&apos;s walked the hard road, not just read the books</li>
-          </ul>
-        </section>
-
         <section className="space-y-4">
           <h2 className="text-3xl font-bold text-white">Powered by Purpose</h2>
           <p>
