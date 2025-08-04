@@ -227,7 +227,7 @@ export default function Home() {
     { title: "Coping with Stress", description: "Developing healthy stress coping mechanisms is vital. This includes engaging in physical movement (e.g., brisk walks, yoga), practicing meditation, spending time in nature, or interacting with pets. Defining personal values and exploring new pursuits and passions can also help bring pleasure and meaning back into one's life." },
     { title: "Navigating Relapse", description: "It is important to understand that relapse can be a part of the recovery process, and it should not be a reason to abandon efforts. Continuously monitoring substance use and learning from any lapses is essential for long-term recovery." },
   ];
-  
+
   return (
     <>
       <Head>
@@ -325,6 +325,25 @@ export default function Home() {
           </p>
         </HomeSection>
 
+        <HomeSection title="⚡ My Story">
+          <p className="text-lg text-gray-300">
+            I&apos;m <strong>Chad Drummonds</strong> &mdash; a father, husband, and
+            computer science student who lost everything to addiction... and
+            clawed my way back.
+          </p>
+          <p className="text-lg text-gray-300">
+            After nearly 20 years stuck in cycles I couldn&apos;t break, I found the
+            truth in neuroscience: The brain can change. But only through
+            action.
+          </p>
+          <p className="text-lg text-gray-300">
+            I built Myelin Map to help people like me &mdash; people who are sick of
+            failing silently &mdash; finally <em>see</em> their growth. Not with empty
+            checkmarks, but with real, visual feedback grounded in how the brain
+            works.
+          </p>
+        </HomeSection>
+
         <HomeSection title="💡 What You&apos;ll Find Here">
           <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
             <li>Neuroscience-backed habit reinforcement</li>
@@ -353,4 +372,3 @@ export default function Home() {
     </>
   );
 }
-// End of Home Page Component
