@@ -115,8 +115,8 @@ const SelfLoveAccordion: React.FC<AccordionProps> = ({ title, content }) => {
         </span>
       </button>
       <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-96 opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
+        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
+          isOpen ? 'max-h-[20rem] opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
         }`}
       >
         <div className="space-y-4">
