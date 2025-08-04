@@ -90,7 +90,17 @@ const Footer = () => {
 
 
 // --- The Self-Love Accordion Component (now embedded) ---
-const SelfLoveAccordion = ({ title, content }: any) => {
+interface AccordionContent {
+  title: string;
+  description: string;
+}
+
+interface AccordionProps {
+  title: string;
+  content: AccordionContent[];
+}
+
+const SelfLoveAccordion: React.FC<AccordionProps> = ({ title, content }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -110,7 +120,7 @@ const SelfLoveAccordion = ({ title, content }: any) => {
         }`}
       >
         <div className="space-y-4">
-          {content.map((item: any, index: number) => (
+          {content.map((item, index) => (
             <div key={index}>
               <h3 className="font-semibold text-emerald-300">{item.title}</h3>
               <p className="text-gray-300 mt-1">{item.description}</p>
@@ -123,7 +133,14 @@ const SelfLoveAccordion = ({ title, content }: any) => {
 };
 
 // --- Placeholder Components ---
-const MyelinButton = ({ href, color, size = 'normal', children }: any) => {
+interface MyelinButtonProps {
+  href: string;
+  color: string;
+  size?: 'normal' | 'large';
+  children: React.ReactNode;
+}
+
+const MyelinButton: React.FC<MyelinButtonProps> = ({ href, color, size = 'normal', children }) => {
   const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
   return (
     <Link href={href} legacyBehavior>
@@ -136,7 +153,12 @@ const MyelinButton = ({ href, color, size = 'normal', children }: any) => {
   );
 };
 
-const HomeSection = ({ title, children }: any) => {
+interface HomeSectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+const HomeSection: React.FC<HomeSectionProps> = ({ title, children }) => {
   return (
     <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto text-left space-y-6">
       <h2 className="text-3xl md:text-4xl font-bold text-white">
@@ -307,3 +329,4 @@ export default function Home() {
     </>
   );
 }
+// End of Home Page Component
