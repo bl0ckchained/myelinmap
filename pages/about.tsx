@@ -2,9 +2,6 @@ import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-// This is a self-contained version of the About page, combining the main
-// page logic with the Header and Footer components to resolve import issues.
-
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
@@ -12,7 +9,7 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/community", label: "🤝 Myelin Nation", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
@@ -125,33 +122,7 @@ export default function AboutPage() {
           </p>
         </section>
         
-        <section className="space-y-4">
-          <h2 className="text-3xl font-bold text-white">The Story Behind the Map</h2>
-          <p>
-            My name is Chad Adams Drummonds &mdash; a father, husband, computer science student, and a
-            man who&apos;s been through hell and walked back with a mission.
-          </p>
-          <p>
-            My journey of broken pathways began early in childhood, a time marked by deep trauma. Those early
-            wounds led me down a difficult road, one that later culminated in losing my license and
-            spending nearly two decades in the shadow of addiction. For years, I believed I was just a
-            loser, destined to fail.
-          </p>
-          <p>
-            But in 2019, I made a choice to start my comeback. I learned to be kind to myself, embraced daily
-            affirmations, and began a journey of self-discovery. I found powerful insights in books like
-            <a href="https://www.google.com/search?q=what+happened+to+you+oprah" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">&quot;What Happened to You?&quot;</a>
-            and
-            <a href="https://www.google.com/search?q=the+talent+code" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors duration-200 ml-1 mr-1">&quot;The Talent Code&quot;</a>.
-            I returned to school, dove into neuroscience, and discovered something extraordinary: the brain can heal.
-            It can change. It can <em>re-map</em> itself &mdash; with effort, time, and repetition.
-          </p>
-          <p>
-            Myelin Map is the product of that comeback. It is the system I wished existed when I was lost: a way to
-            see your effort, a visual trail of proof that yes &mdash; you are changing. You are a survivor.
-            And you are not alone.
-          </p>
-        </section>
+        {/* The story section has been removed to keep the focus on the mission */}
 
         <section className="space-y-4">
           <h2 className="text-3xl font-bold text-white">What Makes Us Different</h2>
