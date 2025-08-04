@@ -217,6 +217,10 @@ export default function Resources() {
       <main className="bg-gray-900 text-white px-6 py-20 min-h-screen">
         <section className="max-w-4xl mx-auto space-y-16">
 
+          <h1 className="text-4xl font-bold mb-6 text-center text-white">
+            <span role="img" aria-label="brain emoji">🧠</span> Just Some Great Advice
+          </h1>
+
           <Accordion title="Actionable Self-Love & Self-Compassion Practices" content={selfLoveContent} />
           <Accordion title="Essential Practical Advice for Overcoming Addiction" content={essentialAdviceContent} />
           
