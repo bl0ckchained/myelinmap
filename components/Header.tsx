@@ -7,7 +7,7 @@ const navLinks = [
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
-  { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/coach", label: "🧘 Coach", hoverColor: "hover:bg-pink-400" },
   { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
