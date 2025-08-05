@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import OpenAI, { ChatCompletionMessageParam } from "openai";
+import OpenAI from "openai";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+
 
 // --- OpenAI Client Initialization ---
 const openai = new OpenAI({
