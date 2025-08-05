@@ -18,15 +18,33 @@ export default function Coach() {
     setUserInput("");
     setLoading(true);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      body: JSON.stringify({ messages: newLog }),
-      headers: { "Content-Type": "application/json" },
-    });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ messages: newLog }),
+        headers: { "Content-Type": "application/json" },
+      });
 
-    const data = await res.json();
-    setChatLog([...newLog, { role: "assistant", content: data.message }]);
-    setLoading(false);
+      const data = await res.json();
+
+      if (!res.ok || !data.message) {
+        throw new Error("Invalid response from AI");
+      }
+
+      setChatLog([...newLog, { role: "assistant", content: data.message }]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setChatLog([
+        ...newLog,
+        {
+          role: "assistant",
+          content:
+            "Hmm, something went wrong. The Coach is taking a deep breath. Try again shortly.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,11 +80,12 @@ export default function Coach() {
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Type how you're feeling..."
               className="flex-1 px-4 py-2 rounded-md text-black"
+              disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-md"
+              className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-md disabled:opacity-50"
             >
               {loading ? "..." : "Send"}
             </button>
@@ -78,6 +97,5 @@ export default function Coach() {
     </>
   );
 }
-
-// ✅ This page provides a mental health coaching experience
-// ✅ Uses a chat interface to interact with the AI Coach
+// Ensure you have the OpenAI package installed
+// npm install openai
