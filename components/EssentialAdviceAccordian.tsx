@@ -6,7 +6,7 @@ export default function EssentialAdviceAccordion() {
     {
       title: "Seeking and Accepting Help",
       description:
-        "Open and honest communication with loved ones is vital. Asking for support isn't weakness; it's wisdom. Avoid lectures and threats — these increase shame and isolation. Recovery is a team effort."
+        "Open and honest communication with loved ones is vital. Asking for support isn&apos;t weakness; it&apos;s wisdom. Avoid lectures and threats — these increase shame and isolation. Recovery is a team effort."
     },
     {
       title: "Developing a Personalized Recovery Plan",
@@ -16,7 +16,7 @@ export default function EssentialAdviceAccordion() {
     {
       title: "Practicing Self-Care and Healthy Habits",
       description:
-        "Eat well. Move your body. Sleep. Replace old habits with new joys like music, volunteering, or walks. Self-care is not selfish — it's foundational."
+        "Eat well. Move your body. Sleep. Replace old habits with new joys like music, volunteering, or walks. Self-care is not selfish — it&apos;s foundational."
     },
     {
       title: "Managing Triggers and Cravings",
@@ -36,7 +36,7 @@ export default function EssentialAdviceAccordion() {
     {
       title: "Navigating Relapse",
       description:
-        "Relapse isn’t failure — it’s feedback. Learn from it. Use it. Then recommit. The path is never perfect, but your progress is real."
+        "Relapse isn&apos;t failure — it&apos;s feedback. Learn from it. Use it. Then recommit. The path is never perfect, but your progress is real."
     }
   ];
 
