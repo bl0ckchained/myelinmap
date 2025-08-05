@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import Head from "next/head";
 import React from "react";
-import Head from "next/head"; // Correct import
+import OpenAI from "openai";
+
+// --- OpenAI Client Initialization ---
+const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY, dangerouslyAllowBrowser: true });
+
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -10,7 +16,7 @@ const navLinks = [
   { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
+  { href: "/community", label: "🤝 Myelin Nation", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
 
@@ -45,7 +51,7 @@ const Footer = () => {
     <footer className="text-center p-8 bg-gray-900 text-white text-sm">
       <div className="space-y-2 mb-4">
         <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart — your belief helped light this path.
+          Special thanks to Matt Stewart &mdash; your belief helped light this path.
         </p>
         <p>
           <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
@@ -53,7 +59,7 @@ const Footer = () => {
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
+          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
@@ -89,21 +95,18 @@ const Footer = () => {
   );
 };
 
-// --- Main Coach Component ---
 export default function Coach() {
   const [userInput, setUserInput] = useState("");
   const [chatLog, setChatLog] = useState([
-    { role: "assistant", content: "Greetings, my friend. I am the Sensei. Together, we will navigate the pathways of the mind. How can I guide your journey today?" },
+    { role: "assistant", content: "Welcome, brave soul. I'm here to listen and support you on your journey. What's on your mind today?" },
   ]);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  // Automatically scroll to the bottom of the chat log when new messages are added
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatLog]);
 
-  // Function to handle sending a message and calling the API
   const sendMessage = async () => {
     if (!userInput.trim()) return;
 
@@ -113,16 +116,17 @@ export default function Coach() {
     setLoading(true);
 
     try {
-      // Securely call our server-side API route
-      const response = await fetch("/api/chat-with-coach", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatLog: newLog })
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a deeply compassionate, empathetic, and positive AI coach. Your purpose is to provide support, encouragement, and guidance to someone who is a survivor of trauma and is on a path to recovery from addiction. Your responses should be non-judgmental, kind, and focus on reinforcing their strength and resilience. Always maintain a gentle, hopeful, and understanding tone. When providing advice, frame it as suggestions or reflections, not commands.",
+          },
+          ...newLog,
+        ],
       });
-      
-      const result = await response.json();
-      const assistantMessage = result.assistantMessage || "I&apos;m having a little trouble connecting right now. Please try again in a moment.";
-
+      const assistantMessage = response.choices[0].message.content;
       setChatLog([...newLog, { role: "assistant", content: assistantMessage }]);
     } catch (error) {
       console.error("API call failed:", error);
@@ -130,7 +134,7 @@ export default function Coach() {
         ...newLog,
         {
           role: "assistant",
-          content: "I sensed a disturbance in the signal, but I am still here for you. Let&apos;s try again shortly.",
+          content: "I sensed a disturbance in the signal, but I am still here for you. Let's try again shortly.",
         },
       ]);
     } finally {
@@ -143,13 +147,13 @@ export default function Coach() {
       <Head>
         <title>Coach | Myelin Map</title>
         <meta name="description" content="Chat with your calm, kind mental health AI Coach." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header title="Mental Health Coach 🤝" subtitle="Talk. Reflect. Grow." />
 
       <main className="bg-gray-900 text-white min-h-screen px-4 py-16">
         <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-250px)] rounded-3xl shadow-2xl bg-black/20 border border-white/10 p-4">
-          {/* Chat log container */}
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
             {chatLog.map((msg, i) => (
               <div
@@ -181,7 +185,6 @@ export default function Coach() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input and Send button */}
           <div className="flex gap-2">
             <input
               value={userInput}
