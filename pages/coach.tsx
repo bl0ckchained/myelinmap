@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,6 +9,15 @@ export default function Coach() {
     { role: "assistant", content: "Welcome back. How are you feeling today?" },
   ]);
   const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatLog]);
 
   const sendMessage = async () => {
     if (!userInput.trim()) return;
@@ -62,7 +71,9 @@ export default function Coach() {
             {chatLog.map((msg, i) => (
               <div
                 key={i}
-                className={`mb-2 ${msg.role === "user" ? "text-right" : "text-left text-emerald-300"}`}
+                className={`mb-2 animate-fade-in ${
+                  msg.role === "user" ? "text-right" : "text-left text-emerald-300"
+                }`}
               >
                 <p>
                   <span className="font-bold">
@@ -72,14 +83,32 @@ export default function Coach() {
                 </p>
               </div>
             ))}
+
+            {loading && (
+              <div className="text-left text-emerald-300 animate-fade-in">
+                <p>
+                  <span className="font-bold">Coach:</span>{" "}
+                  <span className="inline-flex gap-1 animate-pulse">
+                    <span>.</span>
+                    <span>.</span>
+                    <span>.</span>
+                  </span>
+                </p>
+              </div>
+            )}
+
+            <div ref={chatEndRef} />
           </div>
 
           <div className="flex gap-2">
             <input
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendMessage();
+              }}
               placeholder="Type how you're feeling..."
-              className="flex-1 px-4 py-2 rounded-md text-black"
+              className="flex-1 px-4 py-2 rounded-md text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-inner"
               disabled={loading}
             />
             <button
@@ -94,8 +123,23 @@ export default function Coach() {
       </main>
 
       <Footer />
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(6px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </>
   );
 }
-// Ensure you have the OpenAI package installed
-// npm install openai
