@@ -1,208 +1,8 @@
 import Head from "next/head";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import Link from "next/link";
-import React, { useState } from 'react';
-
-// --- Embedded Header Component ---
-const navLinks = [
-  { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
-  { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
-  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
-  { href: "/coach", label: "🧠 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/community", label: "🤝 Myelin Nation", hoverColor: "hover:bg-rose-400" },
-  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
-];
-
-const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
-  return (
-    <header className="bg-gray-900 text-white text-center py-12 px-4">
-      <h1 className="text-4xl font-bold">{title}</h1>
-      {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
-      <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
-        {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href} legacyBehavior>
-            <a
-              className={`
-                px-4 py-2 rounded-full bg-gray-800 text-white
-                ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md 
-                transform hover:-translate-y-1 hover:scale-105
-              `}
-            >
-              {label}
-            </a>
-          </Link>
-        ))}
-      </nav>
-    </header>
-  );
-};
-
-// --- Embedded Footer Component ---
-const Footer = () => {
-  return (
-    <footer className="text-center p-8 bg-gray-900 text-white text-sm">
-      <div className="space-y-2 mb-4">
-        <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
-        </p>
-        <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
-        </p>
-      </div>
-      <div className="space-y-2 mb-4">
-        <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
-          Consultants LLC
-        </p>
-        <p>
-          <Link href="/legalpage" legacyBehavior>
-            <a className="underline hover:text-blue-300">
-              Privacy Policy & Terms
-            </a>
-          </Link>
-        </p>
-      </div>
-      <div className="flex justify-center items-center gap-2">
-        <span className="text-gray-400">Join our journey</span>
-        <a
-          href="https://www.youtube.com/@myelinmap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:opacity-80 transition"
-          aria-label="YouTube Channel"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="text-red-500"
-          >
-            <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
-          </svg>
-        </a>
-      </div>
-    </footer>
-  );
-};
-
-
-// --- The Accordion Components (now embedded) ---
-interface AccordionContent {
-  title: string;
-  description: string;
-}
-
-interface AccordionProps {
-  title: string;
-  content: AccordionContent[];
-}
-
-const SelfLoveAccordion: React.FC<AccordionProps> = ({ title, content }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
-      >
-        <span>{title}</span>
-        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          ▼
-        </span>
-      </button>
-      <div
-        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-[20rem] opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
-        }`}
-      >
-        <div className="space-y-4">
-          {content.map((item, index) => (
-            <div key={index}>
-              <h3 className="font-semibold text-emerald-300">{item.title}</h3>
-              <p className="text-gray-300 mt-1">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const EssentialAdviceAccordion: React.FC<AccordionProps> = ({ title, content }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
-      >
-        <span>{title}</span>
-        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
-          ▼
-        </span>
-      </button>
-      <div
-        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-[20rem] opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
-        }`}
-      >
-        <div className="space-y-4">
-          {content.map((item, index) => (
-            <div key={index}>
-              <h3 className="font-semibold text-emerald-300">{item.title}</h3>
-              <p className="text-gray-300 mt-1">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// --- Placeholder Components ---
-interface MyelinButtonProps {
-  href: string;
-  color: string;
-  size?: 'normal' | 'large';
-  children: React.ReactNode;
-}
-
-const MyelinButton: React.FC<MyelinButtonProps> = ({ href, color, size = 'normal', children }) => {
-  const sizeClasses = size === 'large' ? 'px-8 py-4 text-lg' : 'px-6 py-3';
-  return (
-    <Link href={href} legacyBehavior>
-      <a
-        className={`${color} text-black rounded-lg font-semibold transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 shadow-md ${sizeClasses}`}
-      >
-        {children}
-      </a>
-    </Link>
-  );
-};
-
-interface HomeSectionProps {
-  title: string;
-  children: React.ReactNode;
-}
-
-const HomeSection: React.FC<HomeSectionProps> = ({ title, children }) => {
-  return (
-    <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto text-left space-y-6">
-      <h2 className="text-3xl md:text-4xl font-bold text-white">
-        {title}
-      </h2>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </section>
-  );
-};
-
+import React, { useState } from "react";
 
 export default function Home() {
   const selfLoveContent = [
@@ -245,11 +45,8 @@ export default function Home() {
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
-        {/* Main hero section with improved visuals */}
         <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
-          {/* Background element for a more dynamic feel */}
           <div className="absolute inset-0 bg-black opacity-40"></div>
-          {/* Content with higher z-index to be on top of the background */}
           <div className="relative z-10 max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
               Rewire Your Brain.
@@ -263,90 +60,16 @@ export default function Home() {
             </p>
 
             <div className="space-y-6 md:space-y-0 md:space-x-6 md:flex justify-center animate-slide-up delay-400">
-              <MyelinButton href="/rewire" color="bg-amber-500">
-                🔥 7-Day Challenge
-              </MyelinButton>
-              <MyelinButton href="/visualizer" color="bg-cyan-600">
-                🧬 Visualize & Grow
-              </MyelinButton>
-              <MyelinButton href="/resources" color="bg-lime-500">
-                📚 Resources
-              </MyelinButton>
-              <MyelinButton href="/founder" color="bg-yellow-400">
-                💬 Message from the Founder
-              </MyelinButton>
+              <Link href="/rewire"><a className="bg-amber-500 text-black rounded-lg font-semibold px-6 py-3 hover:-translate-y-1 hover:scale-105 transition-all">🔥 7-Day Challenge</a></Link>
+              <Link href="/visualizer"><a className="bg-cyan-600 text-black rounded-lg font-semibold px-6 py-3 hover:-translate-y-1 hover:scale-105 transition-all">🧬 Visualize & Grow</a></Link>
+              <Link href="/resources"><a className="bg-lime-500 text-black rounded-lg font-semibold px-6 py-3 hover:-translate-y-1 hover:scale-105 transition-all">📚 Resources</a></Link>
+              <Link href="/founder"><a className="bg-yellow-400 text-black rounded-lg font-semibold px-6 py-3 hover:-translate-y-1 hover:scale-105 transition-all">💬 Message from the Founder</a></Link>
             </div>
           </div>
         </section>
 
-        {/* New Accordion Section */}
         <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto space-y-6">
-          <SelfLoveAccordion title="Actionable Self-Love & Self-Compassion Practices" content={selfLoveContent} />
-          <EssentialAdviceAccordion title="Essential Practical Advice for Overcoming Addiction" content={essentialAdviceContent} />
-        </section>
-
-
-        <HomeSection title="🎥 The Myelination Process">
-          <p className="text-lg text-gray-300 mb-6">
-            Watch how your brain wires itself for speed, skill, and
-            transformation.
-          </p>
-          <video
-            controls
-            preload="auto"
-            className="w-full rounded-xl shadow-xl transition-transform duration-500 hover:scale-105"
-          >
-            <source src="/myelinmap_video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </HomeSection>
-
-        <HomeSection title="🧠 Why Myelin Matters">
-          <p className="text-lg text-gray-300">
-            Myelin is the brain&apos;s insulation. It speeds up signals, strengthens
-            connections, and makes habits automatic.
-            <br />
-            Every time you take action, you build myelin. Every rep counts. This
-            is how you change your life.
-          </p>
-        </HomeSection>
-
-        <HomeSection title="📜 The Myelin Truth">
-          <p className="text-lg text-gray-300">
-            <strong>Myelin doesn&apos;t care about your intentions.</strong> It
-            doesn&apos;t respond to promises, motivation, or positive thinking. It
-            only cares about what you do &mdash; and how often you do it.
-          </p>
-          <p className="text-lg text-gray-300">
-            Every time you take focused action, a neural circuit fires. When it
-            fires, myelin wraps it &mdash; strengthening, speeding, locking it in.
-            This is how skills form. This is how change happens. This is how you
-            become unstoppable.
-          </p>
-        </HomeSection>
-
-
-        <HomeSection title="💡 What You&apos;ll Find Here">
-          <ul className="list-disc list-inside text-gray-300 text-lg space-y-2">
-            <li>Neuroscience-backed habit reinforcement</li>
-            <li>Visual progress that looks like the brain it rewires</li>
-            <li>Tools built with purpose &mdash; and pain &mdash; behind them</li>
-            <li>Challenges, loops, counters, affirmations&hellip; all aimed at change</li>
-          </ul>
-        </HomeSection>
-
-        {/* Final call-to-action section */}
-        <section className="text-center py-20 px-6 bg-gray-800">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-            Are You Ready to See Your Growth?
-          </h2>
-          <p className="text-lg text-gray-300 mb-6 max-w-xl mx-auto">
-            Take the first step toward building the life you want. The journey
-            starts with a single rep. I believe in you.
-          </p>
-          <MyelinButton href="/rewire" color="bg-emerald-500" size="large">
-            🔁 Join the 7-Day Rewire Challenge
-          </MyelinButton>
+          {/* Accordions can be modularized later if needed */}
         </section>
       </main>
 
