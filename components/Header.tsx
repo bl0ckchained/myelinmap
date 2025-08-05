@@ -4,13 +4,16 @@ import React from 'react';
 // Use a lookup table to provide Tailwind with full, static class names
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
-  { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
-  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
   { href: "/coach", label: "🧘 Coach", hoverColor: "hover:bg-pink-400" },
+  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
+  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
+  { href: "/resources", label: "📚 Resources", hoverColor: "hover:bg-lime-500" },
+  { href: "/founder", label: "💬 Message from Founder", hoverColor: "hover:bg-yellow-300" },
+  { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
   { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
   { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
 ];
+
 
 export default function Header({
   title,
