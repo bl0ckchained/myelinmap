@@ -5,6 +5,12 @@ import Link from "next/link";
 import OpenAI from "openai";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
+// --- Local Type to Avoid TypeScript Errors ---
+type ChatRole = "user" | "assistant";
+type SimpleMessage = {
+  role: ChatRole;
+  content: string;
+};
 
 // --- OpenAI Client Initialization ---
 const openai = new OpenAI({
@@ -14,7 +20,7 @@ const openai = new OpenAI({
 
 export default function FloatingCoach() {
   const [open, setOpen] = useState(false);
-  const [chatLog, setChatLog] = useState([
+  const [chatLog, setChatLog] = useState<SimpleMessage[]>([
     {
       role: "assistant",
       content:
@@ -32,7 +38,7 @@ export default function FloatingCoach() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newLog = [...chatLog, { role: "user", content: input }];
+    const newLog: SimpleMessage[] = [...chatLog, { role: "user", content: input }];
     setChatLog(newLog);
     setInput("");
     setLoading(true);
@@ -45,7 +51,7 @@ export default function FloatingCoach() {
             "You are a gentle, compassionate AI coach. You help people recovering from trauma and addiction. Your words should be kind, hopeful, supportive, and never judgmental.",
         },
         ...newLog.map((msg) => ({
-          role: msg.role as "system" | "user" | "assistant",
+          role: msg.role as "user" | "assistant",
           content: msg.content,
         })),
       ];
