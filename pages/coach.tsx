@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 
 export default function Coach() {
   const [userInput, setUserInput] = useState("");
@@ -67,6 +68,17 @@ export default function Coach() {
 
       <main className="bg-gray-900 text-white px-6 py-20 min-h-screen">
         <div className="max-w-2xl mx-auto space-y-6">
+          {/* 🌟 Floating Coach Image */}
+          <div className="flex justify-center">
+            <Image
+              src="/coach-floating.png" // 🧠 Save your coach image here in /public
+              alt="Floating Coach"
+              width={120}
+              height={120}
+              className="rounded-full shadow-lg border-4 border-emerald-500 animate-float"
+            />
+          </div>
+
           <div className="bg-black/20 p-4 rounded-md h-[400px] overflow-y-auto border border-white/10">
             {chatLog.map((msg, i) => (
               <div
@@ -105,10 +117,13 @@ export default function Coach() {
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") sendMessage();
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage();
+                }
               }}
               placeholder="Type how you're feeling..."
-              className="flex-1 px-4 py-2 rounded-md text-black focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-inner"
+              className="flex-1 px-4 py-2 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-gray-300"
               disabled={loading}
             />
             <button
@@ -136,8 +151,24 @@ export default function Coach() {
           }
         }
 
+        @keyframes float {
+          0% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-8px);
+          }
+          100% {
+            transform: translateY(0px);
+          }
+        }
+
         .animate-fade-in {
           animation: fadeIn 0.3s ease-out;
+        }
+
+        .animate-float {
+          animation: float 4s ease-in-out infinite;
         }
       `}</style>
     </>
