@@ -12,6 +12,7 @@ import { User } from "@supabase/supabase-js";
 const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY || "";
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY, dangerouslyAllowBrowser: true });
 
+
 // --- Embedded Header Component ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
@@ -133,7 +134,10 @@ export default function FloatingCoach() {
       ];
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
-        messages,
+        messages: messages.map(msg => ({ 
+          role: msg.role,
+          content: msg.content
+        })),
       });
       const assistantMessage = response.choices[0].message.content;
       setChatLog([...newLog, { role: "assistant", content: assistantMessage }]);

@@ -1,15 +1,23 @@
-/** @type {import('tailwindcss').Config} */
+// tailwind.config.js
 module.exports = {
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
+  // ... other config
   theme: {
     extend: {
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
       animation: {
-        "spin-slow": "spin 6s linear infinite",
+        'fade-in': 'fade-in 1s ease-out forwards',
+        'slide-up': 'slide-up 0.8s ease-out forwards',
       },
     },
   },
-  plugins: [],
-};
+  // ... other config
+}
