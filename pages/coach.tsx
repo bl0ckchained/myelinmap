@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Image from "next/image";
 
 export default function Coach() {
   const [userInput, setUserInput] = useState("");
@@ -68,17 +67,12 @@ export default function Coach() {
 
       <main className="bg-gray-900 text-white px-6 py-20 min-h-screen">
         <div className="max-w-2xl mx-auto space-y-6">
-          {/* 🌟 Floating Coach Image */}
-          <div className="flex justify-center">
-            <Image
-              src="/coach-floating.png" // 🧠 Save your coach image here in /public
-              alt="Floating Coach"
-              width={120}
-              height={120}
-              className="rounded-full shadow-lg border-4 border-emerald-500 animate-float"
-            />
+          {/* 🧘 Floating Coach Emoji */}
+          <div className="flex justify-center text-6xl animate-float drop-shadow-md">
+            🧘
           </div>
 
+          {/* 💬 Chat Area */}
           <div className="bg-black/20 p-4 rounded-md h-[400px] overflow-y-auto border border-white/10">
             {chatLog.map((msg, i) => (
               <div
@@ -112,6 +106,7 @@ export default function Coach() {
             <div ref={chatEndRef} />
           </div>
 
+          {/* ✍️ Input Row */}
           <div className="flex gap-2">
             <input
               value={userInput}
@@ -139,6 +134,7 @@ export default function Coach() {
 
       <Footer />
 
+      {/* 🔮 Animations */}
       <style jsx global>{`
         @keyframes fadeIn {
           from {
