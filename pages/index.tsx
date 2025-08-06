@@ -1,9 +1,56 @@
 import Head from "next/head";
+import Link from "next/link";
+import React, { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SelfLoveAccordion from "../components/SelfLoveAccordion";
-import EssentialAdviceAccordion from "../components/EssentialAdviceAccordion";
 import TreeVisualizer from "@/components/TreeVisualizer";
+
+// In-line Accordion component for this page
+interface AccordionContent {
+  title: string;
+  description: string;
+}
+
+interface AccordionProps {
+  title: string;
+  content: AccordionContent[];
+  color: string;
+}
+
+const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
+      >
+        <span className={`text-${color}`}>{title}</span>
+        <span
+          className={`transform transition-transform duration-300 ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
+        >
+          ▼
+        </span>
+      </button>
+      <div
+        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
+          isOpen ? "max-h-[20rem] opacity-100 p-6" : "max-h-0 opacity-0 p-0"
+        }`}
+      >
+        <div className="space-y-4">
+          {content.map((item, index) => (
+            <div key={index}>
+              <h3 className="font-semibold text-white">{item.title}</h3>
+              <p className="text-gray-300 mt-1">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Home() {
   const selfLoveContent = [
@@ -46,13 +93,10 @@ export default function Home() {
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
-
         {/* 🌳 Display the Magical Tree of Life */}
         <TreeVisualizer />
 
         <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
-          <div className="bg-red-500 text-white p-4">Tailwind test</div>
-
           <div className="absolute inset-0 bg-black opacity-40"></div>
           <div className="relative z-10 max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
@@ -74,45 +118,38 @@ export default function Home() {
             My name is Chad, and I created Myelin Map for anyone stuck in cycles they
             don&apos;t want to repeat. This platform was born from pain — and built with purpose.
           </p>
-
           <p className="text-lg text-gray-300">
             I spent nearly 20 years caught in addiction and survival mode. I read every book, tried
             every program, and failed more times than I can count. What changed everything for me
             was discovering <strong>myelin</strong> — the biological process that wires
             habits into your brain.
           </p>
-
           <p className="text-lg text-gray-300">
             Myelin is the insulation that wraps around your brain’s neural circuits. The more
             you use a circuit — good or bad — the thicker the myelin becomes. That means the
             brain doesn&apos;t change because of motivation. It changes because of <em>repetition</em>.
           </p>
-
           <p className="text-lg text-gray-300">
             That’s what Myelin Map is: a visual habit-building platform that turns your daily
             actions into beautiful, brain-based progress. One rep at a time. One affirmation,
             breath, or pushup — whatever it is for you.
           </p>
-
           <p className="text-lg text-emerald-300 font-semibold">
             This is a new kind of recovery. One that starts with love, and builds with action.
           </p>
         </section>
 
         <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto space-y-10">
-          <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-            <SelfLoveAccordion
-              title="❤️ Actionable Self-Love & Compassion"
-              content={selfLoveContent}
-            />
-          </div>
-
-          <div className="bg-gray-800 rounded-xl shadow-lg border border-gray-700">
-            <EssentialAdviceAccordion
-              title="🧭 Essential Advice for Overcoming Addiction"
-              content={essentialAdviceContent}
-            />
-          </div>
+          <Accordion
+            title="❤️ Actionable Self-Love & Compassion"
+            content={selfLoveContent}
+            color="pink-400"
+          />
+          <Accordion
+            title="🧭 Essential Advice for Overcoming Addiction"
+            content={essentialAdviceContent}
+            color="amber-400"
+          />
         </section>
       </main>
 
@@ -120,5 +157,3 @@ export default function Home() {
     </>
   );
 }
-
-
