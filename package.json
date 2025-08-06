@@ -27,9 +27,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/stripe": "^8.0.416",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5"
   }
 }
