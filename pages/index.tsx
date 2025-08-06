@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SelfLoveAccordion from "@/components/SelfLoveAccordion";
 import EssentialAdviceAccordion from "@/components/EssentialAdviceAccordion";
+import TreeVisualizer from "@/components/TreeVisualizer";
 
 export default function Home() {
   const selfLoveContent = [
@@ -45,6 +46,10 @@ export default function Home() {
       />
 
       <main className="bg-gray-900 text-white min-h-screen">
+
+        {/* 🌳 Display the Magical Tree of Life */}
+        <TreeVisualizer />
+
         <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
           <div className="absolute inset-0 bg-black opacity-40"></div>
           <div className="relative z-10 max-w-4xl mx-auto">
