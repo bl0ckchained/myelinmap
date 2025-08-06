@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect } from 'react';
 
 type Branch = {
   x: number;
@@ -16,14 +16,14 @@ export default function TreeVisualizer() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const width = (canvas.width = canvas.offsetWidth);
     const height = (canvas.height = canvas.offsetHeight);
 
-    const ivyColor = "#8affc1";
-    const magicGlow = "rgba(131, 255, 184, 0.4)";
+    const ivyColor = '#8affc1';
+    const magicGlow = 'rgba(131, 255, 184, 0.4)';
 
     let branches: Branch[] = [];
     let fruitPositions: { x: number; y: number }[] = [];
@@ -31,17 +31,18 @@ export default function TreeVisualizer() {
     let animationFrame: number;
     let loopTimeout: ReturnType<typeof setTimeout>;
     let currentIndex = 0;
+    let fruitStarted = false;
 
     const drawLeaf = (x: number, y: number) => {
       ctx.beginPath();
-      ctx.fillStyle = "rgba(144, 255, 203, 0.6)";
+      ctx.fillStyle = 'rgba(144, 255, 203, 0.6)';
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fill();
     };
 
     const drawIvy = (x: number, y: number, angle: number) => {
       ctx.beginPath();
-      ctx.strokeStyle = "rgba(104, 255, 185, 0.3)";
+      ctx.strokeStyle = 'rgba(104, 255, 185, 0.3)';
       ctx.lineWidth = 1.2;
       ctx.moveTo(x, y);
       ctx.lineTo(x + Math.cos(angle + 1) * 8, y - Math.sin(angle + 1) * 8);
@@ -49,19 +50,41 @@ export default function TreeVisualizer() {
     };
 
     const drawFruit = (x: number, y: number) => {
-      // Glowing green orb for contrast
+      // Glowing green orb
       ctx.beginPath();
-      ctx.fillStyle = "rgba(100, 220, 120, 0.9)"; // bright green
-      ctx.shadowColor = "rgba(180, 255, 180, 0.8)"; // soft glow
+      ctx.fillStyle = 'rgba(100, 220, 120, 0.9)';
+      ctx.shadowColor = 'rgba(180, 255, 180, 0.8)';
       ctx.shadowBlur = 18;
       ctx.arc(x, y, 12, 0, 2 * Math.PI);
       ctx.fill();
 
-      // Coach emoji inside, white and crisp
-      ctx.font = "16px serif";
-      ctx.fillStyle = "#ffffff";
+      // Coach emoji inside
+      ctx.font = '16px serif';
+      ctx.fillStyle = '#ffffff';
       ctx.shadowBlur = 0;
-      ctx.fillText("🧘", x - 8, y + 6);
+      ctx.fillText('🧘', x - 8, y + 6);
+    };
+
+    const drawSparkle = (x: number, y: number) => {
+      const sparkleCount = 6;
+      for (let i = 0; i < sparkleCount; i++) {
+        const angle = (Math.PI * 2 * i) / sparkleCount;
+        const x2 = x + Math.cos(angle) * 16;
+        const y2 = y + Math.sin(angle) * 16;
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      // Clear sparkles after short delay
+      setTimeout(() => {
+        ctx.clearRect(x - 18, y - 18, 36, 36);
+        drawFruit(x, y); // re-draw fruit after clearing sparkles
+      }, 120);
     };
 
     const drawBranch = (
@@ -96,20 +119,8 @@ export default function TreeVisualizer() {
       }
 
       branches.push(
-        {
-          x: x2,
-          y: y2,
-          angle: angle - 0.3,
-          depth: depth - 1,
-          width: width * 0.7,
-        },
-        {
-          x: x2,
-          y: y2,
-          angle: angle + 0.3,
-          depth: depth - 1,
-          width: width * 0.7,
-        }
+        { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
+        { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 }
       );
     };
 
@@ -118,32 +129,37 @@ export default function TreeVisualizer() {
         const { x, y, angle, depth, width } = branches[currentIndex];
         drawBranch(x, y, angle, depth, width);
         currentIndex++;
+
+        // 🍊 Start fruit mid-growth
+        if (!fruitStarted && currentIndex > branches.length * 0.4) {
+          fruitStarted = true;
+          popFruits(0);
+        }
+
         animationFrame = requestAnimationFrame(animate);
       } else {
-        // 🌳 Finished growing — start fruit popping
+        // Tree done — reset after fruit
         loopTimeout = setTimeout(() => {
-          popFruits(0);
-        }, 1000); // Wait 1s before fruit starts
+          startDrawing();
+        }, 3000);
       }
     };
 
     const popFruits = (index: number) => {
-      if (index >= fruitPositions.length) {
-        // 🌱 Restart the tree after delay
-        loopTimeout = setTimeout(() => {
-          startDrawing();
-        }, 6000); // wait 6s after fruit ends
-        return;
-      }
+      if (index >= fruitPositions.length) return;
 
       const fp = fruitPositions[index];
-      const jitterX = (Math.random() - 0.5) * 16; // ±8px
+      const jitterX = (Math.random() - 0.5) * 16;
       const jitterY = (Math.random() - 0.5) * 16;
-      drawFruit(fp.x + jitterX, fp.y + jitterY);
+      const fx = fp.x + jitterX;
+      const fy = fp.y + jitterY;
+
+      drawFruit(fx, fy);
+      drawSparkle(fx, fy);
 
       setTimeout(() => {
         popFruits(index + 1);
-      }, 200); // delay between each fruit pop
+      }, 150); // faster pop time
     };
 
     const startDrawing = () => {
@@ -151,6 +167,7 @@ export default function TreeVisualizer() {
       branches = [];
       fruitPositions = [];
       currentIndex = 0;
+      fruitStarted = false;
 
       drawBranch(width / 2, height, Math.PI / 2, 8, 8);
       animationFrame = requestAnimationFrame(animate);
