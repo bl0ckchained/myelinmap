@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useRef, useEffect } from "react";
 
@@ -47,21 +47,19 @@ export default function TreeVisualizer() {
     };
 
     const drawFruit = (x: number, y: number) => {
-      const useEmoji = Math.random() > 0.5;
-      if (useEmoji) {
-        ctx.font = "24px serif";
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-        ctx.shadowColor = "#ffcb77";
-        ctx.shadowBlur = 10;
-        ctx.fillText("🧘", x - 10, y + 10);
-      } else {
-        ctx.beginPath();
-        ctx.fillStyle = "rgba(255, 210, 120, 0.8)";
-        ctx.shadowColor = "#ffe6b3";
-        ctx.shadowBlur = 12;
-        ctx.arc(x, y, 6, 0, 2 * Math.PI);
-        ctx.fill();
-      }
+      // Glowing orange orb
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255, 200, 90, 0.9)";
+      ctx.shadowColor = "rgba(255, 220, 120, 0.9)";
+      ctx.shadowBlur = 18;
+      ctx.arc(x, y, 12, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Coach emoji inside
+      ctx.font = "16px serif";
+      ctx.fillStyle = "#fff";
+      ctx.shadowBlur = 0;
+      ctx.fillText("🧘", x - 8, y + 6); // Centered better inside orb
     };
 
     const drawBranch = (
@@ -90,8 +88,20 @@ export default function TreeVisualizer() {
       if (depth === 4) drawFruit(x2, y2);
 
       branches.push(
-        { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
-        { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 }
+        {
+          x: x2,
+          y: y2,
+          angle: angle - 0.3,
+          depth: depth - 1,
+          width: width * 0.7,
+        },
+        {
+          x: x2,
+          y: y2,
+          angle: angle + 0.3,
+          depth: depth - 1,
+          width: width * 0.7,
+        }
       );
     };
 
