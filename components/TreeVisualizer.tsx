@@ -1,7 +1,14 @@
-// components/TreeVisualizer.tsx
 'use client';
 
 import { useRef, useEffect } from "react";
+
+type Branch = {
+  x: number;
+  y: number;
+  angle: number;
+  depth: number;
+  width: number;
+};
 
 export default function TreeVisualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -18,15 +25,10 @@ export default function TreeVisualizer() {
     const ivyColor = "#8affc1";
     const magicGlow = "rgba(131, 255, 184, 0.4)";
 
-    let branches: {
-      x: number;
-      y: number;
-      angle: number;
-      depth: number;
-      width: number;
-    }[] = [];
+    let branches: Branch[] = [];
     let animationFrame: number;
     let currentIndex = 0;
+    let loopTimeout: ReturnType<typeof setTimeout>;
 
     const drawLeaf = (x: number, y: number) => {
       ctx.beginPath();
@@ -45,12 +47,21 @@ export default function TreeVisualizer() {
     };
 
     const drawFruit = (x: number, y: number) => {
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255, 210, 120, 0.8)";
-      ctx.shadowColor = "#ffe6b3";
-      ctx.shadowBlur = 12;
-      ctx.arc(x, y, 5, 0, 2 * Math.PI);
-      ctx.fill();
+      const useEmoji = Math.random() > 0.5;
+      if (useEmoji) {
+        ctx.font = "24px serif";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.shadowColor = "#ffcb77";
+        ctx.shadowBlur = 10;
+        ctx.fillText("🧘", x - 10, y + 10);
+      } else {
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255, 210, 120, 0.8)";
+        ctx.shadowColor = "#ffe6b3";
+        ctx.shadowBlur = 12;
+        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+      }
     };
 
     const drawBranch = (
@@ -76,22 +87,12 @@ export default function TreeVisualizer() {
 
       if (depth >= 7) drawLeaf(x2, y2);
       if (depth >= 6) drawIvy(x2, y2, angle);
-      if (depth === 4 && Math.random() > 0.9) drawFruit(x2, y2);
+      if (depth === 4) drawFruit(x2, y2);
 
-      branches.push({
-        x: x2,
-        y: y2,
-        angle: angle - 0.3,
-        depth: depth - 1,
-        width: width * 0.7,
-      });
-      branches.push({
-        x: x2,
-        y: y2,
-        angle: angle + 0.3,
-        depth: depth - 1,
-        width: width * 0.7,
-      });
+      branches.push(
+        { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
+        { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 }
+      );
     };
 
     const animate = () => {
@@ -100,6 +101,10 @@ export default function TreeVisualizer() {
         drawBranch(x, y, angle, depth, width);
         currentIndex++;
         animationFrame = requestAnimationFrame(animate);
+      } else {
+        loopTimeout = setTimeout(() => {
+          startDrawing();
+        }, 15000);
       }
     };
 
@@ -107,14 +112,16 @@ export default function TreeVisualizer() {
       ctx.clearRect(0, 0, width, height);
       branches = [];
       currentIndex = 0;
-
       drawBranch(width / 2, height, Math.PI / 2, 8, 8);
       animationFrame = requestAnimationFrame(animate);
     };
 
     startDrawing();
 
-    return () => cancelAnimationFrame(animationFrame);
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      clearTimeout(loopTimeout);
+    };
   }, []);
 
   return (
