@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect } from "react";
 
 type Branch = {
   x: number;
@@ -16,14 +16,14 @@ export default function TreeVisualizer() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const width = (canvas.width = canvas.offsetWidth);
     const height = (canvas.height = canvas.offsetHeight);
 
-    const ivyColor = '#8affc1';
-    const magicGlow = 'rgba(131, 255, 184, 0.4)';
+    const ivyColor = "#8affc1";
+    const magicGlow = "rgba(131, 255, 184, 0.4)";
 
     let branches: Branch[] = [];
     let fruitPositions: { x: number; y: number }[] = [];
@@ -34,14 +34,14 @@ export default function TreeVisualizer() {
 
     const drawLeaf = (x: number, y: number) => {
       ctx.beginPath();
-      ctx.fillStyle = 'rgba(144, 255, 203, 0.6)';
+      ctx.fillStyle = "rgba(144, 255, 203, 0.6)";
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fill();
     };
 
     const drawIvy = (x: number, y: number, angle: number) => {
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(104, 255, 185, 0.3)';
+      ctx.strokeStyle = "rgba(104, 255, 185, 0.3)";
       ctx.lineWidth = 1.2;
       ctx.moveTo(x, y);
       ctx.lineTo(x + Math.cos(angle + 1) * 8, y - Math.sin(angle + 1) * 8);
@@ -49,17 +49,19 @@ export default function TreeVisualizer() {
     };
 
     const drawFruit = (x: number, y: number) => {
+      // Glowing green orb for contrast
       ctx.beginPath();
-      ctx.fillStyle = 'rgba(255, 200, 90, 0.9)';
-      ctx.shadowColor = 'rgba(255, 220, 120, 0.9)';
+      ctx.fillStyle = "rgba(100, 220, 120, 0.9)"; // bright green
+      ctx.shadowColor = "rgba(180, 255, 180, 0.8)"; // soft glow
       ctx.shadowBlur = 18;
       ctx.arc(x, y, 12, 0, 2 * Math.PI);
       ctx.fill();
 
-      ctx.font = '16px serif';
-      ctx.fillStyle = '#fff';
+      // Coach emoji inside, white and crisp
+      ctx.font = "16px serif";
+      ctx.fillStyle = "#ffffff";
       ctx.shadowBlur = 0;
-      ctx.fillText('🧘', x - 8, y + 6);
+      ctx.fillText("🧘", x - 8, y + 6);
     };
 
     const drawBranch = (
@@ -94,8 +96,20 @@ export default function TreeVisualizer() {
       }
 
       branches.push(
-        { x: x2, y: y2, angle: angle - 0.3, depth: depth - 1, width: width * 0.7 },
-        { x: x2, y: y2, angle: angle + 0.3, depth: depth - 1, width: width * 0.7 }
+        {
+          x: x2,
+          y: y2,
+          angle: angle - 0.3,
+          depth: depth - 1,
+          width: width * 0.7,
+        },
+        {
+          x: x2,
+          y: y2,
+          angle: angle + 0.3,
+          depth: depth - 1,
+          width: width * 0.7,
+        }
       );
     };
 
@@ -122,12 +136,14 @@ export default function TreeVisualizer() {
         return;
       }
 
-      const { x, y } = fruitPositions[index];
-      drawFruit(x, y);
+      const fp = fruitPositions[index];
+      const jitterX = (Math.random() - 0.5) * 16; // ±8px
+      const jitterY = (Math.random() - 0.5) * 16;
+      drawFruit(fp.x + jitterX, fp.y + jitterY);
 
       setTimeout(() => {
         popFruits(index + 1);
-      }, 200); // Delay between fruit pops
+      }, 200); // delay between each fruit pop
     };
 
     const startDrawing = () => {
