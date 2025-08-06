@@ -47,6 +47,22 @@ export default function Home() {
 
       <main className="bg-gray-900 text-white min-h-screen">
 
+        {/* ✨ Magical Tagline Section */}
+        <section className="text-center px-4 pt-12 animate-fade-in">
+          <h2 className="text-2xl md:text-3xl font-bold text-emerald-300 leading-snug drop-shadow">
+            Healing Isn’t Just Possible — 
+            <span className="text-white glow-text"> It’s Biological.</span>
+          </h2>
+          <p className="text-lg md:text-xl text-slate-200 mt-2 animate-slide-up">
+            Welcome to your addiction and trauma coach. Let’s rewire together.
+          </p>
+          <div className="mt-4 flex justify-center">
+            <div className="sparkle sparkle-1" />
+            <div className="sparkle sparkle-2" />
+            <div className="sparkle sparkle-3" />
+          </div>
+        </section>
+
         {/* 🌳 Display the Magical Tree of Life */}
         <TreeVisualizer />
 
