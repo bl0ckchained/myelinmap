@@ -62,4 +62,3 @@ export default function EssentialAdviceAccordion() {
     </div>
   );
 }
-// components/EssentialAdviceAccordion.tsx
