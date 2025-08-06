@@ -1,6 +1,10 @@
 // tailwind.config.js
 module.exports = {
-  // ... other config
+  content: [
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       keyframes: {
@@ -19,5 +23,7 @@ module.exports = {
       },
     },
   },
-  // ... other config
-}
+  plugins: [],
+};
+// This is a Tailwind CSS configuration file that extends the default theme with custom animations.
+// It includes fade-in and slide-up animations that can be used throughout the application.
