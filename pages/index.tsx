@@ -51,6 +51,8 @@ export default function Home() {
         <TreeVisualizer />
 
         <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
+          <div className="bg-red-500 text-white p-4">Tailwind test</div>
+
           <div className="absolute inset-0 bg-black opacity-40"></div>
           <div className="relative z-10 max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
