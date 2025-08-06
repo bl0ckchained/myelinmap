@@ -1,8 +1,8 @@
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import SelfLoveAccordion from "@/components/SelfLoveAccordion";
-import EssentialAdviceAccordion from "@/components/EssentialAdviceAccordion";
+import SelfLoveAccordion from "../components/SelfLoveAccordion";
+import EssentialAdviceAccordion from "../components/EssentialAdviceAccordion";
 import TreeVisualizer from "@/components/TreeVisualizer";
 
 export default function Home() {
