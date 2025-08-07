@@ -1,0 +1,25 @@
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1, h2, h3 {
+  color: #00ffaa;
+}
+
+a {
+  color: #77f;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

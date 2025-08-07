@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "@/styles/basic.css";
 import type { AppProps } from "next/app";
 import FloatingCoach from "@/components/FloatingCoach"; // 🧠 Add this
 
