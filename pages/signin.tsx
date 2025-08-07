@@ -1,6 +1,9 @@
+// pages/signin.tsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { createClient } from "@supabase/supabase-js";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,36 +33,76 @@ export default function SignIn() {
     });
 
     if (error) {
-      setMessage("There was an error. Please try again.");
-      console.error(error.message);
+      setMessage(`Error: ${error.message}`);
+      console.error("Supabase Auth Error:", error);
     } else {
       setMessage("Check your email for a magic link!");
     }
   };
 
   return (
-    <main style={{ minHeight: "70vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <form onSubmit={handleLogin} style={{ width: "100%", maxWidth: "400px", padding: "2rem", border: "1px solid #ccc", borderRadius: "12px", textAlign: "center" }}>
-        <h1>Sign In to Myelin Map</h1>
-        <p style={{ marginBottom: "1rem", color: "#666" }}>Use your email to receive a magic login link.</p>
+    <>
+      <Header title="Sign In" subtitle="Access your Myelin Map Dashboard" />
 
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ width: "100%", padding: "0.75rem", marginBottom: "1rem", fontSize: "1rem" }}
-        />
-        <button
-          type="submit"
-          style={{ padding: "0.75rem 2rem", fontSize: "1rem", cursor: "pointer" }}
+      <main
+        style={{
+          minHeight: "70vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "1rem",
+        }}
+      >
+        <form
+          onSubmit={handleLogin}
+          style={{
+            width: "100%",
+            maxWidth: "400px",
+            padding: "2rem",
+            border: "1px solid #ccc",
+            borderRadius: "12px",
+            textAlign: "center",
+          }}
         >
-          Send Magic Link
-        </button>
+          <h1>Sign In to Myelin Map</h1>
+          <p style={{ marginBottom: "1rem", color: "#666" }}>
+            Use your email to receive a magic login link.
+          </p>
 
-        {message && <p style={{ marginTop: "1rem", color: "#007bff" }}>{message}</p>}
-      </form>
-    </main>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              padding: "0.75rem",
+              marginBottom: "1rem",
+              fontSize: "1rem",
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              padding: "0.75rem 2rem",
+              fontSize: "1rem",
+              cursor: "pointer",
+            }}
+          >
+            Send Magic Link
+          </button>
+
+          {message && (
+            <p style={{ marginTop: "1rem", color: "#007bff" }}>{message}</p>
+          )}
+        </form>
+      </main>
+
+      <Footer />
+    </>
   );
 }
+// Note: Ensure you have the necessary environment variables set in your .env.local file
+// NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
