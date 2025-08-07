@@ -101,44 +101,54 @@ export default function Dashboard() {
 
       <Header title="Your Dashboard 📈" subtitle="A visual record of your comeback" />
 
-      <main className="dashboard-main">
-        <div className="dashboard-container">
+      <main style={{ minHeight: "70vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "2rem" }}>
+        <div style={{ width: "100%", maxWidth: "600px", textAlign: "center" }}>
           {user ? (
             <>
-              <section className="card">
+              <section style={{ marginBottom: "3rem", padding: "2rem", border: "1px solid #ccc", borderRadius: "12px" }}>
                 <h2>Welcome Back 🧠</h2>
                 <p>Email: <strong>{user.email}</strong></p>
 
-                <div className="data-section">
-                  <div className="data-box">
-                    <p>Total Reps</p>
-                    <h3>{userData.reps}</h3>
+                <div style={{ display: "flex", justifyContent: "space-around", marginTop: "1.5rem" }}>
+                  <div>
+                    <p><strong>Total Reps</strong></p>
+                    <p>{userData.reps}</p>
                   </div>
-                  <div className="data-box">
-                    <p>Last Rep</p>
-                    <h3>{userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "Never"}</h3>
+                  <div>
+                    <p><strong>Last Rep</strong></p>
+                    <p>{userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "Never"}</p>
                   </div>
                 </div>
 
-                <button onClick={handleLogout}>Sign Out</button>
+                <button onClick={handleLogout} style={{ marginTop: "2rem", padding: "0.75rem 2rem" }}>
+                  Sign Out
+                </button>
               </section>
 
-              <section className="card highlight">
+              <section style={{ padding: "2rem", border: "1px solid #ccc", borderRadius: "12px", backgroundColor: "#f0f0f0" }}>
                 <h2>Log a Rep</h2>
-                <p>Clicking this button builds myelin and rewires your brain.</p>
-                <button onClick={logRep} disabled={loading}>
+                <p>This is how you wire new habits into your brain.</p>
+                <button
+                  onClick={logRep}
+                  disabled={loading}
+                  style={{ marginTop: "1rem", padding: "0.75rem 2rem" }}
+                >
                   {loading ? "Logging..." : "Log Rep"}
                 </button>
               </section>
             </>
           ) : (
-            <section className="card">
+            <section style={{ padding: "2rem", border: "1px solid #ccc", borderRadius: "12px" }}>
               <h2>Sign In Required</h2>
-              <p>Please <Link href="/signin">sign in here</Link> to access your dashboard.</p>
+              <p>
+                Please <Link href="/signin">sign in here</Link> to access your dashboard.
+              </p>
             </section>
           )}
 
-          <p className="quote">“You are not broken. You are becoming.”</p>
+          <p style={{ marginTop: "3rem", fontStyle: "italic" }}>
+            “You are not broken. You are becoming.”
+          </p>
         </div>
       </main>
 
@@ -146,4 +156,3 @@ export default function Dashboard() {
     </>
   );
 }
-// --- Dashboard Component ---
