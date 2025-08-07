@@ -106,14 +106,14 @@ export default function Home() {
         <title>Myelin Map – Rewire Your Brain, One Rep at a Time</title>
         <meta
           name="description"
-          content="Welcome to Myelin Nation! We can beat addiction together."
+          content="Welcome to Myelin Nation! Time to leave trauma and addiction behind us."
         />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header
         title="Welcome to Myelin Nation!"
-        subtitle="We can beat addiction together."
+        subtitle="Time to leave trauma and addiction behind us."
       />
 
       <main
