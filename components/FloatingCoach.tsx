@@ -68,6 +68,8 @@ export default function FloatingCoach() {
     }
   };
 
+  const YELLOW = "#facc15"; // amber-400-ish
+
   return (
     <div
       style={{
@@ -77,6 +79,7 @@ export default function FloatingCoach() {
         zIndex: 9999,
       }}
     >
+      {/* Floating coach toggle button */}
       <button
         onClick={() => setOpen(!open)}
         style={{
@@ -84,9 +87,14 @@ export default function FloatingCoach() {
           color: "#fff",
           borderRadius: "9999px",
           padding: "1.25rem",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          // Yellow edge + subtle glow
+          border: `2px solid ${YELLOW}`,
+          boxShadow: `0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)`,
           transition: "transform 0.2s",
           cursor: "pointer",
+          // Gentle float animation
+          animation: "mm-float 3s ease-in-out infinite",
+          willChange: "transform",
         }}
         aria-label="Toggle AI Coach"
       >
@@ -102,9 +110,10 @@ export default function FloatingCoach() {
             backgroundColor: "#fff",
             color: "#333",
             borderRadius: "1rem",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            // Yellow edge to match the button
+            border: `2px solid ${YELLOW}`,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
             padding: "1rem",
-            border: "1px solid #ccc",
             display: "flex",
             flexDirection: "column",
           }}
@@ -207,6 +216,25 @@ export default function FloatingCoach() {
           </div>
         </div>
       )}
+
+      {/* Global keyframes for the float animation */}
+      <style jsx global>{`
+        @keyframes mm-float {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0% { opacity: 0.4; }
+          50% { opacity: 1; }
+          100% { opacity: 0.4; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          button[aria-label="Toggle AI Coach"] {
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
