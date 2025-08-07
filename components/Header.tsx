@@ -1,7 +1,6 @@
 import Link from "next/link";
 import React from 'react';
 
-// Use a lookup table to provide Tailwind with full, static class names
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/coach", label: "🧘 Coach", hoverColor: "hover:bg-pink-400" },
@@ -34,10 +33,10 @@ export default function Header({
           <Link key={href} href={href} legacyBehavior>
             <a
               className={`
-                px-4 py-2 rounded-full bg-gray-800 text-white
-                ${hoverColor} hover:text-black
+                px-4 py-2 rounded-full text-white
                 transition-all duration-300 shadow-md 
                 transform hover:-translate-y-1 hover:scale-105
+                bg-gray-800 ${hoverColor} hover:text-black
               `}
             >
               {label}
