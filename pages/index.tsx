@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TreeVisualizer from "@/components/TreeVisualizer";
 
-// In-line Accordion component for this page
+// --- Accordion Types ---
 interface AccordionContent {
   title: string;
   description: string;
@@ -20,33 +20,57 @@ interface AccordionProps {
 const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: "#1f2937",
+        borderRadius: "1rem",
+        marginBottom: "1.5rem",
+        border: "1px solid #374151",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.3)",
+      }}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "1rem 1.5rem",
+          textAlign: "left",
+          fontWeight: "bold",
+          background: "none",
+          color: "#ffffff",
+          border: "none",
+          cursor: "pointer",
+        }}
       >
-        <span className={`text-${color}`}>{title}</span>
+        <span style={{ color }}>{title}</span>
         <span
-          className={`transform transition-transform duration-300 ${
-            isOpen ? "rotate-180" : "rotate-0"
-          }`}
+          style={{
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.3s ease",
+          }}
         >
           ▼
         </span>
       </button>
       <div
-        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
-          isOpen ? "max-h-[20rem] opacity-100 p-6" : "max-h-0 opacity-0 p-0"
-        }`}
+        style={{
+          maxHeight: isOpen ? "320px" : "0",
+          opacity: isOpen ? 1 : 0,
+          overflow: "hidden",
+          padding: isOpen ? "1rem 1.5rem" : "0",
+          transition: "all 0.5s ease",
+        }}
       >
-        <div className="space-y-4">
-          {content.map((item, index) => (
-            <div key={index}>
-              <h3 className="font-semibold text-white">{item.title}</h3>
-              <p className="text-gray-300 mt-1">{item.description}</p>
-            </div>
-          ))}
-        </div>
+        {content.map((item, index) => (
+          <div key={index} style={{ marginBottom: "1rem" }}>
+            <h3 style={{ fontWeight: "bold", color: "#ffffff" }}>{item.title}</h3>
+            <p style={{ color: "#d1d5db", marginTop: "0.5rem" }}>{item.description}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -67,19 +91,19 @@ export default function Home() {
   ];
 
   const essentialAdviceContent = [
-    { title: "Seeking and Accepting Help", description: "Open and honest communication with loved ones is vital; individuals should not be afraid to ask for their support. It is important to understand that overcoming addiction often requires support and the development of new coping skills; expecting to change without help is often unrealistic. Furthermore, it is advisable to avoid approaches involving lectures, threats, or emotional appeals, as these can exacerbate feelings of shame and lead to isolation." },
-    { title: "Developing a Personalized Recovery Plan", description: "Setting realistic, specific, and measurable goals is a cornerstone of recovery. This includes establishing a start date for abstinence or setting limits on substance use. Identifying personal reasons for wanting to change and outlining concrete steps to take are also crucial elements of this plan. Reflecting on what worked and what did not work in past attempts can provide valuable insights for future strategies." },
-    { title: "Practicing Self-Care and Healthy Habits", description: "Prioritizing physical health is essential. This involves maintaining a healthy diet rich in fruits, vegetables, and whole grains, while limiting processed and sugary foods and ensuring adequate hydration. Regular exercise, starting with low-intensity activities and setting realistic goals, is beneficial, with rest days incorporated for recovery. Sufficient sleep is also fundamental for both physical and mental well-being. Actively finding enjoyable activities, such as hobbies, sports, or volunteering, to replace addictive behaviors can create a fulfilling, substance-free life." },
-    { title: "Managing Triggers and Cravings", description: "Identifying and actively avoiding triggers—people, places, or situations that provoke substance use—is a key strategy. Removing reminders of addiction from one's environment can also be highly effective. Keeping a detailed log of substance use patterns helps in identifying specific triggers. Learning and practicing various coping skills for cravings is paramount. Techniques include \"Urge Surfing,\" which involves mindfully observing the craving's sensations without acting on them. Mindfulness-based tools, such as deep breathing and progressive muscle relaxation, can also provide immediate relief. The SMART Recovery \"DENTS\" tool—Deny or Delay, Escape, Neutralize, Tasks, Swap—offers a structured approach to managing urges. \"Personify and Disarm\" encourages viewing urges as separate from oneself, making them more manageable. An \"Urge Log\" helps individuals identify when and why urges occur, allowing for pattern recognition and assessment of coping effectiveness." },
-    { title: "Building a Strong Support System", description: "Leaning on close friends and family members provides invaluable support; relationship counseling may be beneficial if needed. Building a sober social network by connecting with new, supportive individuals is crucial. Regularly attending 12-step recovery support groups (AA, NA) or SMART Recovery meetings allows individuals to benefit from shared experiences and a sense of community." },
-    { title: "Coping with Stress", description: "Developing healthy stress coping mechanisms is vital. This includes engaging in physical movement (e.g., brisk walks, yoga), practicing meditation, spending time in nature, or interacting with pets. Defining personal values and exploring new pursuits and passions can also help bring pleasure and meaning back into one's life." },
-    { title: "Navigating Relapse", description: "It is important to understand that relapse can be a part of the recovery process, and it should not be a reason to abandon efforts. Continuously monitoring substance use and learning from any lapses is essential for long-term recovery." },
+    { title: "Seeking and Accepting Help", description: "Open and honest communication with loved ones is vital; individuals should not be afraid to ask for their support..." },
+    { title: "Developing a Personalized Recovery Plan", description: "Setting realistic, specific, and measurable goals is a cornerstone of recovery..." },
+    { title: "Practicing Self-Care and Healthy Habits", description: "Prioritizing physical health is essential..." },
+    { title: "Managing Triggers and Cravings", description: "Identifying and actively avoiding triggers—people, places, or situations that provoke substance use..." },
+    { title: "Building a Strong Support System", description: "Leaning on close friends and family members provides invaluable support..." },
+    { title: "Coping with Stress", description: "Developing healthy stress coping mechanisms is vital..." },
+    { title: "Navigating Relapse", description: "It is important to understand that relapse can be a part of the recovery process..." },
   ];
 
   return (
     <>
       <Head>
-        <title>Myelin Map &ndash; Rewire Your Brain, One Rep at a Time</title>
+        <title>Myelin Map – Rewire Your Brain, One Rep at a Time</title>
         <meta
           name="description"
           content="Welcome to Myelin Nation! We can beat addiction together."
@@ -92,63 +116,92 @@ export default function Home() {
         subtitle="We can beat addiction together."
       />
 
-      <main className="bg-gray-900 text-white min-h-screen">
-        {/* 🌳 Display the Magical Tree of Life */}
+      <main
+        style={{
+          backgroundColor: "#111827",
+          color: "#ffffff",
+          minHeight: "100vh",
+          paddingBottom: "4rem",
+        }}
+      >
+        {/* 🌳 Tree Visualizer */}
         <TreeVisualizer />
 
-        <section className="relative overflow-hidden pt-20 pb-40 text-center flex flex-col items-center justify-center min-h-[80vh] px-6">
-          <div className="absolute inset-0 bg-black opacity-40"></div>
-          <div className="relative z-10 max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight animate-fade-in">
+        {/* 🧠 Hero Section */}
+        <section
+          style={{
+            textAlign: "center",
+            padding: "5rem 1rem",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              maxWidth: "768px",
+              margin: "0 auto",
+              zIndex: 1,
+            }}
+          >
+            <h1 style={{ fontSize: "3rem", fontWeight: "bold", marginBottom: "1rem" }}>
               Rewire Your Brain.
               <br />
               One Rep at a Time 🧠
             </h1>
-            <p className="text-xl md:text-2xl max-w-2xl mb-10 text-gray-300 animate-slide-up delay-200">
-              Welcome to <strong>Myelin Map</strong> &mdash; a tool for transformation
-              built on the neuroscience of action and repetition. This isn&apos;t
-              motivation. This is wiring.
+            <p style={{ fontSize: "1.25rem", color: "#d1d5db" }}>
+              Welcome to <strong>Myelin Map</strong> — a tool for transformation
+              built on the neuroscience of action and repetition. This isn’t motivation.
+              This is wiring.
             </p>
           </div>
         </section>
 
-        <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto space-y-6">
-          <h2 className="text-3xl font-bold text-emerald-400">🌟 The Mission Behind Myelin Map</h2>
-          <p className="text-lg text-gray-300">
+        {/* 💡 Mission Section */}
+        <section
+          style={{
+            padding: "3rem 1.5rem",
+            maxWidth: "768px",
+            margin: "0 auto",
+          }}
+        >
+          <h2 style={{ fontSize: "2rem", fontWeight: "bold", color: "#34d399" }}>
+            🌟 The Mission Behind Myelin Map
+          </h2>
+          <p style={{ fontSize: "1.125rem", color: "#d1d5db", marginTop: "1rem" }}>
             My name is Chad, and I created Myelin Map for anyone stuck in cycles they
-            don&apos;t want to repeat. This platform was born from pain — and built with purpose.
+            don’t want to repeat...
           </p>
-          <p className="text-lg text-gray-300">
-            I spent nearly 20 years caught in addiction and survival mode. I read every book, tried
-            every program, and failed more times than I can count. What changed everything for me
-            was discovering <strong>myelin</strong> — the biological process that wires
-            habits into your brain.
+          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+            I spent nearly 20 years caught in addiction and survival mode...
           </p>
-          <p className="text-lg text-gray-300">
-            Myelin is the insulation that wraps around your brain’s neural circuits. The more
-            you use a circuit — good or bad — the thicker the myelin becomes. That means the
-            brain doesn&apos;t change because of motivation. It changes because of <em>repetition</em>.
+          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+            Myelin is the insulation that wraps around your brain’s neural circuits...
           </p>
-          <p className="text-lg text-gray-300">
-            That’s what Myelin Map is: a visual habit-building platform that turns your daily
-            actions into beautiful, brain-based progress. One rep at a time. One affirmation,
-            breath, or pushup — whatever it is for you.
+          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+            That’s what Myelin Map is: a visual habit-building platform...
           </p>
-          <p className="text-lg text-emerald-300 font-semibold">
+          <p style={{ fontSize: "1.125rem", fontWeight: "bold", color: "#6ee7b7" }}>
             This is a new kind of recovery. One that starts with love, and builds with action.
           </p>
         </section>
 
-        <section className="py-16 px-6 md:px-20 max-w-4xl mx-auto space-y-10">
+        {/* ❤️ Accordions Section */}
+        <section
+          style={{
+            padding: "3rem 1.5rem",
+            maxWidth: "768px",
+            margin: "0 auto",
+          }}
+        >
           <Accordion
             title="❤️ Actionable Self-Love & Compassion"
             content={selfLoveContent}
-            color="pink-400"
+            color="#f472b6"
           />
           <Accordion
             title="🧭 Essential Advice for Overcoming Addiction"
             content={essentialAdviceContent}
-            color="amber-400"
+            color="#fbbf24"
           />
         </section>
       </main>
@@ -157,3 +210,4 @@ export default function Home() {
     </>
   );
 }
+// --- Footer Component ---
