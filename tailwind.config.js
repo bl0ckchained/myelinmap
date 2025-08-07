@@ -25,5 +25,6 @@ module.exports = {
   },
   plugins: [],
 };
+
 // This is a Tailwind CSS configuration file that extends the default theme with custom animations.
 // It includes fade-in and slide-up animations that can be used throughout the application.
