@@ -69,45 +69,98 @@ export default function FloatingCoach() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div
+      style={{
+        position: "fixed",
+        bottom: "1.5rem",
+        right: "1.5rem",
+        zIndex: 9999,
+      }}
+    >
       <button
         onClick={() => setOpen(!open)}
-        className={`
-          bg-emerald-600 text-white rounded-full p-5 shadow-xl transition
-          transform hover:scale-110 focus:outline-none
-          animate-pulse ring-2 ring-emerald-400 ring-offset-2
-        `}
+        style={{
+          backgroundColor: "#059669",
+          color: "#fff",
+          borderRadius: "9999px",
+          padding: "1.25rem",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+          transition: "transform 0.2s",
+          cursor: "pointer",
+        }}
         aria-label="Toggle AI Coach"
       >
-        <span className="text-3xl">🧘</span>
+        <span style={{ fontSize: "1.75rem" }}>🧘</span>
       </button>
 
       {open && (
-        <div className="w-80 h-[440px] mt-2 bg-white text-gray-800 rounded-xl shadow-2xl p-4 border border-gray-200 flex flex-col">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-3 pr-2">
+        <div
+          style={{
+            width: "320px",
+            height: "440px",
+            marginTop: "0.5rem",
+            backgroundColor: "#fff",
+            color: "#333",
+            borderRadius: "1rem",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+            padding: "1rem",
+            border: "1px solid #ccc",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              marginBottom: "0.75rem",
+              paddingRight: "0.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
             {chatLog.map((msg, i) => (
               <div
                 key={i}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                style={{
+                  display: "flex",
+                  justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+                }}
               >
                 <div
-                  className={`max-w-[75%] px-4 py-2 rounded-xl text-sm break-words shadow-sm transition-all duration-300 ${
-                    msg.role === "user"
-                      ? "bg-emerald-500 text-white rounded-tr-none"
-                      : "bg-gray-200 text-gray-800 rounded-tl-none"
-                  }`}
+                  style={{
+                    maxWidth: "75%",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "1rem",
+                    fontSize: "0.9rem",
+                    backgroundColor: msg.role === "user" ? "#10b981" : "#e5e7eb",
+                    color: msg.role === "user" ? "#fff" : "#333",
+                    borderTopRightRadius: msg.role === "user" ? "0" : "1rem",
+                    borderTopLeftRadius: msg.role !== "user" ? "0" : "1rem",
+                  }}
                 >
                   {msg.content}
                 </div>
               </div>
             ))}
             {loading && (
-              <div className="flex justify-start">
-                <div className="max-w-[75%] px-4 py-2 rounded-xl text-sm bg-gray-200 text-gray-800 rounded-tl-none">
-                  <div className="animate-pulse flex space-x-2">
-                    <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
-                    <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <div
+                  style={{
+                    maxWidth: "75%",
+                    padding: "0.5rem 1rem",
+                    borderRadius: "1rem",
+                    fontSize: "0.9rem",
+                    backgroundColor: "#e5e7eb",
+                    color: "#333",
+                    borderTopLeftRadius: "0",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "0.25rem", animation: "pulse 1s infinite" }}>
+                    <div style={{ width: "8px", height: "8px", backgroundColor: "#999", borderRadius: "50%" }} />
+                    <div style={{ width: "8px", height: "8px", backgroundColor: "#999", borderRadius: "50%" }} />
+                    <div style={{ width: "8px", height: "8px", backgroundColor: "#999", borderRadius: "50%" }} />
                   </div>
                 </div>
               </div>
@@ -115,7 +168,7 @@ export default function FloatingCoach() {
             <div ref={chatEndRef} />
           </div>
 
-          <div className="flex gap-2 mt-auto">
+          <div style={{ display: "flex", gap: "0.5rem" }}>
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -126,13 +179,28 @@ export default function FloatingCoach() {
                 }
               }}
               placeholder="Your thoughts..."
-              className="flex-1 px-4 py-2 rounded-md bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-gray-300"
               disabled={loading}
+              style={{
+                flex: 1,
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                backgroundColor: "#f3f4f6",
+                border: "1px solid #ccc",
+                color: "#111",
+              }}
             />
             <button
               onClick={sendMessage}
               disabled={loading}
-              className="bg-emerald-500 text-white px-4 py-2 rounded-md hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: "#10b981",
+                color: "#fff",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                border: "none",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.5 : 1,
+              }}
             >
               {loading ? "..." : "Send"}
             </button>

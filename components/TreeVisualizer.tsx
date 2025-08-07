@@ -192,8 +192,27 @@ export default function TreeVisualizer() {
   }, []);
 
   return (
-    <div className="relative w-full max-w-4xl h-[500px] mb-16 mx-auto rounded-2xl overflow-hidden shadow-2xl bg-black">
-      <canvas ref={canvasRef} className="w-full h-full" />
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        maxWidth: "960px",
+        height: "500px",
+        margin: "0 auto 4rem auto",
+        borderRadius: "1rem",
+        overflow: "hidden",
+        boxShadow: "0 12px 24px rgba(0,0,0,0.5)",
+        backgroundColor: "#000000",
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "block",
+        }}
+      />
     </div>
   );
 }

@@ -1,18 +1,17 @@
 import Link from "next/link";
-import React from 'react';
+import React from "react";
 
 const navLinks = [
-  { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
-  { href: "/coach", label: "🧘 Coach", hoverColor: "hover:bg-pink-400" },
-  { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
-  { href: "/visualizer", label: "🧬 Visualizer", hoverColor: "hover:bg-cyan-500" },
-  { href: "/resources", label: "📚 Resources", hoverColor: "hover:bg-lime-500" },
-  { href: "/founder", label: "💬 Message from Founder", hoverColor: "hover:bg-yellow-300" },
-  { href: "/about", label: "👤 About Us", hoverColor: "hover:bg-lime-400" },
-  { href: "/community", label: "🤝 Myelination", hoverColor: "hover:bg-rose-400" },
-  { href: "/dashboard", label: "📈 Dashboard", hoverColor: "hover:bg-blue-400" },
+  { href: "/", label: "🏠 Home", bgColor: "#059669" },          // Emerald
+  { href: "/coach", label: "🧘 Coach", bgColor: "#ec4899" },     // Pink
+  { href: "/rewire", label: "🔥 7-Day Challenge", bgColor: "#f59e0b" }, // Amber
+  { href: "/visualizer", label: "🧬 Visualizer", bgColor: "#06b6d4" },  // Cyan
+  { href: "/resources", label: "📚 Resources", bgColor: "#84cc16" },    // Lime
+  { href: "/founder", label: "💬 Message from Founder", bgColor: "#facc15" }, // Yellow
+  { href: "/about", label: "👤 About Us", bgColor: "#a3e635" },  // Lime alt
+  { href: "/community", label: "🤝 Myelination", bgColor: "#fb7185" }, // Rose
+  { href: "/dashboard", label: "📈 Dashboard", bgColor: "#60a5fa" },   // Blue
 ];
-
 
 export default function Header({
   title,
@@ -22,22 +21,63 @@ export default function Header({
   subtitle?: string;
 }) {
   return (
-    <header className="bg-gray-900 text-white text-center py-12 px-4">
-      {/* Dynamic Title and Subtitle */}
-      <h1 className="text-4xl font-bold">{title}</h1>
-      {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
+    <header
+      style={{
+        backgroundColor: "#111827", // Tailwind's gray-900
+        color: "#ffffff",
+        textAlign: "center",
+        padding: "3rem 1rem",
+      }}
+    >
+      {/* Title and Subtitle */}
+      <h1 style={{ fontSize: "2.25rem", fontWeight: "bold", margin: 0 }}>{title}</h1>
+      {subtitle && (
+        <p
+          style={{
+            fontSize: "1.125rem",
+            marginTop: "0.5rem",
+            maxWidth: "40rem",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          {subtitle}
+        </p>
+      )}
 
       {/* Navigation */}
-      <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
-        {navLinks.map(({ href, label, hoverColor }) => (
+      <nav
+        style={{
+          marginTop: "2rem",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: "0.75rem",
+          fontSize: "0.875rem",
+        }}
+      >
+        {navLinks.map(({ href, label, bgColor }) => (
           <Link key={href} href={href} legacyBehavior>
             <a
-              className={`
-                px-4 py-2 rounded-full text-white
-                transition-all duration-300 shadow-md 
-                transform hover:-translate-y-1 hover:scale-105
-                bg-gray-800 ${hoverColor} hover:text-black
-              `}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "9999px",
+                color: "#ffffff",
+                backgroundColor: "#1f2937", // Tailwind's gray-800
+                textDecoration: "none",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                transition: "all 0.3s",
+              }}
+              onMouseOver={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = bgColor;
+                (e.currentTarget as HTMLAnchorElement).style.color = "#000000";
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#1f2937";
+                (e.currentTarget as HTMLAnchorElement).style.color = "#ffffff";
+                (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+              }}
             >
               {label}
             </a>
