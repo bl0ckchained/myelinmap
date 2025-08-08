@@ -1,13 +1,12 @@
 // pages/community.tsx
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, User } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 interface Post {
   id: string;
@@ -16,23 +15,21 @@ interface Post {
   created_at: string;
 }
 
-const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-  <header className="bg-gray-900 text-white text-center py-12 px-4">
-    <h1 className="text-4xl font-bold">{title}</h1>
-    {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
-  </header>
-);
-
-const Footer = () => (
-  <footer className="text-center p-8 bg-gray-900 text-white text-sm">
-    <p className="text-gray-400">Join our journey · Powered by Quantum Step Consultants LLC</p>
-    <p className="mt-1">&copy; 2025 MyelinMap.com 💙 Made in Michigan</p>
-  </footer>
-);
-
 export default function CommunityPage() {
+  const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [postContent, setPostContent] = useState("");
+  const [loading, setLoading] = useState(false);
   const feedEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+  }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -40,16 +37,19 @@ export default function CommunityPage() {
         .from("community_posts")
         .select("*")
         .order("created_at", { ascending: true });
-
       if (!error && data) setPosts(data as Post[]);
     };
     fetchPosts();
 
-    const channel = supabase.channel("public_feed");
+    const channel = supabase.channel("community_channel");
     channel
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "community_posts" }, (payload) => {
-        setPosts((prev) => [...prev, payload.new as Post]);
-      })
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "community_posts" },
+        (payload) => {
+          setPosts((prev) => [...prev, payload.new as Post]);
+        }
+      )
       .subscribe();
 
     return () => {
@@ -57,62 +57,86 @@ export default function CommunityPage() {
     };
   }, []);
 
+  const handlePostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postContent.trim() || !user) return;
+    setLoading(true);
+    await supabase.from("community_posts").insert({ user_id: user.id, content: postContent });
+    setPostContent("");
+    setLoading(false);
+  };
+
   useEffect(() => {
-    if (feedEndRef.current) feedEndRef.current.scrollIntoView({ behavior: "smooth" });
+    feedEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [posts]);
 
   return (
     <>
       <Head>
-        <title>Myelin Nation | Open Community</title>
+        <title>Myelin Nation 🤝</title>
+        <meta name="description" content="A feed of courage, progress, and real transformation." />
       </Head>
 
-      <Header
-        title="Myelin Nation 🤝"
-        subtitle="A public community feed for those building new lives, one rep at a time."
-      />
+      <main className="bg-gray-950 text-white min-h-screen py-16 px-4">
+        <div className="max-w-3xl mx-auto space-y-16">
+          <header className="text-center">
+            <h1 className="text-4xl font-bold text-rose-400">Myelin Nation 🤝</h1>
+            <p className="mt-4 text-lg text-gray-400 max-w-xl mx-auto">
+              A feed of courage, progress, and real transformation. Read the reps. Feel the energy.
+            </p>
+          </header>
 
-      <main className="bg-gray-900 text-white px-4 py-16 min-h-screen">
-        <div className="max-w-3xl mx-auto space-y-10">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-emerald-400 mb-2">Want to share?</h2>
-            <p className="text-gray-400 mb-4">Sign in to post your story and inspire others.</p>
-            <Link
-              href="/signin"
-              className="bg-emerald-500 px-6 py-3 rounded-full font-bold text-white hover:bg-emerald-600 transition"
-            >
-              Sign In to Post
-            </Link>
-          </div>
+          <section className="bg-gray-900 p-6 rounded-2xl shadow-xl border border-white/10">
+            {user ? (
+              <form onSubmit={handlePostSubmit} className="space-y-4">
+                <textarea
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  placeholder="Share a rep. A moment of growth. A lesson learned."
+                  className="w-full h-24 p-3 bg-gray-800 text-white rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                  disabled={loading}
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-rose-500 text-white px-6 py-3 rounded-lg font-bold shadow-md hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!postContent.trim() || loading}
+                >
+                  {loading ? "Sharing..." : "Share with Myelin Nation"}
+                </button>
+              </form>
+            ) : (
+              <div className="text-center">
+                <p className="text-rose-300 font-bold">Sign in to share your energy with the Nation.</p>
+              </div>
+            )}
+          </section>
 
           <section>
-            <h2 className="text-2xl font-bold mb-6">Community Feed</h2>
+            <h2 className="text-2xl font-bold mb-4 text-white">Community Feed</h2>
             <div className="space-y-6">
               {posts.length ? (
                 posts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-700 space-y-2"
-                  >
-                    <p className="text-sm text-gray-400">
-                      User: <span className="font-mono text-xs break-all">{post.user_id}</span>
-                    </p>
-                    <p className="text-lg text-gray-200 leading-relaxed">{post.content}</p>
-                    <p className="text-xs text-gray-500">
+                  <div key={post.id} className="bg-gray-900 p-5 rounded-xl border border-gray-800 shadow-sm">
+                    <p className="text-gray-400 text-sm font-mono">{post.user_id}</p>
+                    <p className="text-lg text-white mt-2">{post.content}</p>
+                    <p className="text-xs text-gray-500 mt-2">
                       {new Date(post.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-center text-gray-400 italic">No posts yet — be the first to leave a mark.</p>
+                <p className="text-gray-500 italic">No posts yet. Be the first to spark the feed. 🔥</p>
               )}
               <div ref={feedEndRef} />
             </div>
           </section>
+
+          <footer className="text-center text-gray-600 text-sm mt-12">
+            <p>Powered by 💙 MyelinMap.com · Supabase · Michigan Energy</p>
+          </footer>
         </div>
       </main>
-
-      <Footer />
     </>
   );
 }
+// Add any additional styles or components as needed
