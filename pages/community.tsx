@@ -1,8 +1,9 @@
 // pages/community.tsx
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Head from "next/head";
 import { createClient, User } from "@supabase/supabase-js";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -77,15 +78,10 @@ export default function CommunityPage() {
         <meta name="description" content="A feed of courage, progress, and real transformation." />
       </Head>
 
+      <Header title="Myelin Nation 🤝" subtitle="A feed of courage, progress, and real transformation." />
+
       <main className="bg-gray-950 text-white min-h-screen py-16 px-4">
         <div className="max-w-3xl mx-auto space-y-16">
-          <header className="text-center">
-            <h1 className="text-4xl font-bold text-rose-400">Myelin Nation 🤝</h1>
-            <p className="mt-4 text-lg text-gray-400 max-w-xl mx-auto">
-              A feed of courage, progress, and real transformation. Read the reps. Feel the energy.
-            </p>
-          </header>
-
           <section className="bg-gray-900 p-6 rounded-2xl shadow-xl border border-white/10">
             {user ? (
               <form onSubmit={handlePostSubmit} className="space-y-4">
@@ -107,6 +103,12 @@ export default function CommunityPage() {
             ) : (
               <div className="text-center">
                 <p className="text-rose-300 font-bold">Sign in to share your energy with the Nation.</p>
+                <button
+                  onClick={() => supabase.auth.signInWithOAuth({ provider: "github" })}
+                  className="mt-4 bg-rose-600 text-white px-5 py-2 rounded-full hover:bg-rose-700"
+                >
+                  Sign In with GitHub
+                </button>
               </div>
             )}
           </section>
@@ -130,13 +132,10 @@ export default function CommunityPage() {
               <div ref={feedEndRef} />
             </div>
           </section>
-
-          <footer className="text-center text-gray-600 text-sm mt-12">
-            <p>Powered by 💙 MyelinMap.com · Supabase · Michigan Energy</p>
-          </footer>
         </div>
       </main>
+
+      <Footer />
     </>
   );
 }
-// Add any additional styles or components as needed
