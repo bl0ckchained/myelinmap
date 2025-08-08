@@ -2,21 +2,20 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { createClient, User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-// Supabase Client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({ reps: 0, last_rep: null });
+  const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({
+    reps: 0,
+    last_rep: null
+  });
   const [loading, setLoading] = useState(false);
 
+  // Watch authentication state
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -31,6 +30,7 @@ export default function Dashboard() {
     };
   }, []);
 
+  // Fetch user reps data
   useEffect(() => {
     if (!user) return;
 
@@ -42,6 +42,7 @@ export default function Dashboard() {
         .single();
 
       if (error && error.code === "PGRST116") {
+        // No record found, insert default row
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
           .insert({ user_id: user.id, reps: 0, last_rep: null })
@@ -55,11 +56,12 @@ export default function Dashboard() {
 
     fetchUserData();
 
+    // Subscribe to updates for this user's reps
     const subscription = supabase
       .channel(`user_reps:${user.id}`)
       .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'user_reps', filter: `user_id=eq.${user.id}` },
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "user_reps", filter: `user_id=eq.${user.id}` },
         (payload) => {
           setUserData(prev => ({ ...prev, ...payload.new }));
         }
@@ -101,11 +103,26 @@ export default function Dashboard() {
 
       <Header title="Your Dashboard 📈" subtitle="A visual record of your comeback" />
 
-      <main style={{ minHeight: "70vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "2rem" }}>
+      <main
+        style={{
+          minHeight: "70vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "2rem"
+        }}
+      >
         <div style={{ width: "100%", maxWidth: "600px", textAlign: "center" }}>
           {user ? (
             <>
-              <section style={{ marginBottom: "3rem", padding: "2rem", border: "1px solid #ccc", borderRadius: "12px" }}>
+              <section
+                style={{
+                  marginBottom: "3rem",
+                  padding: "2rem",
+                  border: "1px solid #ccc",
+                  borderRadius: "12px"
+                }}
+              >
                 <h2>Welcome Back 🧠</h2>
                 <p>Email: <strong>{user.email}</strong></p>
 
@@ -125,7 +142,14 @@ export default function Dashboard() {
                 </button>
               </section>
 
-              <section style={{ padding: "2rem", border: "1px solid #ccc", borderRadius: "12px", backgroundColor: "#f0f0f0" }}>
+              <section
+                style={{
+                  padding: "2rem",
+                  border: "1px solid #ccc",
+                  borderRadius: "12px",
+                  backgroundColor: "#f0f0f0"
+                }}
+              >
                 <h2>Log a Rep</h2>
                 <p>This is how you wire new habits into your brain.</p>
                 <button

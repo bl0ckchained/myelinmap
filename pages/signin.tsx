@@ -1,14 +1,9 @@
 // pages/signin.tsx
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabaseClient";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -104,5 +99,3 @@ export default function SignIn() {
     </>
   );
 }
-// Note: Ensure you have the necessary environment variables set in your .env.local file
-// NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
