@@ -124,10 +124,72 @@ export default function Home() {
           paddingBottom: "4rem",
         }}
       >
-        {/* 🌳 Tree Visualizer */}
-        <TreeVisualizer />
+        {/* 🧠 New Landing Section (between Header & Tree) */}
+        <section className="landing-wrap">
+          <div className="landing-overlay" />
+          <div className="landing-inner">
+            <h1 className="landing-headline">
+              No matter how deep the pain, your brain can grow new pathways.
+              <br />
+              <span className="glow">Every rep counts.</span>
+            </h1>
 
-        {/* 🧠 Hero Section */}
+            <p className="landing-sub">
+              The <strong>KIND Method</strong> blends trauma science, brain rewiring, and self-compassion so you can rebuild your habits — and your life — one small, repeatable action at a time.
+            </p>
+
+            <div className="cta-row">
+              <Link href="/rewire">
+                <a className="btn btn-primary">🌱 Start My Healing Journey</a>
+              </Link>
+              <Link href="/science">
+                <a className="btn btn-secondary">🔬 Learn the Science</a>
+              </Link>
+            </div>
+
+            {/* Optional video placeholder (use your current myelin video) */}
+            <div className="video-frame">
+              <iframe
+                title="Intro to Myelin"
+                src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1&playsinline=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 🌳 Tree Visualizer with science side-panels */}
+        <section className="tree-grid">
+          {/* Left science card */}
+          <aside className="science-card">
+            <h3>Trauma & the Brain</h3>
+            <ul>
+              <li>Trauma trains survival circuits; the brain adapts to keep you safe.</li>
+              <li>Repeated stress signals strengthen pathways you don’t actually want.</li>
+              <li>Safety + repetition lets the brain prune old routes and grow new ones.</li>
+            </ul>
+            <p className="micro-note">You’re not broken. You’re adaptive — and adaptable.</p>
+          </aside>
+
+          {/* Center tree */}
+          <div className="tree-wrap">
+            <TreeVisualizer />
+          </div>
+
+          {/* Right science card */}
+          <aside className="science-card">
+            <h3>Myelin & Habits</h3>
+            <ul>
+              <li>Myelin is insulation that makes signals faster and more reliable.</li>
+              <li>Reps = more myelin. Good or bad, repetition wires the pathway.</li>
+              <li>Small daily reps compound into automatic, healthier defaults.</li>
+            </ul>
+            <p className="micro-note">Kindness lowers friction so reps become doable.</p>
+          </aside>
+        </section>
+
+        {/* 🧠 Hero Section (kept) */}
         <section
           style={{
             textAlign: "center",
@@ -156,7 +218,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 💡 Mission Section */}
+        {/* 💡 Mission Section (kept) */}
         <section
           style={{
             padding: "3rem 1.5rem",
@@ -185,7 +247,7 @@ export default function Home() {
           </p>
         </section>
 
-        {/* ❤️ Accordions Section */}
+        {/* ❤️ Accordions Section (kept) */}
         <section
           style={{
             padding: "3rem 1.5rem",
@@ -207,7 +269,165 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      {/* Inline styles for the new sections */}
+      <style jsx>{`
+        .landing-wrap {
+          position: relative;
+          overflow: hidden;
+          min-height: 70vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4rem 1rem 2rem;
+          background:
+            radial-gradient(1200px 600px at 70% -10%, rgba(255, 184, 108, 0.15), transparent 60%),
+            radial-gradient(800px 500px at 20% 10%, rgba(255, 221, 170, 0.12), transparent 60%),
+            linear-gradient(180deg, #0f172a, #111827 40%, #0b1220 100%);
+        }
+        /* Optional: swap the above for a real sunrise image behind a gradient overlay */
+        .landing-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(17, 24, 39, 0.2), rgba(17, 24, 39, 0.85));
+          pointer-events: none;
+        }
+        .landing-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 960px;
+          text-align: center;
+        }
+        .landing-headline {
+          font-size: clamp(1.8rem, 3.5vw, 3rem);
+          line-height: 1.2;
+          margin: 0 0 0.5rem 0;
+          font-weight: 800;
+          letter-spacing: 0.2px;
+        }
+        .glow {
+          display: inline-block;
+          position: relative;
+        }
+        .glow::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -0.35em;
+          height: 8px;
+          border-radius: 999px;
+          background: radial-gradient(circle at 50% 50%, rgba(255, 200, 120, 0.9), rgba(255, 200, 120, 0.0) 70%);
+          filter: blur(8px);
+          opacity: 0.75;
+          animation: pulse 3.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scaleX(0.95); opacity: 0.6; }
+          50% { transform: scaleX(1); opacity: 0.9; }
+        }
+        .landing-sub {
+          color: #d1d5db;
+          font-size: clamp(1rem, 2vw, 1.25rem);
+          margin: 0.75rem auto 1.5rem;
+          max-width: 820px;
+        }
+        .cta-row {
+          display: flex;
+          gap: 0.75rem;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-bottom: 1.5rem;
+        }
+        .btn {
+          display: inline-block;
+          padding: 0.8rem 1.2rem;
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          text-decoration: none;
+          font-weight: 700;
+          transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+        .btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+        }
+        .btn-primary {
+          background: #10b981;
+          color: #062019;
+        }
+        .btn-primary:hover { background: #34d399; }
+        .btn-secondary {
+          background: #0b1220;
+          color: #e5e7eb;
+        }
+        .btn-secondary:hover { background: #111827; }
+
+        .video-frame {
+          margin: 0 auto;
+          width: min(900px, 92vw);
+          aspect-ratio: 16 / 9;
+          border-radius: 16px;
+          overflow: hidden;
+          border: 1px solid #26324a;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        }
+        .video-frame iframe {
+          width: 100%;
+          height: 100%;
+          border: 0;
+        }
+
+        .tree-grid {
+          display: grid;
+          grid-template-columns: 1fr minmax(280px, 820px) 1fr;
+          gap: 1rem;
+          align-items: start;
+          padding: 2rem 1rem 0;
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+        @media (max-width: 1100px) {
+          .tree-grid { grid-template-columns: 1fr; }
+          .science-card { order: 2; }
+          .tree-wrap { order: 1; }
+        }
+        .tree-wrap {
+          background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.00));
+          border-radius: 16px;
+          border: 1px solid #253244;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 14px 28px rgba(0,0,0,0.35);
+          padding: 0.5rem;
+        }
+        .science-card {
+          background: #0f172a;
+          border: 1px solid #233147;
+          border-radius: 16px;
+          padding: 1.25rem;
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+          position: sticky;
+          top: 1rem;
+          align-self: start;
+        }
+        .science-card h3 {
+          margin: 0 0 0.75rem 0;
+          font-size: 1.1rem;
+          color: #93c5fd;
+        }
+        .science-card ul {
+          margin: 0 0 0.75rem 1.1rem;
+          padding: 0;
+          color: #d1d5db;
+          line-height: 1.5;
+        }
+        .science-card li { margin-bottom: 0.35rem; }
+        .micro-note {
+          font-size: 0.9rem;
+          color: #9ca3af;
+          border-top: 1px dashed #2b3a52;
+          padding-top: 0.5rem;
+        }
+      `}</style>
     </>
   );
 }
-// --- Footer Component ---
