@@ -1,6 +1,7 @@
 // pages/science.tsx
 import React from "react";
 import Head from "next/head";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -38,63 +39,54 @@ export default function Science() {
           </p>
         </section>
 
-        {/* Section 1: Trauma and the Brain */}
+        {/* Trauma & the Brain */}
         <section style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Trauma and the Brain</h2>
           <p>
-            When we experience trauma, our brain rewires itself for survival — not growth. 
-            The stress response floods our system, shrinking areas like the hippocampus (memory) 
-            and over-activating the amygdala (fear center). This can keep us in cycles of reaction 
+            When we experience trauma, our brain rewires itself for survival — not growth.
+            The stress response floods our system, shrinking areas like the hippocampus (memory)
+            and over-activating the amygdala (fear center). This can keep us in cycles of reaction
             and self-sabotage.
           </p>
           <p>
-            But here’s the truth: your brain is neuroplastic. It can adapt, change, and grow — at any age. 
+            But here’s the truth: your brain is neuroplastic. It can adapt, change, and grow — at any age.
             Understanding this is the first step toward reclaiming your life.
           </p>
         </section>
 
-        {/* Section 2: The Magic of Myelin */}
+        {/* Myelin & Habits */}
         <section style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>The Magic of Myelin</h2>
           <p>
-            Myelin is the brain’s insulation — a fatty layer that wraps around your neural pathways, 
-            making signals travel faster and stronger. The more you repeat an action, thought, or skill, 
+            Myelin is the brain’s insulation — a fatty layer that wraps around your neural pathways,
+            making signals travel faster and stronger. The more you repeat an action, thought, or skill,
             the more myelin you build.
           </p>
           <p>
-            This means you can literally wire kindness, resilience, and confidence into your brain — 
+            This means you can literally wire kindness, resilience, and confidence into your brain —
             the same way old habits were wired in. Every rep you take is physical proof you are changing.
           </p>
         </section>
 
-        {/* Section 3: The KIND Method */}
+        {/* KIND Method */}
         <section style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>The KIND Method</h2>
           <ul style={{ listStyle: "disc", paddingLeft: "1.5rem" }}>
-            <li>
-              <strong>Knowledge</strong> – Learn how trauma impacts your brain and body.
-            </li>
-            <li>
-              <strong>Identification</strong> – Notice harmful patterns without judgment.
-            </li>
-            <li>
-              <strong>Neural Rewiring</strong> – Use repetition to build healthy habits and dissolve old ones.
-            </li>
-            <li>
-              <strong>Daily Kindness</strong> – Practice self-compassion every single day.
-            </li>
+            <li><strong>Knowledge</strong> – Learn how trauma impacts your brain and body.</li>
+            <li><strong>Identification</strong> – Notice harmful patterns without judgment.</li>
+            <li><strong>Neural Rewiring</strong> – Use repetition to build healthy habits and dissolve old ones.</li>
+            <li><strong>Daily Kindness</strong> – Practice self-compassion every single day.</li>
           </ul>
         </section>
 
-        {/* Section 4: Call to Action */}
+        {/* CTA */}
         <section style={{ textAlign: "center", marginTop: "3rem" }}>
-          <h2 style={{ color: "#fbbf24", fontSize: "1.5rem" }}>
-            You are not broken — you are rewiring.
-          </h2>
+          <h2 style={{ color: "#fbbf24", fontSize: "1.5rem" }}>You are not broken — you are rewiring.</h2>
           <p style={{ marginBottom: "1.5rem", color: "#d1d5db" }}>
             Start today. Repeat tomorrow. Then again. Every rep strengthens your new path.
           </p>
-          <a
+
+          <Link
             href="/dashboard"
             style={{
               display: "inline-block",
@@ -108,7 +100,7 @@ export default function Science() {
             }}
           >
             Start My Healing Journey →
-          </a>
+          </Link>
         </section>
       </main>
 
@@ -116,3 +108,4 @@ export default function Science() {
     </>
   );
 }
+// pages/science.tsx
