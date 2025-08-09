@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
-import { User } from "@supabase/supabase-js";
+import { User, type PostgrestError } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
@@ -11,6 +11,15 @@ import { supabase } from "@/lib/supabaseClient";
 // import Visualizer from "@/components/Visualizer";
 
 type Tab = "overview" | "visualizer" | "coach" | "history";
+
+// Narrow row type for your table
+type UserRepsRow = {
+  user_id: string;
+  reps: number;
+  last_rep: string | null;
+  // created_at?: string;
+  // id?: string;
+};
 
 export default function Dashboard() {
   const [user, setUser] = useState<User | null>(null);
@@ -48,27 +57,35 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .single();
 
-      if (error && (error as any).code === "PGRST116") {
-        // no row yet — create one
+      // PGRST116 = No rows found with .single()
+      if ((error as PostgrestError | null)?.code === "PGRST116") {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
           .insert({ user_id: user.id, reps: 0, last_rep: null })
           .select()
           .single();
-        if (!insertError && initialData) setUserData(initialData);
+        if (!insertError && initialData) setUserData(initialData as UserRepsRow);
       } else if (!error && data) {
-        setUserData(data);
+        setUserData(data as UserRepsRow);
       }
     };
 
     fetchUserData();
+
+    // type the realtime payload without `any`
+    type UpdatePayload<T> = { eventType: "INSERT" | "UPDATE" | "DELETE" | "SELECT"; new: T | null; old: T | null };
 
     const subscription = supabase
       .channel(`user_reps:${user.id}`)
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "user_reps", filter: `user_id=eq.${user.id}` },
-        (payload) => setUserData((prev) => ({ ...prev, ...(payload as any).new }))
+        (payload) => {
+          const p = payload as unknown as UpdatePayload<UserRepsRow>;
+          if (p.eventType === "UPDATE" && p.new) {
+            setUserData((prev) => ({ ...prev, ...p.new! }));
+          }
+        }
       )
       .subscribe();
 

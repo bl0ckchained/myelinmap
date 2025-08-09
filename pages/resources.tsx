@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 // --- Embedded Header Component ---
 const navLinks = [
@@ -129,20 +129,30 @@ const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
 };
 
 // --- Helper Component for Resource Links ---
-const ResourceLink = ({ href, title, description, color }: { href: string; title: string; description: string; color: string }) => (
+const ResourceLink = ({
+  href,
+  title,
+  description,
+  color,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  color: string;
+}) => (
   <li>
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`text-lg block transition-transform duration-200 transform hover:translate-x-2`}
+      className="text-lg block transition-transform duration-200 transform hover:translate-x-2"
     >
+      {/* Note: if Tailwind purge removes dynamic colors, we can safelist or map fixed classes */}
       <span className={`text-${color} font-semibold hover:underline`}>{title}</span>
       <p className="text-gray-400 text-sm mt-1">{description}</p>
     </a>
   </li>
 );
-
 
 // --- Main Resources Component ---
 export default function Resources() {
@@ -168,7 +178,7 @@ export default function Resources() {
     { title: "Coping with Stress", description: "Developing healthy stress coping mechanisms is vital. This includes engaging in physical movement (e.g., brisk walks, yoga), practicing meditation, spending time in nature, or interacting with pets. Defining personal values and exploring new pursuits and passions can also help bring pleasure and meaning back into one's life." },
     { title: "Navigating Relapse", description: "It is important to understand that relapse can be a part of the recovery process, and it should not be a reason to abandon efforts. Continuously monitoring substance use and learning from any lapses is essential for long-term recovery." },
   ];
-  
+
   const recoveryLinks = [
     { href: "https://www.samhsa.gov/find-help/national-helpline", title: "SAMHSA National Helpline", description: "Free, 24/7 treatment referral and information service." },
     { href: "https://988lifeline.org/", title: "988 Suicide & Crisis Lifeline", description: "Free and confidential support for people in distress." },
@@ -223,7 +233,25 @@ export default function Resources() {
 
           <Accordion title="Actionable Self-Love & Self-Compassion Practices" content={selfLoveContent} />
           <Accordion title="Essential Practical Advice for Overcoming Addiction" content={essentialAdviceContent} />
-          
+
+          {/* Science & Brain Rewiring Section (uses scienceLinks) */}
+          <div>
+            <h2 className="text-3xl font-bold text-emerald-300 mb-6">
+              <span role="img" aria-label="microscope emoji">🔬</span> Science & Brain Rewiring
+            </h2>
+            <ul className="list-none space-y-6">
+              {scienceLinks.map((link, index) => (
+                <ResourceLink
+                  key={index}
+                  href={link.href}
+                  title={link.title}
+                  description={link.description}
+                  color="emerald-300"
+                />
+              ))}
+            </ul>
+          </div>
+
           {/* Addiction Recovery & Mental Health Section */}
           <div>
             <h2 className="text-3xl font-bold text-emerald-400 mb-6">
@@ -282,3 +310,5 @@ export default function Resources() {
 }
 // End of Resources Page Component
 // --- IGNORE ---
+// This is a Next.js page component that serves as the resources page for Myelin Map.
+// It includes a header, main content with various resource sections, and a footer.
