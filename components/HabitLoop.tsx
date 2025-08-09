@@ -1,5 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 
+type CSSVars = React.CSSProperties & Record<string, string | number>;
+
+/**
+ * HabitLoop component visualizes a habit loop with a spinning ring,
+ * showing progress through wraps and celebrating completed habits.
+ *
+ * @param {Object} props - Component properties
+ * @param {number} props.repCount - Total reps for the active habit
+ * @param {number} props.wrapSize - Wrap size for the active habit (e.g., 7)
+ * @param {number} props.trigger - Bump this number after each successful rep to trigger a pulse
+ * @param {boolean} props.celebrate - Set true briefly when a wrap completes to celebrate
+ * @param {string} [props.title] - Optional title (e.g., habit name)
+ */
+
 type HabitLoopProps = {
   /** total reps for the active habit */
   repCount: number;
@@ -272,10 +286,12 @@ function BurstOverlay() {
           const x = Math.cos(angle);
           const y = Math.sin(angle);
           const delay = (i % 6) * 30;
+
           // how far each dot travels
           const tx = x * 40;
           const ty = y * 40;
-          const style: React.CSSProperties = {
+
+          const style: CSSVars = {
             position: "absolute",
             width: 6,
             height: 6,
@@ -285,12 +301,11 @@ function BurstOverlay() {
             animation: "burst 800ms ease-out both",
             animationDelay: `${delay}ms`,
             boxShadow: "0 0 8px rgba(255,255,255,0.6)",
-            // set vars the keyframes will read
-            // @ts-expect-error – CSS custom props
-            ["--tx" as any]: `${tx}px`,
-            // @ts-expect-error – CSS custom props
-            ["--ty" as any]: `${ty}px`,
+            // CSS custom props read by keyframes
+            ["--tx"]: `${tx}px`,
+            ["--ty"]: `${ty}px`,
           };
+
           return <span key={i} style={style} />;
         })}
         <style jsx>{`
@@ -301,7 +316,7 @@ function BurstOverlay() {
             }
             100% {
               opacity: 0;
-              transform: translate(var(--tx), var(--ty)) scale(1.2);
+              transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.2);
             }
           }
         `}</style>
@@ -309,4 +324,3 @@ function BurstOverlay() {
     </div>
   );
 }
-
