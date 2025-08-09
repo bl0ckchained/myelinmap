@@ -980,7 +980,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+          <p style={{ color: "#2b5192ff", margin: "6px 0 0" }}>
             You can change goals as you grow. Progress isn’t linear — it’s kind.
           </p>
         </div>
