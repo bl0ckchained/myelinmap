@@ -37,6 +37,66 @@ type UpdatePayload<T> = {
   old: T | null;
 };
 
+/* ===========================
+   NEW: Tiny Modal Component
+   =========================== */
+function Modal({
+  open,
+  title,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+        padding: "1rem",
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 480,
+          background: "#0f172a",
+          color: "#e5e7eb",
+          borderRadius: 12,
+          border: "1px solid #233147",
+          boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+          padding: "16px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <h3 style={{ margin: 0 }}>{title}</h3>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{ background: "transparent", border: "none", color: "#9ca3af", fontSize: 18, cursor: "pointer" }}
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   /** --- Auth & core page state --- */
   const [user, setUser] = useState<User | null>(null);
@@ -58,6 +118,21 @@ export default function Dashboard() {
   const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
   const [wraps, setWraps] = useState<number>(0); // wraps completed for active habit
   const [progressPct, setProgressPct] = useState<number>(0); // % toward next wrap
+
+  /* ===========================
+     NEW: Create/Edit modal state
+     =========================== */
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  // create form
+  const [newName, setNewName] = useState("Breath reset");
+  const [newGoal, setNewGoal] = useState<number>(21);
+  const [newWrap, setNewWrap] = useState<number>(7);
+  // edit form
+  const [editName, setEditName] = useState("");
+  const [editGoal, setEditGoal] = useState<number>(21);
+  const [editWrap, setEditWrap] = useState<number>(7);
+  const clampInt = (v: number, min: number, max: number) => Math.max(min, Math.min(max, Math.floor(v)));
 
   /** Watch authentication state */
   useEffect(() => {
@@ -81,7 +156,7 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .single();
 
-      // PGRST116 = No rows found with .single()
+    // PGRST116 = No rows found with .single()
       if ((error as PostgrestError | null)?.code === "PGRST116") {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
@@ -115,10 +190,7 @@ export default function Dashboard() {
     };
   }, [user]);
 
-  /** KEPT: your original minimal streak + last-7-days (based on last_rep).
-   * We leave this in place so nothing breaks, but a NEW effect below will compute
-   * precise values from rep_events and overwrite these with more accurate data.
-   */
+  /** KEPT: your original minimal streak + last-7-days (based on last_rep). */
   useEffect(() => {
     if (!user) return;
     const today = new Date();
@@ -185,7 +257,6 @@ export default function Dashboard() {
   /**
    * NEW (accurate): Compute streak (distinct days with rep_events),
    * last-7-days counts, and progress for the ACTIVE habit.
-   * This will overwrite the rough values from the earlier effect (above).
    */
   useEffect(() => {
     if (!user) return;
@@ -321,6 +392,73 @@ export default function Dashboard() {
     }
   };
 
+  /** NEW: Habit create/edit handlers */
+  const handleCreateHabit = async () => {
+    if (!user) return;
+    const name = newName.trim().slice(0, 80);
+    const goal = clampInt(newGoal, 1, 9999);
+    const wrap = clampInt(newWrap, 1, 9999);
+    if (!name) return;
+
+    const { data, error } = await supabase
+      .from("habits")
+      .insert({ user_id: user.id, name, goal_reps: goal, wrap_size: wrap })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("create habit error:", error);
+      return;
+    }
+
+    const row = data as HabitRow;
+    setHabits((prev) => [...prev, row]);
+    setActiveHabitId(row.id);
+    setCreateOpen(false);
+    // reset counts for the new active habit
+    setHabitRepCount(0);
+    setWraps(0);
+    setProgressPct(0);
+  };
+
+  const openEditForActive = () => {
+    const h = habits.find((x) => x.id === activeHabitId);
+    if (!h) return;
+    setEditName(h.name);
+    setEditGoal(h.goal_reps);
+    setEditWrap(h.wrap_size);
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!activeHabitId) return;
+    const name = editName.trim().slice(0, 80);
+    const goal = clampInt(editGoal, 1, 9999);
+    const wrap = clampInt(editWrap, 1, 9999);
+
+    const { data, error } = await supabase
+      .from("habits")
+      .update({ name, goal_reps: goal, wrap_size: wrap })
+      .eq("id", activeHabitId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("update habit error:", error);
+      return;
+    }
+
+    const updated = data as HabitRow;
+    setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
+    setEditOpen(false);
+
+    const size = Math.max(1, updated.wrap_size);
+    const wrapsDone = Math.floor(habitRepCount / size);
+    const pct = ((habitRepCount % size) / size) * 100;
+    setWraps(wrapsDone);
+    setProgressPct(pct);
+  };
+
   /** Sign out (kept) */
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -386,8 +524,8 @@ export default function Dashboard() {
                       Email: <strong>{user.email}</strong>
                     </p>
 
-                    {/* NEW: Habit selector */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 14px" }}>
+                    {/* NEW: Habit selector + actions */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 14px", flexWrap: "wrap" }}>
                       <label htmlFor="habit" style={{ color: "#6b7280" }}>
                         Active habit:
                       </label>
@@ -409,6 +547,38 @@ export default function Dashboard() {
                           </option>
                         ))}
                       </select>
+
+                      {/* + New Habit */}
+                      <button
+                        onClick={() => setCreateOpen(true)}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #374151",
+                          background: "#0b1220",
+                          color: "#e5e7eb",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + New Habit
+                      </button>
+
+                      {/* Edit current */}
+                      <button
+                        onClick={openEditForActive}
+                        disabled={!activeHabitId}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #374151",
+                          background: "#0b1220",
+                          color: "#e5e7eb",
+                          cursor: !activeHabitId ? "not-allowed" : "pointer",
+                          opacity: !activeHabitId ? 0.6 : 1,
+                        }}
+                      >
+                        Edit
+                      </button>
                     </div>
 
                     {/* Your original 3 mini-cards (kept) */}
@@ -666,6 +836,156 @@ export default function Dashboard() {
         </div>
       </main>
 
+      {/* ===========================
+          NEW: Create & Edit Modals
+          =========================== */}
+      <Modal open={createOpen} title="Create a habit" onClose={() => setCreateOpen(false)}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="e.g., Breath reset"
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
+            <input
+              type="number"
+              min={1}
+              value={newGoal}
+              onChange={(e) => setNewGoal(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
+            <input
+              type="number"
+              min={1}
+              value={newWrap}
+              onChange={(e) => setNewWrap(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+            <button
+              onClick={() => setCreateOpen(false)}
+              style={{ padding: "8px 12px", borderRadius: 8, background: "#1f2937", color: "#e5e7eb", border: "1px solid #374151" }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateHabit}
+              style={{ padding: "8px 12px", borderRadius: 8, background: "#10b981", color: "#062019", fontWeight: 700 }}
+            >
+              Create
+            </button>
+          </div>
+
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+            Start small is smart. You can always change this later.
+          </p>
+        </div>
+      </Modal>
+
+      <Modal open={editOpen} title="Edit habit" onClose={() => setEditOpen(false)}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
+            <input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
+            <input
+              type="number"
+              min={1}
+              value={editGoal}
+              onChange={(e) => setEditGoal(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
+            <input
+              type="number"
+              min={1}
+              value={editWrap}
+              onChange={(e) => setEditWrap(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+            <button
+              onClick={() => setEditOpen(false)}
+              style={{ padding: "8px 12px", borderRadius: 8, background: "#1f2937", color: "#e5e7eb", border: "1px solid #374151" }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              style={{ padding: "8px 12px", borderRadius: 8, background: "#34d399", color: "#062019", fontWeight: 700 }}
+            >
+              Save
+            </button>
+          </div>
+
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+            You can change goals as you grow. Progress isn’t linear — it’s kind.
+          </p>
+        </div>
+      </Modal>
+
       <Footer />
 
       {/* Small style niceties */}
@@ -679,4 +999,3 @@ export default function Dashboard() {
     </>
   );
 }
-// pages/science.tsx
