@@ -10,18 +10,35 @@ import { supabase } from "@/lib/supabaseClient";
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
 
+/** Tabs for the dashboard UI */
 type Tab = "overview" | "visualizer" | "coach" | "history";
 
-// Narrow row type for your table
+/** Narrow row type for your existing totals table (user_reps) */
 type UserRepsRow = {
   user_id: string;
   reps: number;
   last_rep: string | null;
-  // created_at?: string;
-  // id?: string;
+};
+
+/** Row type for the new 'habits' table */
+type HabitRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  goal_reps: number;
+  wrap_size: number;
+  created_at: string;
+};
+
+/** Typed realtime payload helper (no 'any') */
+type UpdatePayload<T> = {
+  eventType: "INSERT" | "UPDATE" | "DELETE" | "SELECT";
+  new: T | null;
+  old: T | null;
 };
 
 export default function Dashboard() {
+  /** --- Auth & core page state --- */
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({
     reps: 0,
@@ -30,12 +47,19 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState<Tab>("overview");
 
-  // lightweight “streak” & last-7-days counts (approximate with current schema)
+  /** --- Lightweight counts from your original implementation (kept) --- */
   const [dailyCounts, setDailyCounts] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
 
-  // Watch authentication state
+  /** --- NEW: Habits state & progress for active habit --- */
+  const [habits, setHabits] = useState<HabitRow[]>([]);
+  const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
+  const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
+  const [wraps, setWraps] = useState<number>(0); // wraps completed for active habit
+  const [progressPct, setProgressPct] = useState<number>(0); // % toward next wrap
+
+  /** Watch authentication state */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -46,7 +70,7 @@ export default function Dashboard() {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
-  // Fetch user reps data + subscribe to updates
+  /** Fetch user totals (user_reps) + subscribe to updates (kept, with better typing) */
   useEffect(() => {
     if (!user) return;
 
@@ -72,9 +96,6 @@ export default function Dashboard() {
 
     fetchUserData();
 
-    // type the realtime payload without `any`
-    type UpdatePayload<T> = { eventType: "INSERT" | "UPDATE" | "DELETE" | "SELECT"; new: T | null; old: T | null };
-
     const subscription = supabase
       .channel(`user_reps:${user.id}`)
       .on(
@@ -83,7 +104,7 @@ export default function Dashboard() {
         (payload) => {
           const p = payload as unknown as UpdatePayload<UserRepsRow>;
           if (p.eventType === "UPDATE" && p.new) {
-            setUserData((prev) => ({ ...prev, ...p.new! }));
+            setUserData((prev) => ({ ...prev, ...p.new }));
           }
         }
       )
@@ -94,19 +115,22 @@ export default function Dashboard() {
     };
   }, [user]);
 
-  // compute minimal streak + last-7-days (until we add a rep_events table)
+  /** KEPT: your original minimal streak + last-7-days (based on last_rep).
+   * We leave this in place so nothing breaks, but a NEW effect below will compute
+   * precise values from rep_events and overwrite these with more accurate data.
+   */
   useEffect(() => {
     if (!user) return;
-    const today = new Date(); today.setHours(0,0,0,0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const arr = Array(7).fill(0);
 
     if (userData.last_rep) {
       const lr = new Date(userData.last_rep);
       lr.setHours(0, 0, 0, 0);
       const diffDays = Math.round((today.getTime() - lr.getTime()) / 86400000);
-      // crude: mark today if last_rep is today
-      if (diffDays === 0) arr[6] = 1;
-      setStreak(diffDays === 0 ? 1 : 0); // upgrade once we track daily events
+      if (diffDays === 0) arr[6] = 1; // crude: mark today if last_rep is today
+      setStreak(diffDays === 0 ? 1 : 0);
     } else {
       setStreak(0);
     }
@@ -114,35 +138,190 @@ export default function Dashboard() {
     setDailyCounts(arr);
   }, [user, userData.last_rep]);
 
-  const logRep = async () => {
+  /** NEW: Load user habits (or auto-create a default one) */
+  useEffect(() => {
     if (!user) return;
+
+    const loadHabits = async () => {
+      const { data, error } = await supabase
+        .from("habits")
+        .select("id, user_id, name, goal_reps, wrap_size, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Load habits error:", error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        // create a gentle default so first-time users see something meaningful
+        const { data: created, error: insErr } = await supabase
+          .from("habits")
+          .insert({
+            user_id: user.id,
+            name: "Breath reset",
+            goal_reps: 21,
+            wrap_size: 7,
+          })
+          .select()
+          .single();
+
+        if (!insErr && created) {
+          const row = created as HabitRow;
+          setHabits([row]);
+          setActiveHabitId(row.id);
+        }
+      } else {
+        const rows = data as HabitRow[];
+        setHabits(rows);
+        setActiveHabitId(rows[0].id);
+      }
+    };
+
+    loadHabits();
+  }, [user]);
+
+  /**
+   * NEW (accurate): Compute streak (distinct days with rep_events),
+   * last-7-days counts, and progress for the ACTIVE habit.
+   * This will overwrite the rough values from the earlier effect (above).
+   */
+  useEffect(() => {
+    if (!user) return;
+
+    const compute = async () => {
+      // --- Streak + last 7 days from rep_events ---
+      const since60 = new Date();
+      since60.setDate(since60.getDate() - 60);
+
+      const { data: events, error: evErr } = await supabase
+        .from("rep_events")
+        .select("ts")
+        .eq("user_id", user.id)
+        .gte("ts", since60.toISOString())
+        .order("ts", { ascending: false });
+
+      if (evErr) {
+        console.error("rep_events streak error:", evErr);
+      }
+
+      const dayKeys = new Set(
+        (events ?? []).map((e) => new Date(e.ts as string).toISOString().slice(0, 10))
+      );
+
+      // streak: walk backward from today while dates exist
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let s = 0;
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        if (dayKeys.has(key)) s++;
+        else break;
+      }
+      setStreak(s);
+
+      // last 7 days mini-series
+      const arr7 = Array(7).fill(0);
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - (6 - i));
+        const key = d.toISOString().slice(0, 10);
+        arr7[i] = dayKeys.has(key) ? 1 : 0;
+      }
+      setDailyCounts(arr7);
+
+      // --- Active habit progress ---
+      if (!activeHabitId) return;
+
+      const { count, error: cntErr } = await supabase
+        .from("rep_events")
+        .select("id", { count: "exact", head: true })
+        .eq("habit_id", activeHabitId);
+
+      if (cntErr) {
+        console.error("rep_events count error:", cntErr);
+        return;
+      }
+
+      const total = typeof count === "number" ? count : 0;
+      setHabitRepCount(total);
+
+      const activeHabit = habits.find((h) => h.id === activeHabitId);
+      if (activeHabit) {
+        const size = Math.max(1, activeHabit.wrap_size);
+        const wrapsDone = Math.floor(total / size);
+        const pct = ((total % size) / size) * 100;
+        setWraps(wrapsDone);
+        setProgressPct(pct);
+      }
+    };
+
+    compute();
+  }, [user, activeHabitId, habits, userData.last_rep]);
+
+  /**
+   * UPDATED: Log a rep
+   * - Inserts into rep_events (accurate history/streaks)
+   * - Updates your existing user_reps totals (kept)
+   * - Trauma-aware nudge afterward
+   */
+  const logRep = async () => {
+    if (!user || !activeHabitId) return;
     setLoading(true);
 
+    // 1) write event for analytics/streaks
+    const { error: evErr } = await supabase
+      .from("rep_events")
+      .insert({ user_id: user.id, habit_id: activeHabitId });
+
+    if (evErr) {
+      console.error("Error inserting rep_event:", evErr);
+      setLoading(false);
+      return;
+    }
+
+    // 2) bump totals table (kept logic)
     const newRepCount = userData.reps + 1;
     const now = new Date();
 
-    const { error } = await supabase
+    const { error: updErr } = await supabase
       .from("user_reps")
       .update({ reps: newRepCount, last_rep: now.toISOString() })
       .eq("user_id", user.id);
 
     setLoading(false);
 
-    if (error) {
-      console.error("Error logging rep:", error);
+    if (updErr) {
+      console.error("Error updating user_reps:", updErr);
       return;
     }
 
-    // small science-backed nudge (implementation intentions)
+    // gentle implementation-intention nudges
     const nudges = [
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
       "Small + consistent > perfect. One more tiny rep later today.",
-      "Label the win: 'I am someone who reps even when it’s hard.'",
+      "Label the win: “I am someone who reps even when it’s hard.”",
     ];
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
+
+    // local UI refresh (no full reload)
+    setUserData((prev) => ({ ...prev, reps: newRepCount, last_rep: now.toISOString() }));
+    // optimistically bump progress for active habit
+    setHabitRepCount((c) => c + 1);
+    const activeHabit = habits.find((h) => h.id === activeHabitId);
+    if (activeHabit) {
+      const size = Math.max(1, activeHabit.wrap_size);
+      const nextTotal = habitRepCount + 1;
+      setWraps(Math.floor(nextTotal / size));
+      setProgressPct(((nextTotal % size) / size) * 100);
+    }
   };
 
+  /** Sign out (kept) */
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -200,12 +379,39 @@ export default function Dashboard() {
                     marginBottom: 16,
                   }}
                 >
-                  {/* Stats card */}
+                  {/* Stats + Habit card */}
                   <div style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
                     <h2 style={{ marginTop: 0 }}>Welcome Back 🧠</h2>
-                    <p style={{ margin: "8px 0 16px" }}>
+                    <p style={{ margin: "8px 0 12px" }}>
                       Email: <strong>{user.email}</strong>
                     </p>
+
+                    {/* NEW: Habit selector */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 14px" }}>
+                      <label htmlFor="habit" style={{ color: "#6b7280" }}>
+                        Active habit:
+                      </label>
+                      <select
+                        id="habit"
+                        value={activeHabitId ?? ""}
+                        onChange={(e) => setActiveHabitId(e.target.value)}
+                        style={{
+                          padding: "6px 10px",
+                          borderRadius: 8,
+                          border: "1px solid #374151",
+                          background: "#0f172a",
+                          color: "#e5e7eb",
+                        }}
+                      >
+                        {habits.map((h) => (
+                          <option key={h.id} value={h.id}>
+                            {h.name} (goal {h.goal_reps})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Your original 3 mini-cards (kept) */}
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
                       <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
                         <p style={{ margin: 0, color: "#666" }}>Total Reps</p>
@@ -213,7 +419,9 @@ export default function Dashboard() {
                       </div>
                       <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
                         <p style={{ margin: 0, color: "#666" }}>Streak</p>
-                        <p style={{ margin: "6px 0 0", fontSize: 24 }}>{streak} day{streak === 1 ? "" : "s"}</p>
+                        <p style={{ margin: "6px 0 0", fontSize: 24 }}>
+                          {streak} day{streak === 1 ? "" : "s"}
+                        </p>
                       </div>
                       <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
                         <p style={{ margin: 0, color: "#666" }}>Last Rep</p>
@@ -222,20 +430,133 @@ export default function Dashboard() {
                         </p>
                       </div>
                     </div>
+
+                    {/* NEW: Progress Wrap Bar for active habit */}
+                    <div style={{ marginTop: 12 }}>
+                      {(() => {
+                        const h = habits.find((x) => x.id === activeHabitId);
+                        if (!h) return null;
+                        const wrapsComplete = Math.floor(habitRepCount / Math.max(1, h.wrap_size));
+                        const repsIntoWrap = habitRepCount % Math.max(1, h.wrap_size);
+                        const repsToNext = Math.max(0, h.wrap_size - repsIntoWrap);
+
+                        return (
+                          <div
+                            style={{
+                              border: "1px solid #233147",
+                              borderRadius: 12,
+                              padding: 12,
+                              background: "#0b1220",
+                              marginTop: 8,
+                            }}
+                          >
+                            <p style={{ margin: 0, color: "#9CA3AF" }}>
+                              <strong>{h.name}</strong> — {habitRepCount}/{h.goal_reps} reps
+                            </p>
+                            <div
+                              style={{
+                                height: 10,
+                                borderRadius: 999,
+                                background: "#1f2937",
+                                overflow: "hidden",
+                                marginTop: 8,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: `${Math.min(100, (habitRepCount / Math.max(1, h.goal_reps)) * 100)}%`,
+                                  height: "100%",
+                                  background: "linear-gradient(90deg, #34d399, #10b981)",
+                                  transition: "width 400ms ease",
+                                }}
+                              />
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                marginTop: 8,
+                                color: "#9CA3AF",
+                              }}
+                            >
+                              <span>Wrap size: {h.wrap_size}</span>
+                              <span>Wraps: {wrapsComplete}</span>
+                              <span>
+                                Next wrap in: {repsToNext} rep{repsToNext === 1 ? "" : "s"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* NEW: Streak ring (gentle glow) */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+                      <svg width="72" height="72" viewBox="0 0 72 72">
+                        <defs>
+                          <filter id="glow">
+                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                            <feMerge>
+                              <feMergeNode in="coloredBlur" />
+                              <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                          </filter>
+                        </defs>
+                        {/* background ring */}
+                        <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
+                        {/* progress ring (cap visualization at 30) */}
+                        {(() => {
+                          const cap = 30;
+                          const pct = Math.min(1, streak / cap);
+                          const circumference = 2 * Math.PI * 30;
+                          const dash = pct * circumference;
+                          return (
+                            <circle
+                              cx="36"
+                              cy="36"
+                              r="30"
+                              stroke="#fbbf24"
+                              strokeWidth="8"
+                              fill="none"
+                              strokeDasharray={`${dash} ${circumference - dash}`}
+                              strokeLinecap="round"
+                              transform="rotate(-90 36 36)"
+                              filter={streak > 0 ? "url(#glow)" : undefined}
+                            />
+                          );
+                        })()}
+                      </svg>
+                      <div>
+                        <div style={{ fontSize: 18, fontWeight: 700 }}>
+                          {streak} day{streak === 1 ? "" : "s"} streak
+                        </div>
+                        <div style={{ color: "#6b7280" }}>
+                          {streak > 0
+                            ? "You came back. That’s braver than never missing."
+                            : "Today can be day one. One tiny rep."}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Log a rep */}
+                  {/* Log a rep (kept, now powers rep_events + totals) */}
                   <div style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16, background: "#f7f7f7" }}>
                     <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
                     <p style={{ marginTop: 0 }}>This is how you wire new habits into your brain.</p>
                     <button
                       onClick={logRep}
-                      disabled={loading}
+                      disabled={loading || !activeHabitId}
                       style={{ padding: "10px 20px", cursor: loading ? "not-allowed" : "pointer" }}
                     >
                       {loading ? "Logging..." : "Log Rep"}
                     </button>
                     {nudge && <p style={{ marginTop: 10, color: "#0f766e" }}>{nudge}</p>}
+                    {!activeHabitId && (
+                      <p style={{ marginTop: 8, color: "#9CA3AF" }}>
+                        Creating your first habit… if this persists, refresh.
+                      </p>
+                    )}
                   </div>
 
                   {/* 7-day sparkline (full width) */}
@@ -253,9 +574,7 @@ export default function Dashboard() {
                       {(() => {
                         const max = Math.max(1, ...dailyCounts);
                         const stepX = 140 / 6;
-                        const pts = dailyCounts
-                          .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
-                          .join(" ");
+                        const pts = dailyCounts.map((v, i) => `${i * stepX},${46 - (v / max) * 42}`).join(" ");
                         return (
                           <>
                             <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
@@ -272,7 +591,9 @@ export default function Dashboard() {
                         );
                       })()}
                     </svg>
-                    <small style={{ color: "#666" }}>We’ll make this precise once we add per‑rep events.</small>
+                    <small style={{ color: "#666" }}>
+                      Counts reflect days with activity. One tiny rep is enough to light up a day.
+                    </small>
                   </div>
                 </section>
               )}
@@ -284,7 +605,16 @@ export default function Dashboard() {
                     This view grows with your reps. (Dashboard‑only visualizer — keep the fruit tree on Home.)
                   </p>
                   {/* Mount your visualizer component here */}
-                  <div style={{ height: 360, border: "1px dashed #bbb", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div
+                    style={{
+                      height: 360,
+                      border: "1px dashed #bbb",
+                      borderRadius: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     {/* <Visualizer reps={userData.reps} lastRep={userData.last_rep} /> */}
                     <span style={{ color: "#777" }}>Visualizer placeholder — plug in your component</span>
                   </div>
@@ -300,10 +630,8 @@ export default function Dashboard() {
                   <div style={{ border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
                     <p style={{ margin: 0 }}>
                       “Based on your last rep on{" "}
-                      <strong>
-                        {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
-                      </strong>
-                      , here’s a micro‑win for today: <em>2‑minute breath reset + 1 tiny rep after coffee.</em>”
+                      <strong>{userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}</strong>,
+                      here’s a micro‑win for today: <em>2‑minute breath reset + 1 tiny rep after coffee.</em>”
                     </p>
                   </div>
                 </section>
@@ -343,7 +671,7 @@ export default function Dashboard() {
       {/* Small style niceties */}
       <style jsx>{`
         @media (max-width: 820px) {
-          section[style*="grid-template-columns"] {
+          section[style*='grid-template-columns'] {
             display: block !important;
           }
         }
@@ -351,3 +679,4 @@ export default function Dashboard() {
     </>
   );
 }
+// pages/science.tsx
