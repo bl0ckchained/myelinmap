@@ -117,8 +117,7 @@ export default function Dashboard() {
   const [habits, setHabits] = useState<HabitRow[]>([]);
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
-  const [wraps, setWraps] = useState<number>(0); // wraps completed for active habit
-  const [progressPct, setProgressPct] = useState<number>(0); // % toward next wrap (kept for future use)
+  
 
   /** --- HabitLoop animation triggers --- */
   const [loopPulse, setLoopPulse] = useState(0); // bump after each rep
@@ -330,8 +329,7 @@ export default function Dashboard() {
         const size = Math.max(1, activeHabit.wrap_size);
         const wrapsDone = Math.floor(total / size);
         const pct = ((total % size) / size) * 100;
-        setWraps(wrapsDone);
-        setProgressPct(pct);
+      
       }
     };
 
@@ -408,8 +406,7 @@ export default function Dashboard() {
     if (activeHabit) {
       const size = Math.max(1, activeHabit.wrap_size);
       const nextTotal = habitRepCount + 1;
-      setWraps(Math.floor(nextTotal / size));
-      setProgressPct(((nextTotal % size) / size) * 100);
+     
     }
   };
 
@@ -438,8 +435,6 @@ export default function Dashboard() {
     setCreateOpen(false);
     // reset counts for the new active habit
     setHabitRepCount(0);
-    setWraps(0);
-    setProgressPct(0);
   };
 
   const openEditForActive = () => {
@@ -476,8 +471,6 @@ export default function Dashboard() {
     const size = Math.max(1, updated.wrap_size);
     const wrapsDone = Math.floor(habitRepCount / size);
     const pct = ((habitRepCount % size) / size) * 100;
-    setWraps(wrapsDone);
-    setProgressPct(pct);
   };
 
   /** Sign out (kept) */
