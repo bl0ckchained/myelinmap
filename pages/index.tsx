@@ -146,16 +146,6 @@ export default function Home() {
                 <a className="btn btn-secondary">🔬 Learn the Science</a>
               </Link>
             </div>
-
-            {/* Optional video placeholder (use your current myelin video) */}
-            <div className="video-frame">
-              <iframe
-                title="Intro to Myelin"
-                src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1&playsinline=1"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              />
-            </div>
           </div>
         </section>
 
@@ -187,6 +177,30 @@ export default function Home() {
             </ul>
             <p className="micro-note">Kindness lowers friction so reps become doable.</p>
           </aside>
+        </section>
+
+        {/* 🎥 Intro Video + Healing Coach Callout (moved below tree + sidebars) */}
+        <section style={{ padding: "1.5rem 1rem 0", textAlign: "center" }}>
+          <div className="video-frame" aria-label="Intro to Myelin video">
+            <iframe
+              title="Intro to Myelin"
+              src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1&playsinline=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+          <p style={{ marginTop: "0.75rem", color: "#ccc", fontSize: "0.95rem" }}>
+            ⏳ 2 minutes: How myelin makes habits stick
+          </p>
+
+          {/* Healing Coach Callout */}
+          <div className="coach-callout">
+            <span className="coach-dot" aria-hidden />
+            <p style={{ margin: 0 }}>
+              🌟 Meet your <strong>Healing Coach</strong> — floating in the corner, ready with daily tips, motivation,
+              and science‑backed micro‑wins. Tap it anytime.
+            </p>
+          </div>
         </section>
 
         {/* 🧠 Hero Section (kept) */}
@@ -426,6 +440,40 @@ export default function Home() {
           color: #9ca3af;
           border-top: 1px dashed #2b3a52;
           padding-top: 0.5rem;
+        }
+
+        /* Healing Coach callout */
+        .coach-callout {
+          margin: 1.25rem auto 0;
+          background: rgba(255,255,255,0.05);
+          padding: 1rem 1.1rem 1rem 0.9rem;
+          border-radius: 12px;
+          display: inline-flex;
+          gap: 0.6rem;
+          align-items: center;
+          border: 1px solid rgba(255,255,255,0.08);
+          position: relative;
+        }
+        .coach-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          background: #34d399;
+          position: relative;
+          display: inline-block;
+        }
+        .coach-dot::after {
+          content: "";
+          position: absolute;
+          inset: -6px;
+          border-radius: 999px;
+          border: 2px solid rgba(52, 211, 153, 0.55);
+          animation: coachPulse 2.4s ease-in-out infinite;
+        }
+        @keyframes coachPulse {
+          0%   { transform: scale(0.85); opacity: 0.6; }
+          50%  { transform: scale(1);    opacity: 1; }
+          100% { transform: scale(0.85); opacity: 0.6; }
         }
       `}</style>
     </>
