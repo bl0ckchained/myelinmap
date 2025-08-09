@@ -272,22 +272,26 @@ function BurstOverlay() {
           const x = Math.cos(angle);
           const y = Math.sin(angle);
           const delay = (i % 6) * 30;
-          return (
-            <span
-              key={i}
-              style={{
-                position: "absolute",
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                background: i % 2 ? "#34d399" : "#fbbf24",
-                transform: `translate(${x * 6}px, ${y * 6}px) scale(0.6)`,
-                animation: "burst 800ms ease-out both",
-                animationDelay: `${delay}ms`,
-                boxShadow: "0 0 8px rgba(255,255,255,0.6)",
-              }}
-            />
-          );
+          // how far each dot travels
+          const tx = x * 40;
+          const ty = y * 40;
+          const style: React.CSSProperties = {
+            position: "absolute",
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: i % 2 ? "#34d399" : "#fbbf24",
+            transform: `translate(${x * 6}px, ${y * 6}px) scale(0.6)`,
+            animation: "burst 800ms ease-out both",
+            animationDelay: `${delay}ms`,
+            boxShadow: "0 0 8px rgba(255,255,255,0.6)",
+            // set vars the keyframes will read
+            // @ts-expect-error – CSS custom props
+            ["--tx" as any]: `${tx}px`,
+            // @ts-expect-error – CSS custom props
+            ["--ty" as any]: `${ty}px`,
+          };
+          return <span key={i} style={style} />;
         })}
         <style jsx>{`
           @keyframes burst {
@@ -297,7 +301,7 @@ function BurstOverlay() {
             }
             100% {
               opacity: 0;
-              transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.2);
+              transform: translate(var(--tx), var(--ty)) scale(1.2);
             }
           }
         `}</style>
@@ -305,3 +309,4 @@ function BurstOverlay() {
     </div>
   );
 }
+

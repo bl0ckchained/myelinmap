@@ -6,6 +6,7 @@ import { User, type PostgrestError } from "@supabase/supabase-js";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
+import HabitLoop from "@/components/HabitLoop";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
@@ -38,7 +39,7 @@ type UpdatePayload<T> = {
 };
 
 /* ===========================
-   NEW: Tiny Modal Component
+   Tiny Modal Component
    =========================== */
 function Modal({
   open,
@@ -112,15 +113,19 @@ export default function Dashboard() {
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
 
-  /** --- NEW: Habits state & progress for active habit --- */
+  /** --- Habits state & progress for active habit --- */
   const [habits, setHabits] = useState<HabitRow[]>([]);
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
   const [wraps, setWraps] = useState<number>(0); // wraps completed for active habit
-  const [progressPct, setProgressPct] = useState<number>(0); // % toward next wrap
+  const [progressPct, setProgressPct] = useState<number>(0); // % toward next wrap (kept for future use)
+
+  /** --- HabitLoop animation triggers --- */
+  const [loopPulse, setLoopPulse] = useState(0); // bump after each rep
+  const [wrapBurst, setWrapBurst] = useState(false); // true briefly when a wrap completes
 
   /* ===========================
-     NEW: Create/Edit modal state
+     Create/Edit modal state
      =========================== */
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -156,7 +161,7 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .single();
 
-    // PGRST116 = No rows found with .single()
+      // PGRST116 = No rows found with .single()
       if ((error as PostgrestError | null)?.code === "PGRST116") {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
@@ -190,7 +195,7 @@ export default function Dashboard() {
     };
   }, [user]);
 
-  /** KEPT: your original minimal streak + last-7-days (based on last_rep). */
+  /** KEPT: minimal streak + last-7-days based on last_rep (overwritten later by precise values) */
   useEffect(() => {
     if (!user) return;
     const today = new Date();
@@ -210,7 +215,7 @@ export default function Dashboard() {
     setDailyCounts(arr);
   }, [user, userData.last_rep]);
 
-  /** NEW: Load user habits (or auto-create a default one) */
+  /** Load user habits (or auto-create a default one) */
   useEffect(() => {
     if (!user) return;
 
@@ -255,7 +260,7 @@ export default function Dashboard() {
   }, [user]);
 
   /**
-   * NEW (accurate): Compute streak (distinct days with rep_events),
+   * Accurate: Compute streak (distinct days with rep_events),
    * last-7-days counts, and progress for the ACTIVE habit.
    */
   useEffect(() => {
@@ -334,10 +339,10 @@ export default function Dashboard() {
   }, [user, activeHabitId, habits, userData.last_rep]);
 
   /**
-   * UPDATED: Log a rep
+   * Log a rep:
    * - Inserts into rep_events (accurate history/streaks)
-   * - Updates your existing user_reps totals (kept)
-   * - Trauma-aware nudge afterward
+   * - Updates user_reps totals (kept)
+   * - Triggers HabitLoop pulse + wrap celebration
    */
   const logRep = async () => {
     if (!user || !activeHabitId) return;
@@ -352,6 +357,22 @@ export default function Dashboard() {
       console.error("Error inserting rep_event:", evErr);
       setLoading(false);
       return;
+    }
+
+    // animate the loop on each rep
+    setLoopPulse((n) => n + 1);
+
+    // celebrate on wrap completion
+    {
+      const activeHabit = habits.find((h) => h.id === activeHabitId);
+      if (activeHabit) {
+        const size = Math.max(1, activeHabit.wrap_size);
+        const nextTotal = habitRepCount + 1;
+        if (nextTotal % size === 0) {
+          setWrapBurst(true);
+          setTimeout(() => setWrapBurst(false), 900);
+        }
+      }
     }
 
     // 2) bump totals table (kept logic)
@@ -392,7 +413,7 @@ export default function Dashboard() {
     }
   };
 
-  /** NEW: Habit create/edit handlers */
+  /** Habit create/edit handlers */
   const handleCreateHabit = async () => {
     if (!user) return;
     const name = newName.trim().slice(0, 80);
@@ -507,6 +528,22 @@ export default function Dashboard() {
                 </button>
               </nav>
 
+              {/* NEW: HabitLoop (animated habit flywheel) */}
+              <div style={{ marginBottom: 16 }}>
+                {(() => {
+                  const h = habits.find((x) => x.id === activeHabitId);
+                  return (
+                    <HabitLoop
+                      title={h ? `Habit Loop — ${h.name}` : "Myelin Habit Loop"}
+                      repCount={habitRepCount}
+                      wrapSize={h?.wrap_size ?? 7}
+                      trigger={loopPulse}
+                      celebrate={wrapBurst}
+                    />
+                  );
+                })()}
+              </div>
+
               {/* Panels */}
               {active === "overview" && (
                 <section
@@ -524,7 +561,7 @@ export default function Dashboard() {
                       Email: <strong>{user.email}</strong>
                     </p>
 
-                    {/* NEW: Habit selector + actions */}
+                    {/* Habit selector + actions */}
                     <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 14px", flexWrap: "wrap" }}>
                       <label htmlFor="habit" style={{ color: "#6b7280" }}>
                         Active habit:
@@ -601,7 +638,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* NEW: Progress Wrap Bar for active habit */}
+                    {/* Progress Wrap Bar for active habit */}
                     <div style={{ marginTop: 12 }}>
                       {(() => {
                         const h = habits.find((x) => x.id === activeHabitId);
@@ -661,7 +698,7 @@ export default function Dashboard() {
                       })()}
                     </div>
 
-                    {/* NEW: Streak ring (gentle glow) */}
+                    {/* Streak ring (gentle glow) */}
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
                       <svg width="72" height="72" viewBox="0 0 72 72">
                         <defs>
@@ -710,7 +747,7 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Log a rep (kept, now powers rep_events + totals) */}
+                  {/* Log a rep (powers rep_events + totals) */}
                   <div style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16, background: "#f7f7f7" }}>
                     <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
                     <p style={{ marginTop: 0 }}>This is how you wire new habits into your brain.</p>
@@ -836,9 +873,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* ===========================
-          NEW: Create & Edit Modals
-          =========================== */}
+      {/* Create & Edit Modals */}
       <Modal open={createOpen} title="Create a habit" onClose={() => setCreateOpen(false)}>
         <div style={{ display: "grid", gap: 10 }}>
           <label>
@@ -980,7 +1015,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <p style={{ color: "#2b5192ff", margin: "6px 0 0" }}>
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
             You can change goals as you grow. Progress isn’t linear — it’s kind.
           </p>
         </div>
