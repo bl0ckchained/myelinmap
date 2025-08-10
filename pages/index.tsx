@@ -19,6 +19,11 @@ interface AccordionProps {
 
 const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
   const [isOpen, setIsOpen] = useState(false);
+
+  // Height math: outer panel animates to 320px; we give the inner scroll body ~280px
+  // so there's room for padding without clipping.
+  const SCROLL_BODY_MAX = 280;
+
   return (
     <div
       style={{
@@ -56,25 +61,40 @@ const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
           ▼
         </span>
       </button>
+
+      {/* Animated container; height transitions, inner body scrolls */}
       <div
         style={{
           maxHeight: isOpen ? "320px" : "0",
           opacity: isOpen ? 1 : 0,
-          overflow: "hidden",
+          overflow: "hidden",             // container hides overflow; inner body handles its own scroll
           padding: isOpen ? "1rem 1.5rem" : "0",
           transition: "all 0.5s ease",
         }}
       >
-        {content.map((item, index) => (
-          <div key={index} style={{ marginBottom: "1rem" }}>
-            <h3 style={{ fontWeight: "bold", color: "#ffffff" }}>
-              {item.title}
-            </h3>
-            <p style={{ color: "#d1d5db", marginTop: "0.5rem" }}>
-              {item.description}
-            </p>
-          </div>
-        ))}
+        {/* Scrollable inner body */}
+        <div
+          style={{
+            maxHeight: SCROLL_BODY_MAX,
+            overflowY: "auto",
+            paddingRight: 8,               // keeps text clear of scrollbar
+            WebkitOverflowScrolling: "touch",
+            overscrollBehavior: "contain",
+            maskImage:
+              "linear-gradient(to bottom, transparent 0, black 10px, black calc(100% - 10px), transparent 100%)",
+          }}
+        >
+          {content.map((item, index) => (
+            <div key={index} style={{ marginBottom: "1rem" }}>
+              <h3 style={{ fontWeight: "bold", color: "#ffffff" }}>
+                {item.title}
+              </h3>
+              <p style={{ color: "#d1d5db", marginTop: "0.5rem", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
+                {item.description}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -220,6 +240,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+
         {/* 🌳 Tree Visualizer with science side-panels */}
         <section className="tree-grid">
           {/* Left science card */}
@@ -269,6 +290,7 @@ export default function Home() {
             </p>
           </aside>
         </section>
+
         {/* 🎥 Intro Video + Healing Coach Callout (moved below tree + sidebars) */}
         <section style={{ padding: "1.5rem 1rem 0", textAlign: "center" }}>
           <div className="video-frame" aria-label="Intro to Myelin video">
@@ -290,11 +312,12 @@ export default function Home() {
             <span className="coach-dot" aria-hidden />
             <p style={{ margin: 0 }}>
               🧘 Meet your <strong>Healing Coach</strong> — floating in the
-              corner, ready with daily tips, motivation, and science‑backed
-              micro‑wins. Tap it anytime.
+              corner, ready with daily tips, motivation, and science-backed
+              micro-wins. Tap it anytime.
             </p>
           </div>
         </section>
+
         {/* 🧠 Hero Section (kept) */}
         <section
           style={{
@@ -329,6 +352,7 @@ export default function Home() {
             </p>
           </div>
         </section>
+
         {/* 💡 Mission Section (kept, expanded copy) */}
         <section
           style={{
@@ -393,8 +417,7 @@ export default function Home() {
             and keep wiring the life you want.
           </p>
         </section>
-      
-        {/* 💡 Mission Section (kept, expanded copy) */}
+
         {/* ❤️ Accordions Section (kept) */}
         <section
           style={{
@@ -440,7 +463,6 @@ export default function Home() {
             ),
             linear-gradient(180deg, #0f172a, #111827 40%, #0b1220 100%);
         }
-        /* Optional: swap the above for a real sunrise image behind a gradient overlay */
         .landing-overlay {
           position: absolute;
           inset: 0;
