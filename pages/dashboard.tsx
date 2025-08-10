@@ -83,12 +83,25 @@ function Modal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
           <h3 style={{ margin: 0 }}>{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            style={{ background: "transparent", border: "none", color: "#9ca3af", fontSize: 18, cursor: "pointer" }}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#9ca3af",
+              fontSize: 18,
+              cursor: "pointer",
+            }}
           >
             ✕
           </button>
@@ -102,7 +115,10 @@ function Modal({
 export default function Dashboard() {
   /** --- Auth & core page state --- */
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<{ reps: number; last_rep: string | null }>({
+  const [userData, setUserData] = useState<{
+    reps: number;
+    last_rep: string | null;
+  }>({
     reps: 0,
     last_rep: null,
   });
@@ -118,9 +134,8 @@ export default function Dashboard() {
   const [habits, setHabits] = useState<HabitRow[]>([]);
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
-  
 
-  /** --- HabitLoop animation triggers --- */
+  /** --- HabitLoop / NeuralField animation triggers --- */
   const [loopPulse, setLoopPulse] = useState(0); // bump after each rep
   const [wrapBurst, setWrapBurst] = useState(false); // true briefly when a wrap completes
 
@@ -137,11 +152,12 @@ export default function Dashboard() {
   const [editName, setEditName] = useState("");
   const [editGoal, setEditGoal] = useState<number>(21);
   const [editWrap, setEditWrap] = useState<number>(7);
-  const clampInt = (v: number, min: number, max: number) => Math.max(min, Math.min(max, Math.floor(v)));
+  const clampInt = (v: number, min: number, max: number) =>
+    Math.max(min, Math.min(max, Math.floor(v)));
 
-  // drives HabitLoop & NeuralField pulse/celebration
-const [loopPulse, setLoopPulse] = useState(0);
-const [wrapBurst, setWrapBurst] = useState(false);
+  /** ---------------------------
+   *  Effects & Handlers
+   * -------------------------- */
 
   /** Watch authentication state */
   useEffect(() => {
@@ -328,14 +344,7 @@ const [wrapBurst, setWrapBurst] = useState(false);
 
       const total = typeof count === "number" ? count : 0;
       setHabitRepCount(total);
-
-      const activeHabit = habits.find((h) => h.id === activeHabitId);
-      if (activeHabit) {
-        const size = Math.max(1, activeHabit.wrap_size);
-        const wrapsDone = Math.floor(total / size);
-        const pct = ((total % size) / size) * 100;
-      
-      }
+      // (No extra local wrap/pct state to update here — UI computes from habitRepCount)
     };
 
     compute();
@@ -362,10 +371,8 @@ const [wrapBurst, setWrapBurst] = useState(false);
       return;
     }
 
-    // animate the loop on each rep
+    // trigger visual pulses & wrap celebration
     setLoopPulse((n) => n + 1);
-
-    // celebrate on wrap completion
     {
       const activeHabit = habits.find((h) => h.id === activeHabitId);
       if (activeHabit) {
@@ -373,7 +380,7 @@ const [wrapBurst, setWrapBurst] = useState(false);
         const nextTotal = habitRepCount + 1;
         if (nextTotal % size === 0) {
           setWrapBurst(true);
-          setTimeout(() => setWrapBurst(false), 900);
+          setTimeout(() => setWrapBurst(false), 1000);
         }
       }
     }
@@ -404,15 +411,13 @@ const [wrapBurst, setWrapBurst] = useState(false);
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
 
     // local UI refresh (no full reload)
-    setUserData((prev) => ({ ...prev, reps: newRepCount, last_rep: now.toISOString() }));
+    setUserData((prev) => ({
+      ...prev,
+      reps: newRepCount,
+      last_rep: now.toISOString(),
+    }));
     // optimistically bump progress for active habit
     setHabitRepCount((c) => c + 1);
-    const activeHabit = habits.find((h) => h.id === activeHabitId);
-    if (activeHabit) {
-      const size = Math.max(1, activeHabit.wrap_size);
-      const nextTotal = habitRepCount + 1;
-     
-    }
   };
 
   /** Habit create/edit handlers */
@@ -472,10 +477,7 @@ const [wrapBurst, setWrapBurst] = useState(false);
     const updated = data as HabitRow;
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
     setEditOpen(false);
-
-    const size = Math.max(1, updated.wrap_size);
-    const wrapsDone = Math.floor(habitRepCount / size);
-    const pct = ((habitRepCount % size) / size) * 100;
+    // no extra local wrap/pct state to maintain
   };
 
   /** Sign out (kept) */
@@ -498,7 +500,14 @@ const [wrapBurst, setWrapBurst] = useState(false);
           {user ? (
             <>
               {/* Tabs */}
-              <nav style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+              <nav
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  marginBottom: 16,
+                  flexWrap: "wrap",
+                }}
+              >
                 {[
                   { id: "overview", label: "Overview" },
                   { id: "visualizer", label: "Visualizer" },
@@ -521,28 +530,18 @@ const [wrapBurst, setWrapBurst] = useState(false);
                   </button>
                 ))}
                 <div style={{ flex: 1 }} />
-                <button onClick={handleLogout} style={{ padding: "8px 14px", borderRadius: 8, cursor: "pointer" }}>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                  }}
+                >
                   Sign Out
                 </button>
               </nav>
 
-              {/* NEW: HabitLoop (animated habit flywheel) */}
-              <div style={{ marginBottom: 16 }}>
-                {(() => {
-                  const h = habits.find((x) => x.id === activeHabitId);
-                  return (
-                    <HabitLoop
-                      title={h ? `Habit Loop — ${h.name}` : "Myelin Habit Loop"}
-                      repCount={habitRepCount}
-                      wrapSize={h?.wrap_size ?? 7}
-                      trigger={loopPulse}
-                      celebrate={wrapBurst}
-                    />
-                  );
-                })()}
-              </div>
-
-              {/* Panels */}
               {active === "overview" && (
                 <section
                   style={{
@@ -553,14 +552,28 @@ const [wrapBurst, setWrapBurst] = useState(false);
                   }}
                 >
                   {/* Stats + Habit card */}
-                  <div style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
+                  <div
+                    style={{
+                      border: "1px solid #ccc",
+                      borderRadius: 12,
+                      padding: 16,
+                    }}
+                  >
                     <h2 style={{ marginTop: 0 }}>Welcome Back 🧠</h2>
                     <p style={{ margin: "8px 0 12px" }}>
                       Email: <strong>{user.email}</strong>
                     </p>
 
                     {/* Habit selector + actions */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "4px 0 14px", flexWrap: "wrap" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        margin: "4px 0 14px",
+                        flexWrap: "wrap",
+                      }}
+                    >
                       <label htmlFor="habit" style={{ color: "#6b7280" }}>
                         Active habit:
                       </label>
@@ -616,88 +629,47 @@ const [wrapBurst, setWrapBurst] = useState(false);
                       </button>
                     </div>
 
-                    {/* Your original 3 mini-cards (kept) */}
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
-                      <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
-                        <p style={{ margin: 0, color: "#666" }}>Total Reps</p>
-                        <p style={{ margin: "6px 0 0", fontSize: 24 }}>{userData.reps}</p>
-                      </div>
-                      <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
-                        <p style={{ margin: 0, color: "#666" }}>Streak</p>
-                        <p style={{ margin: "6px 0 0", fontSize: 24 }}>
-                          {streak} day{streak === 1 ? "" : "s"}
-                        </p>
-                      </div>
-                      <div style={{ flex: 1, border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
-                        <p style={{ margin: 0, color: "#666" }}>Last Rep</p>
-                        <p style={{ margin: "6px 0 0", fontSize: 18 }}>
-                          {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "Never"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Progress Wrap Bar for active habit */}
-                    <div style={{ marginTop: 12 }}>
+                    {/* The loop + neural field */}
+                    <div style={{ marginTop: 16 }}>
                       {(() => {
                         const h = habits.find((x) => x.id === activeHabitId);
                         if (!h) return null;
-                        const wrapsComplete = Math.floor(habitRepCount / Math.max(1, h.wrap_size));
-                        const repsIntoWrap = habitRepCount % Math.max(1, h.wrap_size);
-                        const repsToNext = Math.max(0, h.wrap_size - repsIntoWrap);
-
                         return (
-                          <div
-                            style={{
-                              border: "1px solid #233147",
-                              borderRadius: 12,
-                              padding: 12,
-                              background: "#0b1220",
-                              marginTop: 8,
-                            }}
-                          >
-                            <p style={{ margin: 0, color: "#9CA3AF" }}>
-                              <strong>{h.name}</strong> — {habitRepCount}/{h.goal_reps} reps
-                            </p>
-                            <div
-                              style={{
-                                height: 10,
-                                borderRadius: 999,
-                                background: "#1f2937",
-                                overflow: "hidden",
-                                marginTop: 8,
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: `${Math.min(100, (habitRepCount / Math.max(1, h.goal_reps)) * 100)}%`,
-                                  height: "100%",
-                                  background: "linear-gradient(90deg, #34d399, #10b981)",
-                                  transition: "width 400ms ease",
-                                }}
-                              />
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                marginTop: 8,
-                                color: "#9CA3AF",
-                              }}
-                            >
-                              <span>Wrap size: {h.wrap_size}</span>
-                              <span>Wraps: {wrapsComplete}</span>
-                              <span>
-                                Next wrap in: {repsToNext} rep{repsToNext === 1 ? "" : "s"}
-                              </span>
-                            </div>
-                          </div>
+                          <HabitLoop
+                            repCount={habitRepCount}
+                            wrapSize={Math.max(1, h.wrap_size)}
+                            trigger={loopPulse}
+                            celebrate={wrapBurst}
+                            title={`${h.name} — Habit Loop`}
+                          />
+                        );
+                      })()}
+                    </div>
+
+                    <div style={{ marginTop: 16 }}>
+                      {(() => {
+                        const h = habits.find((x) => x.id === activeHabitId);
+                        if (!h) return null;
+                        return (
+                          <NeuralField
+                            repCount={habitRepCount}
+                            wrapSize={Math.max(1, h.wrap_size)}
+                            pulseKey={loopPulse}
+                            height={260}
+                          />
                         );
                       })()}
                     </div>
 
                     {/* Streak ring (gentle glow) */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        marginTop: 12,
+                      }}
+                    >
                       <svg width="72" height="72" viewBox="0 0 72 72">
                         <defs>
                           <filter id="glow">
@@ -746,13 +718,25 @@ const [wrapBurst, setWrapBurst] = useState(false);
                   </div>
 
                   {/* Log a rep (powers rep_events + totals) */}
-                  <div style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16, background: "#f7f7f7" }}>
+                  <div
+                    style={{
+                      border: "1px solid #ccc",
+                      borderRadius: 12,
+                      padding: 16,
+                      background: "#f7f7f7",
+                    }}
+                  >
                     <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
-                    <p style={{ marginTop: 0 }}>This is how you wire new habits into your brain.</p>
+                    <p style={{ marginTop: 0 }}>
+                      This is how you wire new habits into your brain.
+                    </p>
                     <button
                       onClick={logRep}
                       disabled={loading || !activeHabitId}
-                      style={{ padding: "10px 20px", cursor: loading ? "not-allowed" : "pointer" }}
+                      style={{
+                        padding: "10px 20px",
+                        cursor: loading ? "not-allowed" : "pointer",
+                      }}
                     >
                       {loading ? "Logging..." : "Log Rep"}
                     </button>
@@ -765,7 +749,14 @@ const [wrapBurst, setWrapBurst] = useState(false);
                   </div>
 
                   {/* 7-day sparkline (full width) */}
-                  <div style={{ gridColumn: "1 / -1", border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
+                  <div
+                    style={{
+                      gridColumn: "1 / -1",
+                      border: "1px solid #ccc",
+                      borderRadius: 12,
+                      padding: 16,
+                    }}
+                  >
                     <p style={{ marginTop: 0 }}>
                       <strong>Last 7 Days</strong>
                     </p>
@@ -774,12 +765,18 @@ const [wrapBurst, setWrapBurst] = useState(false);
                       height="48"
                       viewBox="0 0 140 48"
                       preserveAspectRatio="none"
-                      style={{ background: "#fafafa", borderRadius: 8, border: "1px solid #eee" }}
+                      style={{
+                        background: "#fafafa",
+                        borderRadius: 8,
+                        border: "1px solid #eee",
+                      }}
                     >
                       {(() => {
                         const max = Math.max(1, ...dailyCounts);
                         const stepX = 140 / 6;
-                        const pts = dailyCounts.map((v, i) => `${i * stepX},${46 - (v / max) * 42}`).join(" ");
+                        const pts = dailyCounts
+                          .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
+                          .join(" ");
                         return (
                           <>
                             <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
@@ -804,12 +801,17 @@ const [wrapBurst, setWrapBurst] = useState(false);
               )}
 
               {active === "visualizer" && (
-                <section style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
+                <section
+                  style={{
+                    border: "1px solid #ccc",
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                >
                   <h2 style={{ marginTop: 0 }}>Your Neural Visualizer 🧬</h2>
                   <p style={{ marginTop: 0, color: "#555" }}>
                     This view grows with your reps. (Dashboard‑only visualizer — keep the fruit tree on Home.)
                   </p>
-                  {/* Mount your visualizer component here */}
                   <div
                     style={{
                       height: 360,
@@ -827,23 +829,43 @@ const [wrapBurst, setWrapBurst] = useState(false);
               )}
 
               {active === "coach" && (
-                <section style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
+                <section
+                  style={{
+                    border: "1px solid #ccc",
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                >
                   <h2 style={{ marginTop: 0 }}>Your Personal Coach 🧠</h2>
                   <p style={{ marginTop: 0, color: "#555" }}>
                     The public FloatingCoach stays on all pages. This private space can reflect your data and goals.
                   </p>
-                  <div style={{ border: "1px solid #eee", borderRadius: 10, padding: 12 }}>
+                  <div
+                    style={{
+                      border: "1px solid #eee",
+                      borderRadius: 10,
+                      padding: 12,
+                    }}
+                  >
                     <p style={{ margin: 0 }}>
                       “Based on your last rep on{" "}
-                      <strong>{userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}</strong>,
-                      here’s a micro‑win for today: <em>2‑minute breath reset + 1 tiny rep after coffee.</em>”
+                      <strong>
+                        {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
+                      </strong>
+                      , here’s a micro‑win for today: <em>2‑minute breath reset + 1 tiny rep after coffee.</em>”
                     </p>
                   </div>
                 </section>
               )}
 
               {active === "history" && (
-                <section style={{ border: "1px solid #ccc", borderRadius: 12, padding: 16 }}>
+                <section
+                  style={{
+                    border: "1px solid #ccc",
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                >
                   <h2 style={{ marginTop: 0 }}>History & Insights</h2>
                   <p style={{ color: "#555" }}>
                     We’ll populate this with daily reps, weekly trends, and milestones once we add the events table.
@@ -857,7 +879,14 @@ const [wrapBurst, setWrapBurst] = useState(false);
               )}
             </>
           ) : (
-            <section style={{ border: "1px solid #ccc", borderRadius: 12, padding: 24, textAlign: "center" }}>
+            <section
+              style={{
+                border: "1px solid #ccc",
+                borderRadius: 12,
+                padding: 24,
+                textAlign: "center",
+              }}
+            >
               <h2>Sign In Required</h2>
               <p>
                 Please <Link href="/signin">sign in here</Link> to access your dashboard.
@@ -928,13 +957,25 @@ const [wrapBurst, setWrapBurst] = useState(false);
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
             <button
               onClick={() => setCreateOpen(false)}
-              style={{ padding: "8px 12px", borderRadius: 8, background: "#1f2937", color: "#e5e7eb", border: "1px solid #374151" }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                background: "#1f2937",
+                color: "#e5e7eb",
+                border: "1px solid #374151",
+              }}
             >
               Cancel
             </button>
             <button
               onClick={handleCreateHabit}
-              style={{ padding: "8px 12px", borderRadius: 8, background: "#10b981", color: "#062019", fontWeight: 700 }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                background: "#10b981",
+                color: "#062019",
+                fontWeight: 700,
+              }}
             >
               Create
             </button>
@@ -1001,13 +1042,25 @@ const [wrapBurst, setWrapBurst] = useState(false);
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
             <button
               onClick={() => setEditOpen(false)}
-              style={{ padding: "8px 12px", borderRadius: 8, background: "#1f2937", color: "#e5e7eb", border: "1px solid #374151" }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                background: "#1f2937",
+                color: "#e5e7eb",
+                border: "1px solid #374151",
+              }}
             >
               Cancel
             </button>
             <button
               onClick={handleSaveEdit}
-              style={{ padding: "8px 12px", borderRadius: 8, background: "#34d399", color: "#062019", fontWeight: 700 }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 8,
+                background: "#34d399",
+                color: "#062019",
+                fontWeight: 700,
+              }}
             >
               Save
             </button>
@@ -1024,7 +1077,7 @@ const [wrapBurst, setWrapBurst] = useState(false);
       {/* Small style niceties */}
       <style jsx>{`
         @media (max-width: 820px) {
-          section[style*='grid-template-columns'] {
+          section[style*="grid-template-columns"] {
             display: block !important;
           }
         }
