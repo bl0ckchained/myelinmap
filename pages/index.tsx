@@ -329,7 +329,6 @@ export default function Home() {
             </p>
           </div>
         </section>
-        ```tsx
         {/* 💡 Mission Section (kept, expanded copy) */}
         <section
           style={{
@@ -341,7 +340,7 @@ export default function Home() {
           <h2
             style={{ fontSize: "2rem", fontWeight: "bold", color: "#34d399" }}
           >
-            🌟 The Mission Behind Myelin Map
+            💡 The Mission Behind Myelin Map ❤️
           </h2>
 
           <p
