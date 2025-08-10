@@ -333,50 +333,59 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 💡 Mission Section (kept) */}
-        <section
-          style={{
-            padding: "3rem 1.5rem",
-            maxWidth: "768px",
-            margin: "0 auto",
-          }}
-        >
-          <h2
-            style={{ fontSize: "2rem", fontWeight: "bold", color: "#34d399" }}
-          >
-            🌟 The Mission Behind Myelin Map
-          </h2>
-          <p
-            style={{
-              fontSize: "1.125rem",
-              color: "#d1d5db",
-              marginTop: "1rem",
-            }}
-          >
-            My name is Chad, and I created Myelin Map for anyone stuck in cycles
-            they don’t want to repeat...
-          </p>
-          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
-            I spent nearly 20 years caught in addiction and survival mode...
-          </p>
-          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
-            Myelin is the insulation that wraps around your brain’s neural
-            circuits...
-          </p>
-          <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
-            That’s what Myelin Map is: a visual habit-building platform...
-          </p>
-          <p
-            style={{
-              fontSize: "1.125rem",
-              fontWeight: "bold",
-              color: "#6ee7b7",
-            }}
-          >
-            This is a new kind of recovery. One that starts with love, and
-            builds with action.
-          </p>
-        </section>
+        Yes—let’s enrich each line without changing the vibe. Here’s a drop-in replacement for that Mission section with a little more warmth and clarity baked in:
+
+```tsx
+{/* 💡 Mission Section (kept, expanded copy) */}
+<section
+  style={{
+    padding: "3rem 1.5rem",
+    maxWidth: "768px",
+    margin: "0 auto",
+  }}
+>
+  <h2
+    style={{ fontSize: "2rem", fontWeight: "bold", color: "#34d399" }}
+  >
+    🌟 The Mission Behind Myelin Map
+  </h2>
+
+  <p
+    style={{
+      fontSize: "1.125rem",
+      color: "#d1d5db",
+      marginTop: "1rem",
+    }}
+  >
+    My name is Chad, and I created Myelin Map for anyone stuck in cycles they don’t want to repeat—addiction, anxiety loops, doom-scrolling, or starting and stopping the same habit. You don’t need perfect motivation; you need a kinder system that helps you return, one small, doable rep at a time.
+  </p>
+
+  <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+    I spent nearly 20 years caught in addiction and survival mode. What finally changed wasn’t shame or a single “big breakthrough,” but learning to practice self-compassion and stack tiny actions. Those small reps brought me back to school, rebuilt trust with myself, and gave me a way to measure progress—even on the messy days.
+  </p>
+
+  <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+    Myelin is the insulation that wraps around your brain’s neural circuits. Every repetition thickens that insulation, making a pathway faster and more automatic—whether the habit helps you or hurts you. The work is to feed the circuits you want and gently starve the ones you don’t, using cues, tiny actions, and quick wins.
+  </p>
+
+  <p style={{ fontSize: "1.125rem", color: "#d1d5db" }}>
+    That’s what Myelin Map is: a visual habit-building platform with a gentle AI coach and private journaling. It turns reps into growth you can see, offers small plans you can actually keep, and removes the shame and overwhelm that stall progress. When you drift, you’re not broken—you just need a way to return.
+  </p>
+
+  <p
+    style={{
+      fontSize: "1.125rem",
+      fontWeight: "bold",
+      color: "#6ee7b7",
+    }}
+  >
+    This is a new kind of recovery. One that starts with love, and builds with action—start small, track a rep, watch your map grow, and keep wiring the life you want.
+  </p>
+</section>
+```
+
+Next pass, we can echo this tone across a tiny “How it works” strip (3 steps) and a soft CTA that nudges folks into the Coach or Journal without feeling salesy.
+
 
         {/* ❤️ Accordions Section (kept) */}
         <section
