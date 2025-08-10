@@ -276,7 +276,7 @@ export default function Home() {
           <div className="video-frame" aria-label="Intro to Myelin video">
             <iframe
               title="Intro to Myelin"
-              src="https://www.youtube.com/embed/VIDEO_ID?rel=0&modestbranding=1&playsinline=1"
+              src="myelinmap_video.mp4"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
