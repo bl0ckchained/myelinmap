@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import HabitLoop from "@/components/HabitLoop";
+import NeuralField from "@/components/NeuralField";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
@@ -137,6 +138,10 @@ export default function Dashboard() {
   const [editGoal, setEditGoal] = useState<number>(21);
   const [editWrap, setEditWrap] = useState<number>(7);
   const clampInt = (v: number, min: number, max: number) => Math.max(min, Math.min(max, Math.floor(v)));
+
+  // drives HabitLoop & NeuralField pulse/celebration
+const [loopPulse, setLoopPulse] = useState(0);
+const [wrapBurst, setWrapBurst] = useState(false);
 
   /** Watch authentication state */
   useEffect(() => {
