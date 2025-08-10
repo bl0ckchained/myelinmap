@@ -25,7 +25,7 @@ export default function Coach() {
   ]);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // ===== Auth / Habit context =====
   const [user, setUser] = useState<User | null>(null);
@@ -142,7 +142,6 @@ export default function Coach() {
     setLoading(true);
 
     try {
-      // include a system message up front so the API can respond with trauma‑aware, habit‑aware advice
       const payload: ChatMsg[] = [{ role: "system", content: systemContext }, ...withUser];
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -258,7 +257,7 @@ export default function Coach() {
             <section className="rounded-lg border border-white/10 bg-black/20 p-4">
               <h2 className="text-xl font-semibold text-emerald-300">What the Coach is</h2>
               <p className="mt-2 text-gray-300">
-                Your Coach is a steady, shame‑free companion. A place to tell the truth, practice kindness,
+                Your Coach is a steady, shame-free companion. A place to tell the truth, practice kindness,
                 and turn hard moments into one tiny, doable rep. You don’t have to be “okay” to show up.
               </p>
               <p className="mt-2 text-gray-400 text-sm">
@@ -272,7 +271,7 @@ export default function Coach() {
               <ul className="mt-2 list-disc pl-5 text-gray-300 space-y-1">
                 <li>Transform cues & cravings into <em>tiny reps</em>.</li>
                 <li>Rehearse a simple cue → action → reward plan.</li>
-                <li>Replace harsh self‑talk with compassionate truth.</li>
+                <li>Replace harsh self-talk with compassionate truth.</li>
                 <li>Plan tomorrow’s smallest next step.</li>
               </ul>
             </section>
@@ -282,10 +281,10 @@ export default function Coach() {
               <div className="mt-2 flex flex-wrap gap-2">
                 {[
                   "I’m overwhelmed. Help me find one tiny step.",
-                  "Can you help me plan a 2‑minute habit after coffee?",
+                  "Can you help me plan a 2-minute habit after coffee?",
                   "I slipped. How do I restart without shame?",
-                  "I feel anxious. Can we do a 60‑second reset?",
-                  "Help me create a cue‑action‑reward for evenings.",
+                  "I feel anxious. Can we do a 60-second reset?",
+                  "Help me create a cue-action-reward for evenings.",
                 ].map((q) => (
                   <button
                     key={q}
@@ -299,7 +298,7 @@ export default function Coach() {
             </section>
 
             <section className="rounded-lg border border-white/10 bg-black/20 p-4">
-              <h3 className="font-semibold text-amber-300">Mood check‑in</h3>
+              <h3 className="font-semibold text-amber-300">Mood check-in</h3>
               <div className="mt-2 flex flex-wrap gap-2">
                 {["anxious", "tired", "hopeful", "stuck", "proud", "craving"].map((m) => (
                   <button
@@ -359,11 +358,6 @@ export default function Coach() {
 
           {/* Right: Chat */}
           <div className="md:col-span-3 space-y-4">
-            {/* Floating Coach Emoji */}
-            <div className="flex justify-center text-6xl animate-float drop-shadow-md select-none" aria-hidden>
-              🧘
-            </div>
-
             {/* Chat Area */}
             <div
               className="bg-black/20 p-4 rounded-md h-[480px] overflow-y-auto border border-white/10"
@@ -401,31 +395,48 @@ export default function Coach() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Input Row + Actions */}
-            <div className="flex gap-2">
-              <input
-                ref={inputRef}
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage();
-                  }
-                }}
-                placeholder="Type how you're feeling..."
-                className="flex-1 px-4 py-2 rounded-md bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 border border-gray-300"
-                disabled={loading}
-                aria-label="Message to Coach"
-              />
-              <button
-                onClick={sendMessage}
-                disabled={loading}
-                className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-md disabled:opacity-50"
-              >
-                {loading ? "..." : "Send"}
-              </button>
-            </div>
+            {/* Composer: Floating guide + big emerald input */}
+            <section
+              className="rounded-xl border border-emerald-400/25 bg-gradient-to-br from-emerald-900/40 to-teal-900/30 p-4 shadow-lg shadow-emerald-900/30 ring-1 ring-emerald-300/10 backdrop-blur-sm"
+              aria-label="Message composer"
+            >
+              {/* Floating Coach Emoji above input */}
+              <div className="flex justify-center mb-2">
+                <div className="text-6xl animate-float drop-shadow-md select-none" aria-hidden>
+                  🧘
+                </div>
+              </div>
+
+              {/* Big textarea + Send */}
+              <div className="flex items-end gap-3">
+                <textarea
+                  ref={inputRef}
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  placeholder="Tell the Coach how you’re feeling, or what’s hard right now… (Shift+Enter for a new line)"
+                  rows={3}
+                  className="flex-1 px-4 py-3 rounded-xl bg-emerald-800/30 text-emerald-50 placeholder-emerald-100/60 border border-emerald-400/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 focus:border-emerald-300/60"
+                  disabled={loading}
+                  aria-label="Message to Coach"
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={loading}
+                  className="shrink-0 bg-emerald-600 hover:bg-emerald-700 px-5 py-3 rounded-xl disabled:opacity-50 font-medium"
+                >
+                  {loading ? "…" : "Send"}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-emerald-100/80">
+                Enter to send • Shift+Enter for newline
+              </p>
+            </section>
 
             {/* Utilities */}
             <div className="flex flex-wrap gap-2 text-sm">
