@@ -19,10 +19,7 @@ interface AccordionProps {
 
 const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // Height math: outer panel animates to 320px; we give the inner scroll body ~280px
-  // so there's room for padding without clipping.
-  const SCROLL_BODY_MAX = 280;
+  const PANEL_MAX = 360; // px — increase if you want more visible height before scrolling
 
   return (
     <div
@@ -62,39 +59,34 @@ const Accordion: React.FC<AccordionProps> = ({ title, content, color }) => {
         </span>
       </button>
 
-      {/* Animated container; height transitions, inner body scrolls */}
+      {/* Scroll happens on THIS element so the bar is visible inside the accordion */}
       <div
+        className="acc-panel"
         style={{
-          maxHeight: isOpen ? "320px" : "0",
+          maxHeight: isOpen ? `${PANEL_MAX}px` : "0",
           opacity: isOpen ? 1 : 0,
-          overflow: "hidden",             // container hides overflow; inner body handles its own scroll
+          overflowY: isOpen ? "auto" : "hidden",
           padding: isOpen ? "1rem 1.5rem" : "0",
-          transition: "all 0.5s ease",
+          transition: "max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease",
+          WebkitOverflowScrolling: "touch",
+          overscrollBehavior: "contain",
         }}
       >
-        {/* Scrollable inner body */}
-        <div
-          style={{
-            maxHeight: SCROLL_BODY_MAX,
-            overflowY: "auto",
-            paddingRight: 8,               // keeps text clear of scrollbar
-            WebkitOverflowScrolling: "touch",
-            overscrollBehavior: "contain",
-            maskImage:
-              "linear-gradient(to bottom, transparent 0, black 10px, black calc(100% - 10px), transparent 100%)",
-          }}
-        >
-          {content.map((item, index) => (
-            <div key={index} style={{ marginBottom: "1rem" }}>
-              <h3 style={{ fontWeight: "bold", color: "#ffffff" }}>
-                {item.title}
-              </h3>
-              <p style={{ color: "#d1d5db", marginTop: "0.5rem", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        {content.map((item, index) => (
+          <div key={index} style={{ marginBottom: "1rem" }}>
+            <h3 style={{ fontWeight: "bold", color: "#ffffff" }}>{item.title}</h3>
+            <p
+              style={{
+                color: "#d1d5db",
+                marginTop: "0.5rem",
+                whiteSpace: "pre-wrap",
+                lineHeight: 1.6,
+              }}
+            >
+              {item.description}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -679,6 +671,25 @@ export default function Home() {
             transform: scale(0.85);
             opacity: 0.6;
           }
+        }
+
+        /* Accordion panel scrollbars */
+        .acc-panel {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(52, 211, 153, 0.6) transparent;
+        }
+        .acc-panel::-webkit-scrollbar {
+          width: 8px;
+        }
+        .acc-panel::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .acc-panel::-webkit-scrollbar-thumb {
+          background: rgba(52, 211, 153, 0.35);
+          border-radius: 8px;
+        }
+        .acc-panel::-webkit-scrollbar-thumb:hover {
+          background: rgba(52, 211, 153, 0.55);
         }
       `}</style>
     </>
