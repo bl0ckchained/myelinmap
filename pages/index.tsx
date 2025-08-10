@@ -289,7 +289,7 @@ export default function Home() {
           <div className="coach-callout">
             <span className="coach-dot" aria-hidden />
             <p style={{ margin: 0 }}>
-              🌟 Meet your <strong>Healing Coach</strong> — floating in the
+              🧘 Meet your <strong>Healing Coach</strong> — floating in the
               corner, ready with daily tips, motivation, and science‑backed
               micro‑wins. Tap it anytime.
             </p>
@@ -393,7 +393,7 @@ export default function Home() {
             and keep wiring the life you want.
           </p>
         </section>
-        ```
+      
         {/* 💡 Mission Section (kept, expanded copy) */}
         {/* ❤️ Accordions Section (kept) */}
         <section
