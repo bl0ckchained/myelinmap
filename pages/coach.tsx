@@ -1,5 +1,4 @@
 // pages/coach.tsx
-
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
@@ -33,8 +32,8 @@ export default function Coach() {
   const [habits, setHabits] = useState<HabitRow[]>([]);
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
   const [activeHabit, setActiveHabit] = useState<HabitRow | null>(null);
-  const [habitRepCount, setHabitRepCount] = useState<number>(0);
-  const [justCelebrated, setJustCelebrated] = useState(false);
+  const [habitRepCount, setHabitRepCount] = useState<number>(0); // total events for active habit (rep_events count)
+  const [justCelebrated, setJustCelebrated] = useState(false);   // quick UI confetti-ish note
 
   // ===== Helpers =====
   const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -56,17 +55,6 @@ export default function Coach() {
   useEffect(() => {
     scrollToBottom();
   }, [chatLog, loading]);
-
-  // ===== ✨ NEW HOOK FOR AUTO-RESIZING TEXTAREA =====
-  useEffect(() => {
-    const textarea = inputRef.current;
-    if (textarea) {
-      textarea.style.height = "auto"; // Reset height to recalculate
-      const scrollHeight = textarea.scrollHeight;
-      // Set a max height (e.g., 200px) to prevent it from getting too large
-      textarea.style.height = `${Math.min(scrollHeight, 200)}px`;
-    }
-  }, [userInput]);
 
   // ===== Auth & Habits from Supabase =====
   useEffect(() => {
@@ -147,7 +135,7 @@ export default function Coach() {
   // ===== Actions =====
   const sendMessage = async () => {
     const text = userInput.trim();
-    if (!text || loading) return;
+    if (!text) return;
     const withUser = [...chatLog, { role: "user", content: text } as ChatMsg];
     setChatLog(withUser);
     setUserInput("");
@@ -179,7 +167,6 @@ export default function Coach() {
     }
   };
 
-  // --- No changes to any of your other helper functions ---
   const quickAsk = (text: string) => {
     setUserInput(text);
     focusInput();
@@ -216,6 +203,7 @@ export default function Coach() {
     URL.revokeObjectURL(url);
   };
 
+  // Tiny rep directly from Coach
   const logTinyRep = async () => {
     if (!user || !activeHabit) return;
     setLoading(true);
@@ -229,6 +217,7 @@ export default function Coach() {
       setJustCelebrated(true);
       setTimeout(() => setJustCelebrated(false), 900);
 
+      // gentle celebration message
       setChatLog((prev) => [
         ...prev,
         {
@@ -261,33 +250,165 @@ export default function Coach() {
 
       <Header title="Mental Health Coach 🤝" subtitle="Always in your corner — kind, practical, here." />
 
-      {/* --- NO CHANGES TO THE MAIN LAYOUT OR SIDEBAR --- */}
       <main className="bg-gray-900 text-white px-6 py-16 min-h-screen">
         <div className="max-w-5xl mx-auto grid md:grid-cols-5 gap-6">
-          <aside className="md:col-span-2 space-y-4">{/* ... your unchanged aside content ... */}</aside>
+          {/* Left rail: Explainer / Kind framing */}
+          <aside className="md:col-span-2 space-y-4">
+            <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <h2 className="text-xl font-semibold text-emerald-300">What the Coach is</h2>
+              <p className="mt-2 text-gray-300">
+                Your Coach is a steady, shame-free companion. A place to tell the truth, practice kindness,
+                and turn hard moments into one tiny, doable rep. You don’t have to be “okay” to show up.
+              </p>
+              <p className="mt-2 text-gray-400 text-sm">
+                This space is supportive, not diagnostic. If you’re in crisis or unsafe, please contact local
+                emergency services or a licensed professional.
+              </p>
+            </section>
 
-          <div className="md:col-span-3 flex flex-col space-y-4">
-            {/* Chat Area - no changes */}
+            <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-blue-300">How the Coach helps</h3>
+              <ul className="mt-2 list-disc pl-5 text-gray-300 space-y-1">
+                <li>Transform cues & cravings into <em>tiny reps</em>.</li>
+                <li>Rehearse a simple cue → action → reward plan.</li>
+                <li>Replace harsh self-talk with compassionate truth.</li>
+                <li>Plan tomorrow’s smallest next step.</li>
+              </ul>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-violet-300">Quick prompts</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {[
+                  "I’m overwhelmed. Help me find one tiny step.",
+                  "Can you help me plan a 2-minute habit after coffee?",
+                  "I slipped. How do I restart without shame?",
+                  "I feel anxious. Can we do a 60-second reset?",
+                  "Help me create a cue-action-reward for evenings.",
+                ].map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => quickAsk(q)}
+                    className="text-left rounded-md px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-amber-300">Mood check-in</h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {["anxious", "tired", "hopeful", "stuck", "proud", "craving"].map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => addMood(m)}
+                    className="rounded-full px-3 py-1 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 text-amber-200 text-sm"
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-400 mt-2">
+                Naming a feeling can ease it and bring your prefrontal cortex back online.
+              </p>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-black/20 p-4">
+              <h3 className="font-semibold text-emerald-300">Active habit</h3>
+              <div className="mt-2">
+                <label className="text-sm text-gray-400">Choose:</label>
+                <select
+                  value={activeHabitId ?? ""}
+                  onChange={(e) => setActiveHabitId(e.target.value)}
+                  className="mt-1 w-full rounded-md bg-gray-900 border border-white/10 px-3 py-2"
+                >
+                  {habits.map((h) => (
+                    <option key={h.id} value={h.id}>
+                      {h.name} (wrap {h.wrap_size})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mt-3 text-gray-300 text-sm">
+                Total reps logged for this habit:{" "}
+                <span className="font-semibold text-emerald-300">{habitRepCount}</span>
+              </div>
+              <button
+                onClick={logTinyRep}
+                disabled={!activeHabit || loading}
+                className="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 px-3 py-2 rounded-md disabled:opacity-50"
+              >
+                Log a tiny rep
+              </button>
+              {justCelebrated && (
+                <div className="mt-2 text-emerald-300 text-sm">Beautiful. You’re wiring change. 🌱</div>
+              )}
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-white/5 p-4">
+              <p className="text-gray-200">
+                <span className="font-semibold text-emerald-300">K.I.N.D.</span> — Knowledge, Identification,
+                Neural Rewiring, Daily Kindness. The magic is in the reps, not perfection. You don’t have to
+                win the day — you just have to return.
+              </p>
+            </section>
+          </aside>
+
+          {/* Right: Chat */}
+          <div className="md:col-span-3 space-y-4">
+            {/* Chat Area */}
             <div
               className="bg-black/20 p-4 rounded-md h-[480px] overflow-y-auto border border-white/10"
               role="log"
+              aria-live="polite"
+              aria-relevant="additions"
             >
-              {/* ... your unchanged chat log mapping ... */}
+              {chatLog.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`mb-3 animate-fade-in ${
+                    msg.role === "user" ? "text-right" : "text-left text-emerald-300"
+                  }`}
+                >
+                  <p>
+                    <span className="font-bold">{msg.role === "user" ? "You" : "Coach"}:</span>{" "}
+                    <span className={msg.role === "user" ? "text-gray-200" : "text-emerald-200"}>
+                      {msg.content}
+                    </span>
+                  </p>
+                </div>
+              ))}
+
+              {loading && (
+                <div className="text-left text-emerald-300 animate-fade-in">
+                  <p>
+                    <span className="font-bold">Coach:</span>{" "}
+                    <span className="inline-flex gap-1 animate-pulse" aria-hidden>
+                      <span>.</span><span>.</span><span>.</span>
+                    </span>
+                  </p>
+                </div>
+              )}
+
               <div ref={chatEndRef} />
             </div>
 
-            {/* --- 🎨 START OF REFINED COMPOSER --- */}
+            {/* Composer: Floating guide + big emerald input */}
             <section
-              className="rounded-xl border border-purple-500/30 bg-gray-900/50 p-4 shadow-lg shadow-purple-900/20 ring-1 ring-purple-400/20 backdrop-blur-sm"
+              className="rounded-xl border border-emerald-400/25 bg-gradient-to-br from-emerald-900/40 to-teal-900/30 p-4 shadow-lg shadow-emerald-900/30 ring-1 ring-emerald-300/10 backdrop-blur-sm"
               aria-label="Message composer"
             >
+              {/* Floating Coach Emoji above input */}
               <div className="flex justify-center mb-2">
-                <div className="text-6xl animate-float-gentle drop-shadow-md select-none" aria-hidden>
+                <div className="text-6xl animate-float drop-shadow-md select-none" aria-hidden>
                   🧘
                 </div>
               </div>
-              
-              <div className="relative">
+
+              {/* Big textarea + Send */}
+              <div className="flex items-end gap-3">
                 <textarea
                   ref={inputRef}
                   value={userInput}
@@ -298,41 +419,51 @@ export default function Coach() {
                       sendMessage();
                     }
                   }}
-                  placeholder="Share what's on your mind..."
-                  rows={1}
-                  className="w-full p-4 pr-16 text-lg text-gray-200 bg-gray-800/80 rounded-full border border-gray-700 placeholder-gray-400 resize-none transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:opacity-50"
+                  placeholder="Tell the Coach how you’re feeling, or what’s hard right now… (Shift+Enter for a new line)"
+                  rows={3}
+                  className="flex-1 px-4 py-3 rounded-xl bg-emerald-800/30 text-emerald-50 placeholder-emerald-100/60 border border-emerald-400/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 focus:border-emerald-300/60"
                   disabled={loading}
                   aria-label="Message to Coach"
                 />
                 <button
                   onClick={sendMessage}
-                  disabled={loading || !userInput.trim()}
-                  aria-label="Send message"
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-12 h-12 bg-purple-600 text-white rounded-full transform transition-all duration-300 hover:bg-purple-500 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-purple-500 disabled:bg-gray-600 disabled:scale-100 disabled:cursor-not-allowed"
+                  disabled={loading}
+                  className="shrink-0 bg-emerald-600 hover:bg-emerald-700 px-5 py-3 rounded-xl disabled:opacity-50 font-medium"
                 >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white/50 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6">
-                      <path d="M3.105 2.289a.75.75 0 00-.826.95l1.414 4.949a.75.75 0 00.95.54l3.852-1.101a.75.75 0 00-.54-1.392L3.105 2.29zM4.949 14.59l-1.414 4.95a.75.75 0 00.95.826l4.949-1.414a.75.75 0 00.54-.95L6.223 14.2a.75.75 0 00-1.274.39zM14.2 6.223l2.803-3.852a.75.75 0 00-1.392-.54L11.8 5.68a.75.75 0 00.39 1.274l2.01-.574zM14.319 16.895l-4.95-1.414a.75.75 0 00-.95.54l-1.101 3.852a.75.75 0 00.826.95l4.949-1.414a.75.75 0 00.54-.95L14.32 16.895z" />
-                    </svg>
-                  )}
+                  {loading ? "…" : "Send"}
                 </button>
               </div>
-              <p className="mt-3 text-xs text-gray-500 text-center">
+              <p className="mt-2 text-xs text-emerald-100/80">
                 Enter to send • Shift+Enter for newline
               </p>
             </section>
-            {/* --- 🎨 END OF REFINED COMPOSER --- */}
 
-            {/* Utilities - no changes */}
+            {/* Utilities */}
             <div className="flex flex-wrap gap-2 text-sm">
-                {/* ... your unchanged utility buttons ... */}
+              <button
+                onClick={clearChat}
+                className="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10"
+              >
+                Clear
+              </button>
+              <button
+                onClick={copyTranscript}
+                className="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10"
+              >
+                Copy transcript
+              </button>
+              <button
+                onClick={downloadTranscript}
+                className="px-3 py-1.5 rounded-md border border-white/10 bg-white/5 hover:bg-white/10"
+              >
+                Download .txt
+              </button>
             </div>
 
-            {/* Safety Note - no changes */}
+            {/* Safety Note */}
             <div className="text-xs text-gray-400">
-                {/* ... your unchanged safety note ... */}
+              Supportive guidance, not medical advice. If you’re in immediate danger or crisis, contact local
+              emergency services or a licensed professional.
             </div>
           </div>
         </div>
@@ -340,12 +471,12 @@ export default function Coach() {
 
       <Footer />
 
-      {/* Animations - added one new class for the emoji */}
+      {/* Animations */}
       <style jsx global>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes float-gentle { 0% { transform: translateY(0px); } 50% { transform: translateY(-6px); } 100% { transform: translateY(0px); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
-        .animate-float-gentle { animation: float-gentle 5s ease-in-out infinite; }
+        .animate-float { animation: float 4s ease-in-out infinite; }
       `}</style>
     </>
   );
