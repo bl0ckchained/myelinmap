@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
+// pages/coach/index.tsx — Magical & Classy Redesign (Module styles)
 
-// pages/coach.tsx - Magical & Classy Redesign (safe JSX fixes)
+import styles from "./Coach.module.css";
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
@@ -254,9 +255,9 @@ export default function Coach() {
 
       {/* Magical background with subtle animations */}
       <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-emerald-900/20 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_50%)] animate-pulse"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_50%)] animate-pulse" />
+        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl ${styles.animateFloat}`} />
+        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl ${styles.animateFloatDelayed}`} />
       </div>
 
       <main className="relative z-10 text-white px-4 sm:px-6 py-8 sm:py-16 min-h-screen">
@@ -395,7 +396,7 @@ export default function Coach() {
                   </div>
 
                   {justCelebrated && (
-                    <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-xl p-4 animate-fade-in">
+                    <div className={`bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-xl p-4 ${styles.animateFadeIn}`}>
                       <div className="text-emerald-300 text-center font-medium">🎉 Beautiful! You're wiring change. 🌱</div>
                     </div>
                   )}
@@ -425,7 +426,7 @@ export default function Coach() {
               {/* Enhanced chat area */}
               <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-black/40 to-black/20 backdrop-blur-sm overflow-hidden">
                 <div
-                  className="p-6 h-[500px] overflow-y-auto scrollbar-thin"
+                  className={`p-6 h-[500px] overflow-y-auto ${styles.scrollbarThin}`}
                   role="log"
                   aria-live="polite"
                   aria-relevant="additions"
@@ -433,7 +434,7 @@ export default function Coach() {
                   {chatLog.map((msg, i) => (
                     <div
                       key={i}
-                      className={`mb-6 animate-fade-in ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
+                      className={`mb-6 ${styles.animateFadeIn} ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
                     >
                       <div
                         className={`max-w-[85%] rounded-2xl px-4 py-3 ${
@@ -454,7 +455,7 @@ export default function Coach() {
                   ))}
 
                   {loading && (
-                    <div className="flex justify-start mb-6 animate-fade-in">
+                    <div className={`flex justify-start mb-6 ${styles.animateFadeIn}`}>
                       <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-gradient-to-br from-emerald-600/20 to-emerald-700/20 border border-emerald-400/20 text-emerald-100 mr-4">
                         <div className="flex items-start gap-3">
                           <div className="text-lg">🧘</div>
@@ -485,7 +486,7 @@ export default function Coach() {
               >
                 {/* Floating Coach Emoji */}
                 <div className="flex justify-center mb-4">
-                  <div className="text-6xl animate-float drop-shadow-lg select-none" aria-hidden="true">
+                  <div className={`text-6xl drop-shadow-lg select-none ${styles.animateFloat}`} aria-hidden="true">
                     🧘
                   </div>
                 </div>
@@ -556,37 +557,6 @@ export default function Coach() {
       </main>
 
       <Footer />
-
-      {/* Enhanced animations and styles */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-12px); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-8px) rotate(1deg); }
-        }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; animation-delay: -2s; }
-
-        /* Scrollbar styling (no slash-classes) */
-        .scrollbar-thin { scrollbar-width: thin; }
-        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
-        .scrollbar-thin::-webkit-scrollbar-thumb {
-          background: rgba(16,185,129,0.2);
-          border-radius: 9999px;
-        }
-        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-          background: rgba(16,185,129,0.3);
-        }
-      `}</style>
     </>
   );
 }
