@@ -7,11 +7,41 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 
-interface Post {
-  id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
+type DBPost = {
+  id?: string | number | null;     // be defensive
+  user_id?: string | null;
+  content?: string | null;
+  created_at?: string | null;
+};
+
+type Post = {
+  id: string;         // normalized
+  user_id: string;    // normalized
+  content: string;    // normalized
+  created_at: string; // normalized ISO
+};
+
+function normalize(row: DBPost): Post | null {
+  const id =
+    typeof row.id === "string"
+      ? row.id
+      : typeof row.id === "number"
+      ? String(row.id)
+      : null;
+  const user_id = typeof row.user_id === "string" ? row.user_id : "anon";
+  const content = typeof row.content === "string" ? row.content : "";
+  const created_at =
+    typeof row.created_at === "string"
+      ? row.created_at
+      : new Date().toISOString();
+
+  if (!content.trim()) return null; // skip empty/invalid rows
+  return {
+    id: id ?? `missing-${Math.random().toString(36).slice(2)}`,
+    user_id,
+    content,
+    created_at,
+  };
 }
 
 export default function CommunityPage() {
@@ -23,6 +53,7 @@ export default function CommunityPage() {
 
   const MAX_LEN = 500;
   const remaining = MAX_LEN - postContent.length;
+  const trimmed = useMemo(() => postContent.trim(), [postContent]);
 
   // --- Auth ---
   useEffect(() => {
@@ -42,7 +73,14 @@ export default function CommunityPage() {
         .from("community_posts")
         .select("*")
         .order("created_at", { ascending: false }); // newest first
-      if (!error && data) setPosts(data as Post[]);
+      if (error) {
+        console.error("load posts error:", error);
+        return;
+      }
+      const normalized = (data as DBPost[])
+        .map(normalize)
+        .filter((x): x is Post => !!x);
+      setPosts(normalized);
     };
     load();
 
@@ -52,10 +90,12 @@ export default function CommunityPage() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "community_posts" },
         (payload) => {
-          const newPost = payload.new as Post;
+          const norm = normalize(payload.new as DBPost);
+          if (!norm) return;
+          // avoid dup if optimistic temp was already swapped
           setPosts((prev) => {
-            if (prev.find((p) => p.id === newPost.id)) return prev;
-            return [newPost, ...prev];
+            if (prev.find((p) => p.id === norm.id)) return prev;
+            return [norm, ...prev];
           });
         }
       )
@@ -67,8 +107,6 @@ export default function CommunityPage() {
   }, []);
 
   // --- Helpers ---
-  const trimmed = useMemo(() => postContent.trim(), [postContent]);
-
   const timeAgo = (iso: string) => {
     const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
     if (s < 60) return `${s}s ago`;
@@ -95,7 +133,6 @@ export default function CommunityPage() {
       created_at: new Date().toISOString(),
     };
 
-    // optimistic add
     setPosts((prev) => [tempPost, ...prev]);
     setPostContent("");
 
@@ -106,17 +143,15 @@ export default function CommunityPage() {
         .select()
         .single();
 
-      if (error || !data) {
-        throw error || new Error("No data returned");
-      }
+      if (error || !data) throw error || new Error("No data returned");
 
-      // swap temp with real
-      setPosts((prev) =>
-        prev.map((p) => (p.id === tempId ? (data as Post) : p))
-      );
+      const real = normalize(data as DBPost);
+      if (!real) throw new Error("Invalid inserted row");
+
+      setPosts((prev) => prev.map((p) => (p.id === tempId ? real : p)));
     } catch (error) {
       console.error(error);
-      // remove temp and restore text for retry
+      // rollback optimistic and restore text
       setPosts((prev) => prev.filter((p) => p.id !== tempId));
       setPostContent(trimmed);
       alert("Couldn’t share right now. Try again in a moment.");
@@ -215,38 +250,52 @@ export default function CommunityPage() {
               </p>
             ) : (
               <ul className="space-y-4">
-                {posts.map((post) => (
-                  <li
-                    key={post.id}
-                    className="rounded-xl border border-white/10 bg-black/25 p-4 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start gap-3">
-                      {/* Avatar stub (derived from user_id) */}
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/40 to-teal-500/40 border border-emerald-300/30 flex items-center justify-center text-xs text-emerald-100/90">
-                        {post.user_id.slice(0, 4)}
-                      </div>
+                {posts.map((post, index) => {
+                  const isTemp =
+                    typeof post.id === "string" && post.id.startsWith("temp-");
+                  const displayId =
+                    typeof post.user_id === "string" && post.user_id.length > 0
+                      ? post.user_id
+                      : "anon";
+                  const initials = displayId.slice(0, 4);
+                  const when =
+                    typeof post.created_at === "string" && post.created_at
+                      ? timeAgo(post.created_at)
+                      : "now";
 
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 text-xs text-gray-400">
-                          <span className="font-mono">{post.user_id}</span>
-                          <span>•</span>
-                          <time dateTime={post.created_at}>
-                            {timeAgo(post.created_at)}
-                          </time>
-                          {post.id.startsWith("temp-") && (
-                            <>
-                              <span>•</span>
-                              <span className="text-emerald-300">posting…</span>
-                            </>
-                          )}
+                  return (
+                    <li
+                      key={`${post.id}-${index}`}
+                      className="rounded-xl border border-white/10 bg-black/25 p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Avatar stub */}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500/40 to-teal-500/40 border border-emerald-300/30 flex items-center justify-center text-xs text-emerald-100/90">
+                          {initials}
                         </div>
-                        <div className="mt-1 whitespace-pre-wrap leading-relaxed text-gray-100">
-                          {post.content}
+
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <span className="font-mono truncate max-w-[160px]">
+                              {displayId}
+                            </span>
+                            <span>•</span>
+                            <time dateTime={post.created_at}>{when}</time>
+                            {isTemp && (
+                              <>
+                                <span>•</span>
+                                <span className="text-emerald-300">posting…</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="mt-1 whitespace-pre-wrap leading-relaxed text-gray-100">
+                            {post.content}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
