@@ -1,98 +1,134 @@
-import { useState, useRef, useEffect } from "react";
+/* eslint-disable react/no-unescaped-entities */
+// components/FloatingCoach.tsx
+import { useEffect, useMemo, useRef, useState } from "react";
 
+/** Chat message shape (prevents literal -> string widening) */
 type ChatMsg = { role: "user" | "assistant" | "system"; content: string };
 
-type FloatingCoachProps = {
-  mode?: "floating" | "embedded";
-  initialOpen?: boolean;
+type HabitCtx = { name: string; wrap_size: number } | null;
+
+type Props = {
+  /** "floating" renders the FAB + popover; "embedded" renders a card (great for Dashboard) */
+  variant?: "floating" | "embedded";
+  /** Start open (only meaningful for floating) */
+  startOpen?: boolean;
+  /** Key used for localStorage persistence */
   storageKey?: string;
-  systemContextExtra?: string; // e.g., active habit + rep count
-  onLogRep?: () => void;       // show a quick "Log Rep" in header when provided
-  height?: number;             // chat viewport height in px (embedded mode)
-  title?: string;              // header title in embedded mode
+  /** Optional context to personalize suggestions */
+  activeHabit?: HabitCtx;
+  habitRepCount?: number;
+  /** Extra system prompt lines to append */
+  systemContextExtra?: string;
+  /** Embedded-only: chat viewport height (px) */
+  height?: number;
+  /** Embedded-only: container className hook */
+  className?: string;
 };
 
 export default function FloatingCoach({
-  mode = "floating",
-  initialOpen = false,
+  variant = "floating",
+  startOpen = false,
   storageKey = "coach_chatlog",
-  systemContextExtra,
-  onLogRep,
+  activeHabit = null,
+  habitRepCount = 0,
+  systemContextExtra = "",
   height = 260,
-  title = "Coach (private)",
-}: FloatingCoachProps) {
-  // Open if embedded; else respect toggle
-  const [open, setOpen] = useState(mode === "embedded" ? true : initialOpen);
-
-  // Lazy init transcript (avoid SSR/hydration flicker)
-  const [chatLog, setChatLog] = useState<ChatMsg[]>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const saved = localStorage.getItem(storageKey);
-        if (saved) return JSON.parse(saved);
-      } catch {}
-    }
-    return [
-      {
-        role: "assistant",
-        content:
-          "Welcome, brave soul. I'm here to listen and support you on your journey. How are you feeling today?",
-      },
-    ];
-  });
-
+  className,
+}: Props) {
+  const [open, setOpen] = useState(startOpen);
+  const [chatLog, setChatLog] = useState<ChatMsg[]>([
+    {
+      role: "assistant",
+      content:
+        "Welcome. I'm here and on your side. What's present for you right now?",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const scrollBoxRef = useRef<HTMLDivElement>(null);
 
-  const baseSystem =
-    "You are a deeply compassionate, empathetic, and positive AI coach. Your purpose is to provide support, encouragement, and guidance to someone who is a survivor of trauma and is on a path to recovery from addiction. Your responses should be non-judgmental, kind, and focus on reinforcing their strength and resilience. Always maintain a gentle, hopeful, and understanding tone. Keep responses brief (2–4 sentences) and actionable.";
+  // Build system context dynamically from habit data
+  const systemContext = useMemo(() => {
+    const name = activeHabit?.name ?? "your tiny habit";
+    const wrap = activeHabit?.wrap_size ?? 7;
+    const reps = habitRepCount ?? 0;
 
-  const systemPrompt = [baseSystem, systemContextExtra].filter(Boolean).join(" ");
+    return [
+      "You are Myelin Coach — a calm, compassionate, trauma-aware helper.",
+      "Tone: brief, warm, non-judgmental. Empower, don't pressure. Tiny steps > perfection.",
+      "K.I.N.D. method: Knowledge, Identification, Neural Rewiring, Daily Kindness.",
+      "If the user expresses shame or relapse, normalize it and suggest one tiny rep.",
+      "Offer specific, 1–2 sentence suggestions; avoid long lectures.",
+      `Active habit: ${name} (wrap ${wrap}). Total reps: ${reps}.`,
+      "Suggest implementation intentions (After [cue], I will [tiny action]).",
+      systemContextExtra.trim(),
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }, [activeHabit, habitRepCount, systemContextExtra]);
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Load persistent chat
+  useEffect(() => {
+    try {
+      const saved = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      if (saved) {
+        const parsed = JSON.parse(saved) as ChatMsg[];
+        // Guard: ensure parsed looks like ChatMsg[]
+        if (Array.isArray(parsed) && parsed.every(m => typeof m?.role === "string" && typeof m?.content === "string")) {
+          setChatLog(parsed as ChatMsg[]);
+        }
+      }
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
 
-  // Persist transcript
+  // Persist chat
   useEffect(() => {
     try {
       localStorage.setItem(storageKey, JSON.stringify(chatLog));
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, [chatLog, storageKey]);
 
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
-    if (open) scrollToBottom();
-  }, [chatLog, open, loading]);
+    if (variant === "floating" && !open) return;
+    const el = scrollBoxRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [chatLog, loading, open, variant]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    const text = input.trim();
+    if (!text || loading) return;
 
-    const newLog = [...chatLog, { role: "user", content: input }];
+    const newLog: ChatMsg[] = [...chatLog, { role: "user", content: text } as ChatMsg];
     setChatLog(newLog);
     setInput("");
     setLoading(true);
 
     try {
-      const messages: ChatMsg[] = [{ role: "system", content: systemPrompt }, ...newLog];
+      const messages: ChatMsg[] = [{ role: "system", content: systemContext }, ...newLog];
       const res = await fetch("/api/chat", {
         method: "POST",
-        body: JSON.stringify({ messages }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
       });
-
       const data = await res.json();
-      if (!res.ok || !data?.message) throw new Error("Invalid response");
-
-      setChatLog([...newLog, { role: "assistant", content: data.message }]);
+      if (!res.ok || !data?.message) throw new Error("Invalid AI response");
+      setChatLog([...newLog, { role: "assistant", content: String(data.message) } as ChatMsg]);
     } catch (err) {
-      console.error("AI error:", err);
+      console.error("Coach error:", err);
       setChatLog([
         ...newLog,
         {
           role: "assistant",
           content:
-            "I sensed a disturbance in the signal, but I am still here for you. Let's try again shortly.",
+            "The Coach hit a hiccup and is taking a breath. Try again shortly — you didn't do anything wrong.",
         },
       ]);
     } finally {
@@ -100,282 +136,245 @@ export default function FloatingCoach({
     }
   };
 
-  const copyTranscript = () => {
-    const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
-    navigator.clipboard.writeText(text).catch(() => {});
-  };
+  const quickInsert = (text: string) => setInput(prev => (prev ? `${prev} ${text}` : text));
 
-  const downloadTranscript = () => {
-    const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
-    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `coach-session-${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  /** ---------- UI Pieces ---------- */
 
-  // --- Shared UI bits ---
-  const ChatPane = (
+  const ChatWindow = (
     <div
       style={{
-        flex: 1,
-        overflowY: "auto",
-        marginBottom: "0.75rem",
-        paddingRight: "0.5rem",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
-        height: mode === "embedded" ? height : undefined,
+        width: variant === "floating" ? 320 : "100%",
+        height: variant === "floating" ? 460 : "auto",
+        background: variant === "floating" ? "#0b1020" : "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
+        color: "#e5e7eb",
+        borderRadius: 16,
+        border: "1px solid rgba(148,163,184,0.18)",
+        boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+        padding: 12,
       }}
-      role="log"
-      aria-live="polite"
-      aria-relevant="additions"
+      className={className}
     >
-      {chatLog.map((msg, i) => (
-        <div
-          key={i}
-          style={{
-            display: "flex",
-            justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: "75%",
-              padding: "0.5rem 1rem",
-              borderRadius: "1rem",
-              fontSize: "0.9rem",
-              backgroundColor: msg.role === "user" ? "#10b981" : "#e5e7eb",
-              color: msg.role === "user" ? "#fff" : "#333",
-              borderTopRightRadius: msg.role === "user" ? "0" : "1rem",
-              borderTopLeftRadius: msg.role !== "user" ? "0" : "1rem",
-              wordBreak: "break-word",
-              whiteSpace: "pre-wrap",
-            }}
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <span style={{ fontSize: 20 }}>🧘</span>
+        <strong>Coach</strong>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          {/* Quick prompts (compact) */}
+          <button
+            onClick={() => quickInsert("I'm overwhelmed. Help me find one tiny step.")}
+            title="Tiny step"
+            style={chipStyle}
           >
-            <div style={{ opacity: 0.7, fontSize: 12, marginBottom: 4 }}>
-              {msg.role === "user" ? "You" : "Coach"}
-            </div>
-            {msg.content}
-          </div>
-        </div>
-      ))}
-
-      {loading && (
-        <div style={{ display: "flex", justifyContent: "flex-start" }}>
-          <div
-            style={{
-              maxWidth: "75%",
-              padding: "0.5rem 1rem",
-              borderRadius: "1rem",
-              fontSize: "0.9rem",
-              backgroundColor: "#e5e7eb",
-              color: "#333",
-              borderTopLeftRadius: "0",
-            }}
+            Tiny step
+          </button>
+          <button
+            onClick={() => quickInsert("Can you help me plan a 2-minute habit after coffee?")}
+            title="Plan after coffee"
+            style={chipStyle}
           >
-            <div style={{ display: "flex", gap: "0.25rem", animation: "pulse 1s infinite" }}>
-              <div style={{ width: 8, height: 8, backgroundColor: "#999", borderRadius: "50%" }} />
-              <div style={{ width: 8, height: 8, backgroundColor: "#999", borderRadius: "50%" }} />
-              <div style={{ width: 8, height: 8, backgroundColor: "#999", borderRadius: "50%" }} />
-            </div>
-          </div>
+            After coffee
+          </button>
         </div>
-      )}
-      <div ref={chatEndRef} />
-    </div>
-  );
+      </div>
 
-  const Composer = (
-    <div style={{ display: "flex", gap: "0.5rem" }}>
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-          }
-        }}
-        placeholder="Your thoughts..."
-        disabled={loading}
+      {/* Scrollable log */}
+      <div
+        ref={scrollBoxRef}
         style={{
           flex: 1,
-          padding: "0.5rem 1rem",
-          borderRadius: "0.5rem",
-          backgroundColor: "#f3f4f6",
-          border: "1px solid #ccc",
-          color: "#111",
-        }}
-        aria-label="Message the Coach"
-      />
-      <button
-        onClick={sendMessage}
-        disabled={loading}
-        style={{
-          backgroundColor: "#10b981",
-          color: "#fff",
-          padding: "0.5rem 1rem",
-          borderRadius: "0.5rem",
-          border: "none",
-          cursor: loading ? "not-allowed" : "pointer",
-          opacity: loading ? 0.5 : 1,
-        }}
-      >
-        {loading ? "..." : "Send"}
-      </button>
-    </div>
-  );
-
-  const Utilities = (
-    <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 6 }}>
-      <button
-        onClick={copyTranscript}
-        style={{ background: "transparent", border: "none", color: "#6b7280", cursor: "pointer" }}
-        title="Copy transcript"
-      >
-        Copy
-      </button>
-      <button
-        onClick={downloadTranscript}
-        style={{ background: "transparent", border: "none", color: "#6b7280", cursor: "pointer" }}
-        title="Download .txt"
-      >
-        Save
-      </button>
-      <button
-        onClick={() => {
-          if (!confirm("Clear conversation?")) return;
-          setChatLog([
-            { role: "assistant", content: "Reset complete. What would be supportive right now?" },
-          ]);
-        }}
-        style={{ background: "transparent", border: "none", color: "#6b7280", cursor: "pointer" }}
-      >
-        Clear
-      </button>
-    </div>
-  );
-
-  // --- Render by mode ---
-  if (mode === "embedded") {
-    return (
-      <div
-        style={{
+          height: variant === "embedded" ? height : "auto",
+          overflowY: "auto",
+          border: "1px solid rgba(148,163,184,0.15)",
           borderRadius: 12,
           padding: 12,
-          background: "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
-          border: "1px solid rgba(148,163,184,0.15)",
-          boxShadow: "0 10px 24px rgba(0,0,0,0.35)",
-          display: "flex",
-          flexDirection: "column",
+          background: "#0b1020",
         }}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-          <span style={{ fontSize: 20 }}>🧘</span>
-          <strong style={{ color: "#e5e7eb", flex: 1 }}>{title}</strong>
-          {onLogRep && (
-            <button
-              onClick={onLogRep}
+        {chatLog.map((m, i) => (
+          <div key={i} style={{ marginBottom: 12, textAlign: m.role === "user" ? "right" : "left" }}>
+            <div
               style={{
-                padding: "6px 10px",
-                borderRadius: 8,
-                background: "#10b981",
-                color: "#062019",
-                fontWeight: 700,
-                border: "1px solid #0ea5a6",
-                cursor: "pointer",
+                display: "inline-block",
+                maxWidth: "85%",
+                padding: "10px 12px",
+                borderRadius: 12,
+                lineHeight: 1.5,
+                whiteSpace: "pre-wrap",
+                background:
+                  m.role === "user"
+                    ? "linear-gradient(180deg, #2563eb, #1d4ed8)"
+                    : "linear-gradient(180deg, rgba(16,185,129,.18), rgba(16,185,129,.12))",
+                color: m.role === "user" ? "#fff" : "#d1fae5",
+                border:
+                  m.role === "user"
+                    ? "1px solid rgba(37,99,235,.7)"
+                    : "1px solid rgba(16,185,129,.25)",
               }}
-              title="Log a tiny rep"
             >
-              ✨ Log Rep
-            </button>
-          )}
-        </div>
+              <div style={{ opacity: 0.75, fontSize: 12, marginBottom: 4 }}>
+                {m.role === "user" ? "You" : "Coach"}
+              </div>
+              {m.content}
+            </div>
+          </div>
+        ))}
 
-        {ChatPane}
-        {Composer}
-        {Utilities}
+        {loading && (
+          <div style={{ textAlign: "left", color: "#a7f3d0" }}>
+            <span style={{ opacity: 0.8 }}>Coach is thinking</span>
+            <span aria-hidden style={{ marginLeft: 6 }}>···</span>
+          </div>
+        )}
+        <div ref={chatEndRef} />
       </div>
+
+      {/* Composer */}
+      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+          rows={2}
+          placeholder="Tell the Coach what's hard… (Shift+Enter for newline)"
+          style={inputStyle}
+          disabled={loading}
+          aria-label="Message Coach"
+        />
+        <button
+          onClick={sendMessage}
+          disabled={loading || !input.trim()}
+          style={{
+            padding: "10px 14px",
+            borderRadius: 12,
+            background: "#10b981",
+            color: "#062019",
+            fontWeight: 700,
+            cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+            opacity: loading || !input.trim() ? 0.6 : 1,
+          }}
+        >
+          {loading ? "…" : "Send"}
+        </button>
+      </div>
+
+      {/* Utilities */}
+      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
+        <button
+          onClick={() => {
+            const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
+            navigator.clipboard.writeText(text).catch(() => {});
+          }}
+          style={utilBtnStyle}
+        >
+          Copy
+        </button>
+        <button
+          onClick={() => {
+            if (!confirm("Clear conversation?")) return;
+            setChatLog([{ role: "assistant", content: "Reset complete. What feels supportive now?" }]);
+          }}
+          style={utilBtnStyle}
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+  );
+
+  if (variant === "embedded") {
+    return (
+      <>
+        {ChatWindow}
+      </>
     );
   }
 
-  // Floating mode (default)
-  const YELLOW = "#facc15";
-
+  // Floating variant (FAB + popover)
   return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: "1.5rem",
-        right: "1.5rem",
-        zIndex: 9999,
-      }}
-    >
-      {/* Toggle */}
-      <button
-        onClick={() => setOpen(!open)}
+    <>
+      <div
         style={{
-          backgroundColor: "#059669",
-          color: "#fff",
-          borderRadius: "9999px",
-          padding: "1.25rem",
-          border: `2px solid ${YELLOW}`,
-          boxShadow: `0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)`,
-          transition: "transform 0.2s",
-          cursor: "pointer",
-          animation: "mm-float 3s ease-in-out infinite",
-          willChange: "transform",
+          position: "fixed",
+          bottom: "1.25rem",
+          right: "1.25rem",
+          zIndex: 9999,
         }}
-        aria-label="Toggle AI Coach"
       >
-        <span style={{ fontSize: "1.75rem" }}>🧘</span>
-      </button>
-
-      {open && (
-        <div
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle AI Coach"
           style={{
-            width: 320,
-            height: 440,
-            marginTop: "0.5rem",
-            backgroundColor: "#fff",
-            color: "#333",
-            borderRadius: "1rem",
-            border: `2px solid ${YELLOW}`,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.22)",
-            padding: "1rem",
-            display: "flex",
-            flexDirection: "column",
+            backgroundColor: "#059669",
+            color: "#fff",
+            borderRadius: "9999px",
+            padding: "1.1rem",
+            border: "2px solid #facc15",
+            boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
+            transition: "transform 0.2s",
+            cursor: "pointer",
+            animation: "mm-float 3s ease-in-out infinite",
+            willChange: "transform",
           }}
         >
-          {ChatPane}
-          {Composer}
-          {Utilities}
-        </div>
-      )}
+          <span style={{ fontSize: "1.6rem" }}>🧘</span>
+        </button>
 
-      {/* Global keyframes */}
+        {open && (
+          <div style={{ marginTop: "0.5rem" }}>
+            {ChatWindow}
+          </div>
+        )}
+      </div>
+
+      {/* minimal keyframes */}
       <style jsx global>{`
         @keyframes mm-float {
           0% { transform: translateY(0); }
           50% { transform: translateY(-6px); }
           100% { transform: translateY(0); }
         }
-        @keyframes pulse {
-          0% { opacity: 0.4; }
-          50% { opacity: 1; }
-          100% { opacity: 0.4; }
-        }
         @media (prefers-reduced-motion: reduce) {
-          button[aria-label="Toggle AI Coach"] {
-            animation: none !important;
-          }
+          button[aria-label="Toggle AI Coach"] { animation: none !important; }
         }
       `}</style>
-    </div>
+    </>
   );
 }
+
+/* ---------- tiny style helpers ---------- */
+const chipStyle: React.CSSProperties = {
+  borderRadius: 999,
+  padding: "4px 10px",
+  fontSize: 12,
+  background: "rgba(148,163,184,0.15)",
+  color: "#e5e7eb",
+  border: "1px solid rgba(148,163,184,0.25)",
+  cursor: "pointer",
+};
+
+const inputStyle: React.CSSProperties = {
+  flex: 1,
+  padding: "10px 12px",
+  borderRadius: 12,
+  border: "1px solid #334155",
+  background: "#0f172a",
+  color: "#e5e7eb",
+  resize: "none",
+};
+
+const utilBtnStyle: React.CSSProperties = {
+  background: "transparent",
+  border: "none",
+  color: "#94a3b8",
+  cursor: "pointer",
+};
