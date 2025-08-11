@@ -1,5 +1,5 @@
 // pages/dashboard.tsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { User, type PostgrestError } from "@supabase/supabase-js";
@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabaseClient";
 import HabitLoop from "@/components/HabitLoop";
 import NeuralField from "@/components/NeuralField";
 import HabitAnalytics from "@/components/HabitAnalytics";
+import FloatingCoach from "@/components/FloatingCoach";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
@@ -39,216 +40,6 @@ type UpdatePayload<T> = {
   new: T | null;
   old: T | null;
 };
-
-/* ============================================================
-   Mini Coach (scrollable, history persists via localStorage)
-   ============================================================ */
-type ChatMsg = { role: "user" | "assistant" | "system"; content: string };
-
-function MiniCoach({
-  activeHabit,
-  habitRepCount,
-}: {
-  activeHabit: { name: string; wrap_size: number } | null;
-  habitRepCount: number;
-}) {
-  const [chatLog, setChatLog] = useState<ChatMsg[]>([
-    { role: "assistant", content: "Welcome back. How are you feeling right now?" },
-  ]);
-  const [userInput, setUserInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const chatRef = useRef<HTMLDivElement>(null);
-
-  // Load/persist history using the same key as the full Coach page
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("coach_chatlog");
-      if (saved) setChatLog(JSON.parse(saved));
-    } catch {}
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem("coach_chatlog", JSON.stringify(chatLog));
-    } catch {}
-  }, [chatLog]);
-
-  useEffect(() => {
-    chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
-  }, [chatLog, loading]);
-
-  const systemContext = (() => {
-    const name = activeHabit?.name ?? "your tiny habit";
-    const wrap = activeHabit?.wrap_size ?? 7;
-    const reps = habitRepCount ?? 0;
-    return [
-      "You are Myelin Coach — calm, compassionate, trauma-aware.",
-      "Tone brief, warm, non-judgmental. Empower, not pressure. Tiny steps > perfection.",
-      "K.I.N.D. method: Knowledge, Identification, Neural Rewiring, Daily Kindness.",
-      "If user expresses shame/relapse, normalize and suggest one tiny rep.",
-      "Offer specific, 1–2 sentence suggestions; avoid long lectures.",
-      `Active habit: ${name} (wrap ${wrap}). Total reps: ${reps}.`,
-      "Suggest implementation intentions (After [cue], I will [tiny action]).",
-    ].join(" ");
-  })();
-
-  const send = async () => {
-    const text = userInput.trim();
-    if (!text) return;
-    const withUser = [...chatLog, { role: "user", content: text } as ChatMsg];
-    setChatLog(withUser);
-    setUserInput("");
-    setLoading(true);
-    try {
-      const payload: ChatMsg[] = [{ role: "system", content: systemContext }, ...withUser];
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: payload }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data?.message) throw new Error("Invalid response");
-      setChatLog([...withUser, { role: "assistant", content: data.message as string }]);
-    } catch {
-      setChatLog([
-        ...withUser,
-        { role: "assistant", content: "Coach is pausing for breath. Try again shortly." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      style={{
-        borderRadius: 12,
-        padding: 12,
-        background:
-          "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
-        border: "1px solid rgba(148,163,184,0.15)",
-        boxShadow: "0 10px 24px rgba(0,0,0,0.35)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-        <span style={{ fontSize: 20 }}>🧘</span>
-        <strong style={{ color: "#e5e7eb" }}>Coach (private)</strong>
-      </div>
-
-      {/* Scrollable chat area */}
-      <div
-        ref={chatRef}
-        style={{
-          height: 260,
-          overflowY: "auto",
-          border: "1px solid rgba(148,163,184,0.15)",
-          borderRadius: 10,
-          padding: 12,
-          background: "#0b1020",
-          color: "#e5e7eb",
-        }}
-        role="log"
-        aria-live="polite"
-        aria-relevant="additions"
-      >
-        {chatLog.map((m, i) => (
-          <div key={i} style={{ marginBottom: 10, textAlign: m.role === "user" ? "right" : "left" }}>
-            <div
-              style={{
-                display: "inline-block",
-                maxWidth: "85%",
-                padding: "8px 12px",
-                borderRadius: 12,
-                background:
-                  m.role === "user"
-                    ? "linear-gradient(180deg, #2563eb, #1d4ed8)"
-                    : "linear-gradient(180deg, rgba(16,185,129,.20), rgba(16,185,129,.14))",
-                color: m.role === "user" ? "#fff" : "#d1fae5",
-                border:
-                  m.role === "user"
-                    ? "1px solid rgba(37,99,235,.75)"
-                    : "1px solid rgba(16,185,129,.25)",
-              }}
-            >
-              <div style={{ opacity: 0.75, fontSize: 12, marginBottom: 2 }}>
-                {m.role === "user" ? "You" : "Coach"}
-              </div>
-              <div style={{ lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{m.content}</div>
-            </div>
-          </div>
-        ))}
-
-        {loading && (
-          <div style={{ textAlign: "left", color: "#a7f3d0" }}>
-            <span style={{ opacity: 0.8 }}>Coach is thinking</span>
-            <span aria-hidden style={{ marginLeft: 6 }}>···</span>
-          </div>
-        )}
-      </div>
-
-      {/* Composer */}
-      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-        <textarea
-          value={userInput}
-          onChange={(e) => setUserInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
-          rows={2}
-          placeholder="Tell Coach what’s hard right now… (Shift+Enter for newline)"
-          style={{
-            flex: 1,
-            padding: "8px 10px",
-            borderRadius: 10,
-            border: "1px solid #334155",
-            background: "#0f172a",
-            color: "#e5e7eb",
-            resize: "none",
-          }}
-          aria-label="Message Coach"
-        />
-        <button
-          onClick={send}
-          disabled={loading || !userInput.trim()}
-          style={{
-            padding: "8px 14px",
-            borderRadius: 10,
-            background: "#10b981",
-            color: "#062019",
-            fontWeight: 700,
-            cursor: loading || !userInput.trim() ? "not-allowed" : "pointer",
-            opacity: loading || !userInput.trim() ? 0.6 : 1,
-          }}
-        >
-          {loading ? "…" : "Send"}
-        </button>
-      </div>
-
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
-        <button
-          onClick={() => {
-            const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
-            navigator.clipboard.writeText(text).catch(() => {});
-          }}
-          style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer" }}
-        >
-          Copy
-        </button>
-        <button
-          onClick={() => {
-            if (!confirm("Clear conversation?")) return;
-            setChatLog([{ role: "assistant", content: "Reset complete. What feels supportive now?" }]);
-          }}
-          style={{ background: "transparent", border: "none", color: "#94a3b8", cursor: "pointer" }}
-        >
-          Clear
-        </button>
-      </div>
-    </div>
-  );
-}
 
 /* ===========================
    Tiny Modal Component
@@ -392,7 +183,7 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .single();
 
-    // PGRST116 = No rows found with .single()
+      // PGRST116 = No rows found with .single()
       if ((error as PostgrestError | null)?.code === "PGRST116") {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
@@ -929,7 +720,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Mini Coach + Quick Rep (right card) */}
+                    {/* Embedded FloatingCoach + Quick Rep (right card) */}
                     <div
                       style={{
                         border: "1px solid #ccc",
@@ -940,16 +731,27 @@ export default function Dashboard() {
                     >
                       <h2 style={{ marginTop: 0, color: "#e5e7eb" }}>Coach & Quick Rep</h2>
                       <p style={{ marginTop: 0, color: "#94a3b8" }}>
-                        Private mini-coach plus a one-tap rep. Gentle, practical, always on your side.
+                        Private coach plus a one-tap rep. Gentle, practical, always on your side.
                       </p>
 
-                      {/* Pass the active habit + count to the coach */}
+                      {/* Embedded habit-aware coach */}
                       {(() => {
                         const h = habits.find((x) => x.id === activeHabitId) ?? null;
+                        const extra = h
+                          ? `Active habit: ${h.name} (wrap ${Math.max(
+                              1,
+                              h.wrap_size
+                            )}). Total reps: ${habitRepCount}. Offer tiny, specific implementation intentions. Normalize lapses; suggest one tiny rep.`
+                          : `No active habit selected. Encourage choosing a tiny habit and planning an implementation intention.`;
+
                         return (
-                          <MiniCoach
-                            activeHabit={h ? { name: h.name, wrap_size: h.wrap_size } : null}
-                            habitRepCount={habitRepCount}
+                          <FloatingCoach
+                            mode="embedded"
+                            storageKey="coach_chatlog"
+                            systemContextExtra={extra}
+                            onLogRep={logRep}
+                            height={260}
+                            title="Coach (private)"
                           />
                         );
                       })()}
