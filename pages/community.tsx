@@ -1,6 +1,7 @@
 // pages/community.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
@@ -53,7 +54,6 @@ export default function CommunityPage() {
         (payload) => {
           const newPost = payload.new as Post;
           setPosts((prev) => {
-            // avoid dup if optimistic insert already replaced
             if (prev.find((p) => p.id === newPost.id)) return prev;
             return [newPost, ...prev];
           });
@@ -114,14 +114,14 @@ export default function CommunityPage() {
       setPosts((prev) =>
         prev.map((p) => (p.id === tempId ? (data as Post) : p))
       );
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       // remove temp and restore text for retry
       setPosts((prev) => prev.filter((p) => p.id !== tempId));
       setPostContent(trimmed);
       alert("Couldn’t share right now. Try again in a moment.");
     } finally {
       setLoading(false);
-      // smooth focus to top (where the new post appears)
       feedTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
@@ -160,7 +160,8 @@ export default function CommunityPage() {
                   <textarea
                     value={postContent}
                     onChange={(e) => {
-                      if (e.target.value.length <= MAX_LEN) setPostContent(e.target.value);
+                      if (e.target.value.length <= MAX_LEN)
+                        setPostContent(e.target.value);
                     }}
                     placeholder="Share a rep, a realization, a tiny win… your words might be someone else’s spark."
                     rows={4}
@@ -191,12 +192,12 @@ export default function CommunityPage() {
                 <p className="text-emerald-200 font-medium">
                   Sign in to share your energy with the Nation.
                 </p>
-                <a
-                  href="/signin?redirect=/community"
+                <Link
+                  href={{ pathname: "/signin", query: { redirect: "/community" } }}
                   className="inline-block bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-full"
                 >
                   Sign in
-                </a>
+                </Link>
               </div>
             )}
           </section>
@@ -204,7 +205,9 @@ export default function CommunityPage() {
           {/* Feed */}
           <section aria-live="polite" aria-relevant="additions">
             <div ref={feedTopRef} />
-            <h2 className="text-2xl font-semibold mb-4 text-white">Community Feed</h2>
+            <h2 className="text-2xl font-semibold mb-4 text-white">
+              Community Feed
+            </h2>
 
             {posts.length === 0 ? (
               <p className="text-gray-500 italic">
@@ -227,7 +230,9 @@ export default function CommunityPage() {
                         <div className="flex items-center gap-2 text-xs text-gray-400">
                           <span className="font-mono">{post.user_id}</span>
                           <span>•</span>
-                          <time dateTime={post.created_at}>{timeAgo(post.created_at)}</time>
+                          <time dateTime={post.created_at}>
+                            {timeAgo(post.created_at)}
+                          </time>
                           {post.id.startsWith("temp-") && (
                             <>
                               <span>•</span>
