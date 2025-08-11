@@ -544,279 +544,281 @@ export default function Dashboard() {
               </nav>
 
               {active === "overview" && (
-                <section
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 16,
-                    marginBottom: 16,
-                  }}
-                >
-                  {/* Stats + Habit card */}
-                  <div
+                <>
+                  <section
                     style={{
-                      border: "1px solid #ccc",
-                      borderRadius: 12,
-                      padding: 16,
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 16,
+                      marginBottom: 16,
                     }}
                   >
-                    <h2 style={{ marginTop: 0 }}>Welcome Back 🧠</h2>
-                    <p style={{ margin: "8px 0 12px" }}>
-                      Email: <strong>{user.email}</strong>
-                    </p>
-
-                    {/* Habit selector + actions */}
+                    {/* Stats + Habit card */}
                     <div
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        margin: "4px 0 14px",
-                        flexWrap: "wrap",
+                        border: "1px solid #ccc",
+                        borderRadius: 12,
+                        padding: 16,
                       }}
                     >
-                      <label htmlFor="habit" style={{ color: "#6b7280" }}>
-                        Active habit:
-                      </label>
-                      <select
-                        id="habit"
-                        value={activeHabitId ?? ""}
-                        onChange={(e) => setActiveHabitId(e.target.value)}
+                      <h2 style={{ marginTop: 0 }}>Welcome Back 🧠</h2>
+                      <p style={{ margin: "8px 0 12px" }}>
+                        Email: <strong>{user.email}</strong>
+                      </p>
+
+                      {/* Habit selector + actions */}
+                      <div
                         style={{
-                          padding: "6px 10px",
-                          borderRadius: 8,
-                          border: "1px solid #374151",
-                          background: "#0f172a",
-                          color: "#e5e7eb",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                          margin: "4px 0 14px",
+                          flexWrap: "wrap",
                         }}
                       >
-                        {habits.map((h) => (
-                          <option key={h.id} value={h.id}>
-                            {h.name} (goal {h.goal_reps})
-                          </option>
-                        ))}
-                      </select>
+                        <label htmlFor="habit" style={{ color: "#6b7280" }}>
+                          Active habit:
+                        </label>
+                        <select
+                          id="habit"
+                          value={activeHabitId ?? ""}
+                          onChange={(e) => setActiveHabitId(e.target.value)}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 8,
+                            border: "1px solid #374151",
+                            background: "#0f172a",
+                            color: "#e5e7eb",
+                          }}
+                        >
+                          {habits.map((h) => (
+                            <option key={h.id} value={h.id}>
+                              {h.name} (goal {h.goal_reps})
+                            </option>
+                          ))}
+                        </select>
 
-                      {/* + New Habit */}
-                      <button
-                        onClick={() => setCreateOpen(true)}
-                        style={{
-                          padding: "6px 10px",
-                          borderRadius: 8,
-                          border: "1px solid #374151",
-                          background: "#0b1220",
-                          color: "#e5e7eb",
-                          cursor: "pointer",
-                        }}
-                      >
-                        + New Habit
-                      </button>
+                        {/* + New Habit */}
+                        <button
+                          onClick={() => setCreateOpen(true)}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 8,
+                            border: "1px solid #374151",
+                            background: "#0b1220",
+                            color: "#e5e7eb",
+                            cursor: "pointer",
+                          }}
+                        >
+                          + New Habit
+                        </button>
 
-                      {/* Edit current */}
-                      <button
-                        onClick={openEditForActive}
-                        disabled={!activeHabitId}
-                        style={{
-                          padding: "6px 10px",
-                          borderRadius: 8,
-                          border: "1px solid #374151",
-                          background: "#0b1220",
-                          color: "#e5e7eb",
-                          cursor: !activeHabitId ? "not-allowed" : "pointer",
-                          opacity: !activeHabitId ? 0.6 : 1,
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </div>
+                        {/* Edit current */}
+                        <button
+                          onClick={openEditForActive}
+                          disabled={!activeHabitId}
+                          style={{
+                            padding: "6px 10px",
+                            borderRadius: 8,
+                            border: "1px solid #374151",
+                            background: "#0b1220",
+                            color: "#e5e7eb",
+                            cursor: !activeHabitId ? "not-allowed" : "pointer",
+                            opacity: !activeHabitId ? 0.6 : 1,
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
 
-                    {/* The loop + neural field */}
-                    <div style={{ marginTop: 16 }}>
-                      {(() => {
-                        const h = habits.find((x) => x.id === activeHabitId);
-                        if (!h) return null;
-                        return (
-                          <HabitLoop
-                            repCount={habitRepCount}
-                            wrapSize={Math.max(1, h.wrap_size)}
-                            trigger={loopPulse}
-                            celebrate={wrapBurst}
-                            title={`${h.name} — Habit Loop`}
-                          />
-                        );
-                      })()}
-                    </div>
-
-                    <div style={{ marginTop: 16 }}>
-                      {(() => {
-                        const h = habits.find((x) => x.id === activeHabitId);
-                        if (!h) return null;
-                        return (
-                          <NeuralField
-                            repCount={habitRepCount}
-                            wrapSize={Math.max(1, h.wrap_size)}
-                            pulseKey={loopPulse}
-                            height={260}
-                          />
-                        );
-                      })()}
-                    </div>
-
-                    {/* Streak ring (gentle glow) */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 12,
-                        marginTop: 12,
-                      }}
-                    >
-                      <svg width="72" height="72" viewBox="0 0 72 72">
-                        <defs>
-                          <filter id="glow">
-                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                            <feMerge>
-                              <feMergeNode in="coloredBlur" />
-                              <feMergeNode in="SourceGraphic" />
-                            </feMerge>
-                          </filter>
-                        </defs>
-                        {/* background ring */}
-                        <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
-                        {/* progress ring (cap visualization at 30) */}
+                      {/* The loop + neural field */}
+                      <div style={{ marginTop: 16 }}>
                         {(() => {
-                          const cap = 30;
-                          const pct = Math.min(1, streak / cap);
-                          const circumference = 2 * Math.PI * 30;
-                          const dash = pct * circumference;
+                          const h = habits.find((x) => x.id === activeHabitId);
+                          if (!h) return null;
                           return (
-                            <circle
-                              cx="36"
-                              cy="36"
-                              r="30"
-                              stroke="#fbbf24"
-                              strokeWidth="8"
-                              fill="none"
-                              strokeDasharray={`${dash} ${circumference - dash}`}
-                              strokeLinecap="round"
-                              transform="rotate(-90 36 36)"
-                              filter={streak > 0 ? "url(#glow)" : undefined}
+                            <HabitLoop
+                              repCount={habitRepCount}
+                              wrapSize={Math.max(1, h.wrap_size)}
+                              trigger={loopPulse}
+                              celebrate={wrapBurst}
+                              title={`${h.name} — Habit Loop`}
                             />
                           );
                         })()}
-                      </svg>
-                      <div>
-                        <div style={{ fontSize: 18, fontWeight: 700 }}>
-                          {streak} day{streak === 1 ? "" : "s"} streak
-                        </div>
-                        <div style={{ color: "#6b7280" }}>
-                          {streak > 0
-                            ? "You came back. That’s braver than never missing."
-                            : "Today can be day one. One tiny rep."}
+                      </div>
+
+                      <div style={{ marginTop: 16 }}>
+                        {(() => {
+                          const h = habits.find((x) => x.id === activeHabitId);
+                          if (!h) return null;
+                          return (
+                            <NeuralField
+                              repCount={habitRepCount}
+                              wrapSize={Math.max(1, h.wrap_size)}
+                              pulseKey={loopPulse}
+                              height={260}
+                            />
+                          );
+                        })()}
+                      </div>
+
+                      {/* Streak ring (gentle glow) */}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          marginTop: 12,
+                        }}
+                      >
+                        <svg width="72" height="72" viewBox="0 0 72 72">
+                          <defs>
+                            <filter id="glow">
+                              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                              <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                              </feMerge>
+                            </filter>
+                          </defs>
+                          {/* background ring */}
+                          <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
+                          {/* progress ring (cap visualization at 30) */}
+                          {(() => {
+                            const cap = 30;
+                            const pct = Math.min(1, streak / cap);
+                            const circumference = 2 * Math.PI * 30;
+                            const dash = pct * circumference;
+                            return (
+                              <circle
+                                cx="36"
+                                cy="36"
+                                r="30"
+                                stroke="#fbbf24"
+                                strokeWidth="8"
+                                fill="none"
+                                strokeDasharray={`${dash} ${circumference - dash}`}
+                                strokeLinecap="round"
+                                transform="rotate(-90 36 36)"
+                                filter={streak > 0 ? "url(#glow)" : undefined}
+                              />
+                            );
+                          })()}
+                        </svg>
+                        <div>
+                          <div style={{ fontSize: 18, fontWeight: 700 }}>
+                            {streak} day{streak === 1 ? "" : "s"} streak
+                          </div>
+                          <div style={{ color: "#6b7280" }}>
+                            {streak > 0
+                              ? "You came back. That’s braver than never missing."
+                              : "Today can be day one. One tiny rep."}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Log a rep (powers rep_events + totals) */}
-                  <div
-                    style={{
-                      border: "1px solid #ccc",
-                      borderRadius: 12,
-                      padding: 16,
-                      background: "#f7f7f7",
-                    }}
-                  >
-                    <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
-                    <p style={{ marginTop: 0 }}>
-                      This is how you wire new habits into your brain.
-                    </p>
-                    <button
-                      onClick={logRep}
-                      disabled={loading || !activeHabitId}
+                    {/* Log a rep (powers rep_events + totals) */}
+                    <div
                       style={{
-                        padding: "10px 20px",
-                        cursor: loading ? "not-allowed" : "pointer",
+                        border: "1px solid #ccc",
+                        borderRadius: 12,
+                        padding: 16,
+                        background: "#f7f7f7",
                       }}
                     >
-                      {loading ? "Logging..." : "Log Rep"}
-                    </button>
-                    {nudge && <p style={{ marginTop: 10, color: "#0f766e" }}>{nudge}</p>}
-                    {!activeHabitId && (
-                      <p style={{ marginTop: 8, color: "#9CA3AF" }}>
-                        Creating your first habit… if this persists, refresh.
+                      <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
+                      <p style={{ marginTop: 0 }}>
+                        This is how you wire new habits into your brain.
                       </p>
-                    )}
-                  </div>
+                      <button
+                        onClick={logRep}
+                        disabled={loading || !activeHabitId}
+                        style={{
+                          padding: "10px 20px",
+                          cursor: loading ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        {loading ? "Logging..." : "Log Rep"}
+                      </button>
+                      {nudge && <p style={{ marginTop: 10, color: "#0f766e" }}>{nudge}</p>}
+                      {!activeHabitId && (
+                        <p style={{ marginTop: 8, color: "#9CA3AF" }}>
+                          Creating your first habit… if this persists, refresh.
+                        </p>
+                      )}
+                    </div>
 
-                  {/* 7-day sparkline (full width) */}
-                  <div
+                    {/* 7-day sparkline (full width) */}
+                    <div
+                      style={{
+                        gridColumn: "1 / -1",
+                        border: "1px solid #ccc",
+                        borderRadius: 12,
+                        padding: 16,
+                      }}
+                    >
+                      <p style={{ marginTop: 0 }}>
+                        <strong>Last 7 Days</strong>
+                      </p>
+                      <svg
+                        width="100%"
+                        height="48"
+                        viewBox="0 0 140 48"
+                        preserveAspectRatio="none"
+                        style={{
+                          background: "#fafafa",
+                          borderRadius: 8,
+                          border: "1px solid #eee",
+                        }}
+                      >
+                        {(() => {
+                          const max = Math.max(1, ...dailyCounts);
+                          const stepX = 140 / 6;
+                          const pts = dailyCounts
+                            .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
+                            .join(" ");
+                          return (
+                            <>
+                              <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
+                              {dailyCounts.map((v, i) => (
+                                <circle
+                                  key={i}
+                                  cx={i * stepX}
+                                  cy={46 - (v / Math.max(1, max)) * 42}
+                                  r="2.5"
+                                  fill="#10b981"
+                                />
+                              ))}
+                            </>
+                          );
+                        })()}
+                      </svg>
+                      <small style={{ color: "#666" }}>
+                        Counts reflect days with activity. One tiny rep is enough to light up a day.
+                      </small>
+                    </div>
+                  </section>
+
+                  {/* Habit Analytics Section */}
+                  <section
                     style={{
-                      gridColumn: "1 / -1",
                       border: "1px solid #ccc",
                       borderRadius: 12,
                       padding: 16,
+                      background: "#fff",
+                      marginTop: 16,
                     }}
                   >
-                    <p style={{ marginTop: 0 }}>
-                      <strong>Last 7 Days</strong>
-                    </p>
-                    <svg
-                      width="100%"
-                      height="48"
-                      viewBox="0 0 140 48"
-                      preserveAspectRatio="none"
-                      style={{
-                        background: "#fafafa",
-                        borderRadius: 8,
-                        border: "1px solid #eee",
-                      }}
-                    >
-                      {(() => {
-                        const max = Math.max(1, ...dailyCounts);
-                        const stepX = 140 / 6;
-                        const pts = dailyCounts
-                          .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
-                          .join(" ");
-                        return (
-                          <>
-                            <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
-                            {dailyCounts.map((v, i) => (
-                              <circle
-                                key={i}
-                                cx={i * stepX}
-                                cy={46 - (v / Math.max(1, max)) * 42}
-                                r="2.5"
-                                fill="#10b981"
-                              />
-                            ))}
-                          </>
-                        );
-                      })()}
-                    </svg>
-                    <small style={{ color: "#666" }}>
-                      Counts reflect days with activity. One tiny rep is enough to light up a day.
-                    </small>
-                  </div>
-                </section>
-
-                {/* Habit Analytics Section */}
-                <section
-                  style={{
-                    border: "1px solid #ccc",
-                    borderRadius: 12,
-                    padding: 16,
-                    background: "#fff",
-                    marginTop: 16,
-                  }}
-                >
-                  <HabitAnalytics
-                    habits={habits}
-                    habitRepCount={habitRepCount}
-                    streak={streak}
-                    dailyCounts={dailyCounts}
-                  />
-                </section>
+                    <HabitAnalytics
+                      habits={habits}
+                      habitRepCount={habitRepCount}
+                      streak={streak}
+                      dailyCounts={dailyCounts}
+                    />
+                  </section>
+                </>
               )}
 
               {active === "visualizer" && (
@@ -829,7 +831,7 @@ export default function Dashboard() {
                 >
                   <h2 style={{ marginTop: 0 }}>Your Neural Visualizer 🧬</h2>
                   <p style={{ marginTop: 0, color: "#555" }}>
-                    This view grows with your reps. (Dashboard‑only visualizer — keep the fruit tree on Home.)
+                    This view grows with your reps. (Dashboard-only visualizer — keep the fruit tree on Home.)
                   </p>
                   <div
                     style={{
@@ -871,7 +873,7 @@ export default function Dashboard() {
                       <strong>
                         {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
                       </strong>
-                      , here’s a micro‑win for today: <em>2‑minute breath reset + 1 tiny rep after coffee.</em>”
+                      , here’s a micro-win for today: <em>2-minute breath reset + 1 tiny rep after coffee.</em>”
                     </p>
                   </div>
                 </section>
@@ -891,7 +893,7 @@ export default function Dashboard() {
                   </p>
                   <ul style={{ marginTop: 8 }}>
                     <li>Milestones (3, 7, 21, 42, 66 days)</li>
-                    <li>Week‑over‑week improvements</li>
+                    <li>Week-over-week improvements</li>
                     <li>Correlation with mood/craving (future)</li>
                   </ul>
                 </section>
@@ -1104,3 +1106,4 @@ export default function Dashboard() {
     </>
   );
 }
+
