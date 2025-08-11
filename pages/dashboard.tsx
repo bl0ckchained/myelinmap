@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import HabitLoop from "@/components/HabitLoop";
 import NeuralField from "@/components/NeuralField";
+import HabitAnalytics from "@/components/HabitAnalytics";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
@@ -797,6 +798,24 @@ export default function Dashboard() {
                       Counts reflect days with activity. One tiny rep is enough to light up a day.
                     </small>
                   </div>
+                </section>
+
+                {/* Habit Analytics Section */}
+                <section
+                  style={{
+                    border: "1px solid #ccc",
+                    borderRadius: 12,
+                    padding: 16,
+                    background: "#fff",
+                    marginTop: 16,
+                  }}
+                >
+                  <HabitAnalytics
+                    habits={habits}
+                    habitRepCount={habitRepCount}
+                    streak={streak}
+                    dailyCounts={dailyCounts}
+                  />
                 </section>
               )}
 
