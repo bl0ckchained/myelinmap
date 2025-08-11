@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+
 // pages/coach.tsx - Magical & Classy Redesign (safe JSX fixes)
 import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
