@@ -750,74 +750,75 @@ export default function Dashboard() {
                       )}
                     </div>
 
-                    {/* 7-day sparkline (full width) */}
-                    <div
-                      style={{
-                        gridColumn: "1 / -1",
-                        border: "1px solid #ccc",
-                        borderRadius: 12,
-                        padding: 16,
-                      }}
-                    >
-                      <p style={{ marginTop: 0 }}>
-                        <strong>Last 7 Days</strong>
-                      </p>
-                      <svg
-                        width="100%"
-                        height="48"
-                        viewBox="0 0 140 48"
-                        preserveAspectRatio="none"
-                        style={{
-                          background: "#fafafa",
-                          borderRadius: 8,
-                          border: "1px solid #eee",
-                        }}
-                      >
-                        {(() => {
-                          const max = Math.max(1, ...dailyCounts);
-                          const stepX = 140 / 6;
-                          const pts = dailyCounts
-                            .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
-                            .join(" ");
-                          return (
-                            <>
-                              <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
-                              {dailyCounts.map((v, i) => (
-                                <circle
-                                  key={i}
-                                  cx={i * stepX}
-                                  cy={46 - (v / Math.max(1, max)) * 42}
-                                  r="2.5"
-                                  fill="#10b981"
-                                />
-                              ))}
-                            </>
-                          );
-                        })()}
-                      </svg>
-                      <small style={{ color: "#666" }}>
-                        Counts reflect days with activity. One tiny rep is enough to light up a day.
-                      </small>
-                    </div>
-                  </section>
-
-                  {/* Habit Analytics Section */}
-                  <section
+                  {/* 7-day sparkline (full width) */}
+                  <div
                     style={{
+                      gridColumn: "1 / -1",
                       border: "1px solid #ccc",
                       borderRadius: 12,
                       padding: 16,
-                      background: "#fff",
-                      marginTop: 16,
+                      background: "#070707ff",
                     }}
                   >
-                    <HabitAnalytics
-                      habits={habits}
-                      habitRepCount={habitRepCount}
-                      streak={streak}
-                      dailyCounts={dailyCounts}
-                    />
-                  </section>
+                    <p style={{ marginTop: 0 }}>
+                      <strong>Last 7 Days</strong>
+                    </p>
+                    <svg
+                      width="100%"
+                      height="48"
+                      viewBox="0 0 140 48"
+                      preserveAspectRatio="none"
+                      style={{
+                        background: "#0b0b0bff",
+                        borderRadius: 8,
+                        border: "1px solid #020202ff",
+                      }}
+                    >
+                      {(() => {
+                        const max = Math.max(1, ...dailyCounts);
+                        const stepX = 140 / 6;
+                        const pts = dailyCounts
+                          .map((v, i) => `${i * stepX},${46 - (v / max) * 42}`)
+                          .join(" ");
+                        return (
+                          <>
+                            <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
+                            {dailyCounts.map((v, i) => (
+                              <circle
+                                key={i}
+                                cx={i * stepX}
+                                cy={46 - (v / Math.max(1, max)) * 42}
+                                r="2.5"
+                                fill="#10b981"
+                              />
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </svg>
+                    <small style={{ color: "#475569" }}>
+                      Counts reflect days with activity. One tiny rep is enough to light up a day.
+                    </small>
+                  </div>
+                </section>
+
+                {/* Habit Analytics Section */}
+                <section
+                  style={{
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 12,
+                    padding: 16,
+                    background: "#f1f5f9",
+                    marginTop: 16,
+                  }}
+                >
+                  <HabitAnalytics
+                    habits={habits}
+                    habitRepCount={habitRepCount}
+                    streak={streak}
+                    dailyCounts={dailyCounts}
+                  />
+                </section>
                 </>
               )}
 
