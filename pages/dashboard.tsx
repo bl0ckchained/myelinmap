@@ -725,7 +725,7 @@ export default function Dashboard() {
                         border: "1px solid #ccc",
                         borderRadius: 12,
                         padding: 16,
-                        background: "#f7f7f7",
+                        background: "#0f0f0fff",
                       }}
                     >
                       <h2 style={{ marginTop: 0 }}>Log a Rep</h2>
@@ -808,7 +808,7 @@ export default function Dashboard() {
                     border: "1px solid #e2e8f0",
                     borderRadius: 12,
                     padding: 16,
-                    background: "#f1f5f9",
+                    background: "#0a0a0aff",
                     marginTop: 16,
                   }}
                 >
