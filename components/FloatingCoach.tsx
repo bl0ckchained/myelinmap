@@ -23,6 +23,8 @@ type Props = {
   height?: number;
   /** Embedded-only: container className hook */
   className?: string;
+  onLogRep?: () => void | Promise<void>;
+  title?: string;
 };
 
 export default function FloatingCoach({
@@ -34,6 +36,8 @@ export default function FloatingCoach({
   systemContextExtra = "",
   height = 260,
   className,
+  onLogRep,
+  title,
 }: Props) {
   const [open, setOpen] = useState(startOpen);
   const [chatLog, setChatLog] = useState<ChatMsg[]>([
@@ -71,11 +75,17 @@ export default function FloatingCoach({
   // Load persistent chat
   useEffect(() => {
     try {
-      const saved = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      const saved =
+        typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
       if (saved) {
         const parsed = JSON.parse(saved) as ChatMsg[];
         // Guard: ensure parsed looks like ChatMsg[]
-        if (Array.isArray(parsed) && parsed.every(m => typeof m?.role === "string" && typeof m?.content === "string")) {
+        if (
+          Array.isArray(parsed) &&
+          parsed.every(
+            (m) => typeof m?.role === "string" && typeof m?.content === "string"
+          )
+        ) {
           setChatLog(parsed as ChatMsg[]);
         }
       }
@@ -106,13 +116,19 @@ export default function FloatingCoach({
     const text = input.trim();
     if (!text || loading) return;
 
-    const newLog: ChatMsg[] = [...chatLog, { role: "user", content: text } as ChatMsg];
+    const newLog: ChatMsg[] = [
+      ...chatLog,
+      { role: "user", content: text } as ChatMsg,
+    ];
     setChatLog(newLog);
     setInput("");
     setLoading(true);
 
     try {
-      const messages: ChatMsg[] = [{ role: "system", content: systemContext }, ...newLog];
+      const messages: ChatMsg[] = [
+        { role: "system", content: systemContext },
+        ...newLog,
+      ];
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +136,10 @@ export default function FloatingCoach({
       });
       const data = await res.json();
       if (!res.ok || !data?.message) throw new Error("Invalid AI response");
-      setChatLog([...newLog, { role: "assistant", content: String(data.message) } as ChatMsg]);
+      setChatLog([
+        ...newLog,
+        { role: "assistant", content: String(data.message) } as ChatMsg,
+      ]);
     } catch (err) {
       console.error("Coach error:", err);
       setChatLog([
@@ -136,7 +155,8 @@ export default function FloatingCoach({
     }
   };
 
-  const quickInsert = (text: string) => setInput(prev => (prev ? `${prev} ${text}` : text));
+  const quickInsert = (text: string) =>
+    setInput((prev) => (prev ? `${prev} ${text}` : text));
 
   /** ---------- UI Pieces ---------- */
 
@@ -147,7 +167,10 @@ export default function FloatingCoach({
         flexDirection: "column",
         width: variant === "floating" ? 320 : "100%",
         height: variant === "floating" ? 460 : "auto",
-        background: variant === "floating" ? "#0b1020" : "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
+        background:
+          variant === "floating"
+            ? "#0b1020"
+            : "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
         color: "#e5e7eb",
         borderRadius: 16,
         border: "1px solid rgba(148,163,184,0.18)",
@@ -157,20 +180,31 @@ export default function FloatingCoach({
       className={className}
     >
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 8,
+        }}
+      >
         <span style={{ fontSize: 20 }}>🧘</span>
         <strong>Coach</strong>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           {/* Quick prompts (compact) */}
           <button
-            onClick={() => quickInsert("I'm overwhelmed. Help me find one tiny step.")}
+            onClick={() =>
+              quickInsert("I'm overwhelmed. Help me find one tiny step.")
+            }
             title="Tiny step"
             style={chipStyle}
           >
             Tiny step
           </button>
           <button
-            onClick={() => quickInsert("Can you help me plan a 2-minute habit after coffee?")}
+            onClick={() =>
+              quickInsert("Can you help me plan a 2-minute habit after coffee?")
+            }
             title="Plan after coffee"
             style={chipStyle}
           >
@@ -196,7 +230,13 @@ export default function FloatingCoach({
         aria-relevant="additions"
       >
         {chatLog.map((m, i) => (
-          <div key={i} style={{ marginBottom: 12, textAlign: m.role === "user" ? "right" : "left" }}>
+          <div
+            key={i}
+            style={{
+              marginBottom: 12,
+              textAlign: m.role === "user" ? "right" : "left",
+            }}
+          >
             <div
               style={{
                 display: "inline-block",
@@ -227,7 +267,9 @@ export default function FloatingCoach({
         {loading && (
           <div style={{ textAlign: "left", color: "#a7f3d0" }}>
             <span style={{ opacity: 0.8 }}>Coach is thinking</span>
-            <span aria-hidden style={{ marginLeft: 6 }}>···</span>
+            <span aria-hidden style={{ marginLeft: 6 }}>
+              ···
+            </span>
           </div>
         )}
         <div ref={chatEndRef} />
@@ -268,10 +310,21 @@ export default function FloatingCoach({
       </div>
 
       {/* Utilities */}
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 10,
+          justifyContent: "flex-end",
+          marginTop: 6,
+        }}
+      >
         <button
           onClick={() => {
-            const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
+            const text = chatLog
+              .map(
+                (m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`
+              )
+              .join("\n");
             navigator.clipboard.writeText(text).catch(() => {});
           }}
           style={utilBtnStyle}
@@ -281,7 +334,12 @@ export default function FloatingCoach({
         <button
           onClick={() => {
             if (!confirm("Clear conversation?")) return;
-            setChatLog([{ role: "assistant", content: "Reset complete. What feels supportive now?" }]);
+            setChatLog([
+              {
+                role: "assistant",
+                content: "Reset complete. What feels supportive now?",
+              },
+            ]);
           }}
           style={utilBtnStyle}
         >
@@ -292,11 +350,7 @@ export default function FloatingCoach({
   );
 
   if (variant === "embedded") {
-    return (
-      <>
-        {ChatWindow}
-      </>
-    );
+    return <>{ChatWindow}</>;
   }
 
   // Floating variant (FAB + popover)
@@ -319,7 +373,8 @@ export default function FloatingCoach({
             borderRadius: "9999px",
             padding: "1.1rem",
             border: "2px solid #facc15",
-            boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
+            boxShadow:
+              "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
             transition: "transform 0.2s",
             cursor: "pointer",
             animation: "mm-float 3s ease-in-out infinite",
@@ -329,22 +384,26 @@ export default function FloatingCoach({
           <span style={{ fontSize: "1.6rem" }}>🧘</span>
         </button>
 
-        {open && (
-          <div style={{ marginTop: "0.5rem" }}>
-            {ChatWindow}
-          </div>
-        )}
+        {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
       </div>
 
       {/* minimal keyframes */}
       <style jsx global>{`
         @keyframes mm-float {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-          100% { transform: translateY(0); }
+          0% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
+          100% {
+            transform: translateY(0);
+          }
         }
         @media (prefers-reduced-motion: reduce) {
-          button[aria-label="Toggle AI Coach"] { animation: none !important; }
+          button[aria-label="Toggle AI Coach"] {
+            animation: none !important;
+          }
         }
       `}</style>
     </>

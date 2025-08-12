@@ -746,7 +746,7 @@ export default function Dashboard() {
 
                         return (
                           <FloatingCoach
-                            mode="embedded"
+                            variant="embedded"
                             storageKey="coach_chatlog"
                             systemContextExtra={extra}
                             onLogRep={logRep}

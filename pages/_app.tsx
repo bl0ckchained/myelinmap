@@ -1,16 +1,15 @@
-import "@/styles/basic.css";
+// pages/_app.tsx
 import type { AppProps } from "next/app";
-import FloatingCoach from "@/components/FloatingCoach"; // 🧠 Add this
+import FloatingCoach from "@/components/FloatingCoach";
+// If you have global CSS, keep this import:
+import "@/styles/globals.css";
 
-export default function App({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Component {...pageProps} />
-      <FloatingCoach /> {/* 🧠 Loads on every page */}
+      {/* Floating coach on every page */}
+      <FloatingCoach variant="floating" />
     </>
   );
 }
-// ✅ This is the main app component for Next.js
-// ✅ It wraps every page with global styles and the FloatingCoach component
-// ✅ The FloatingCoach component provides a persistent mental health coaching feature
-// ✅ Uses TypeScript for type safety
