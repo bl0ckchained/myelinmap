@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 // components/FloatingCoach.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
