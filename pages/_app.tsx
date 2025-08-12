@@ -2,7 +2,7 @@
 import type { AppProps } from "next/app";
 import FloatingCoach from "@/components/FloatingCoach";
 // If you have global CSS, keep this import:
-import "@/styles/globals.css";
+import "@/styles/basic.css";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
