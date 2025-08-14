@@ -206,7 +206,8 @@ export default function JournalPage() {
 
       <Header title="Private Journal ✍️" subtitle="Small truths, stacked daily. Reflection wires change." />
 
-      <main className={styles.page}>
+     <main className={`${styles.page} ${styles.theme}`}>
+
         <div className={styles.wrap}>
           {/* Mode bar */}
           <div className={styles.modebar} role="toolbar" aria-label="Journal modes">
