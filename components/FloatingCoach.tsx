@@ -22,7 +22,9 @@ type Props = {
   height?: number;
   /** Embedded-only: container className hook */
   className?: string;
+  /** Optional callback to log a rep (e.g., increments habit counter) */
   onLogRep?: () => void | Promise<void>;
+  /** Optional title for header; defaults to "Coach" */
   title?: string;
 };
 
@@ -85,14 +87,13 @@ export default function FloatingCoach({
             (m) => typeof m?.role === "string" && typeof m?.content === "string"
           )
         ) {
-          setChatLog(parsed as ChatMsg[]);
+          setChatLog(parsed);
         }
       }
     } catch {
       // ignore
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey]);
+  }, [storageKey]); // ✅ remove unused eslint-disable; deps are correct
 
   // Persist chat
   useEffect(() => {
@@ -103,7 +104,7 @@ export default function FloatingCoach({
     }
   }, [chatLog, storageKey]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll to bottom on new messages (only when visible)
   useEffect(() => {
     if (variant === "floating" && !open) return;
     const el = scrollBoxRef.current;
@@ -115,19 +116,13 @@ export default function FloatingCoach({
     const text = input.trim();
     if (!text || loading) return;
 
-    const newLog: ChatMsg[] = [
-      ...chatLog,
-      { role: "user", content: text } as ChatMsg,
-    ];
+    const newLog: ChatMsg[] = [...chatLog, { role: "user", content: text }];
     setChatLog(newLog);
     setInput("");
     setLoading(true);
 
     try {
-      const messages: ChatMsg[] = [
-        { role: "system", content: systemContext },
-        ...newLog,
-      ];
+      const messages: ChatMsg[] = [{ role: "system", content: systemContext }, ...newLog];
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -137,7 +132,7 @@ export default function FloatingCoach({
       if (!res.ok || !data?.message) throw new Error("Invalid AI response");
       setChatLog([
         ...newLog,
-        { role: "assistant", content: String(data.message) } as ChatMsg,
+        { role: "assistant", content: String(data.message) },
       ]);
     } catch (err) {
       console.error("Coach error:", err);
@@ -187,9 +182,22 @@ export default function FloatingCoach({
           marginBottom: 8,
         }}
       >
-        <span style={{ fontSize: 20 }}>🧘</span>
-        <strong>Coach</strong>
+        <span style={{ fontSize: 20 }} aria-hidden>🧘</span>
+        <strong aria-live="polite">{title?.trim() || "Coach"}</strong>
+
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          {/* Optional: Log Rep button if provided */}
+          {onLogRep && (
+            <button
+              onClick={() => void onLogRep()}
+              title="Log a rep"
+              aria-label="Log a rep"
+              style={chipStyle}
+            >
+              ⚡ Log rep
+            </button>
+          )}
+
           {/* Quick prompts (compact) */}
           <button
             onClick={() =>
@@ -303,6 +311,7 @@ export default function FloatingCoach({
             cursor: loading || !input.trim() ? "not-allowed" : "pointer",
             opacity: loading || !input.trim() ? 0.6 : 1,
           }}
+          aria-label="Send message"
         >
           {loading ? "…" : "Send"}
         </button>
@@ -327,6 +336,7 @@ export default function FloatingCoach({
             navigator.clipboard.writeText(text).catch(() => {});
           }}
           style={utilBtnStyle}
+          aria-label="Copy conversation"
         >
           Copy
         </button>
@@ -341,6 +351,7 @@ export default function FloatingCoach({
             ]);
           }}
           style={utilBtnStyle}
+          aria-label="Clear conversation"
         >
           Clear
         </button>
@@ -380,7 +391,7 @@ export default function FloatingCoach({
             willChange: "transform",
           }}
         >
-          <span style={{ fontSize: "1.6rem" }}>🧘</span>
+          <span style={{ fontSize: "1.6rem" }} aria-hidden>🧘</span>
         </button>
 
         {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
@@ -436,3 +447,5 @@ const utilBtnStyle: React.CSSProperties = {
   color: "#94a3b8",
   cursor: "pointer",
 };
+  
+
