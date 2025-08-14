@@ -10,6 +10,8 @@ import HabitLoop from "@/components/HabitLoop";
 import NeuralField from "@/components/NeuralField";
 import HabitAnalytics from "@/components/HabitAnalytics";
 import FloatingCoach from "@/components/FloatingCoach";
+// near the other component imports at the top of pages/dashboard.tsx
+import DashboardJournalWidget from "@/components/DashboardJournalWidget";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
