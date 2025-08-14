@@ -128,7 +128,9 @@ export default function Dashboard() {
   const [active, setActive] = useState<Tab>("overview");
 
   /** --- Lightweight counts from your original implementation (kept) --- */
-  const [dailyCounts, setDailyCounts] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const [dailyCounts, setDailyCounts] = useState<number[]>([
+    0, 0, 0, 0, 0, 0, 0,
+  ]);
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
 
@@ -166,9 +168,11 @@ export default function Dashboard() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
     return () => listener?.subscription.unsubscribe();
   }, []);
 
@@ -190,7 +194,8 @@ export default function Dashboard() {
           .insert({ user_id: user.id, reps: 0, last_rep: null })
           .select()
           .single();
-        if (!insertError && initialData) setUserData(initialData as UserRepsRow);
+        if (!insertError && initialData)
+          setUserData(initialData as UserRepsRow);
       } else if (!error && data) {
         setUserData(data as UserRepsRow);
       }
@@ -202,7 +207,12 @@ export default function Dashboard() {
       .channel(`user_reps:${user.id}`)
       .on(
         "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "user_reps", filter: `user_id=eq.${user.id}` },
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "user_reps",
+          filter: `user_id=eq.${user.id}`,
+        },
         (payload) => {
           const p = payload as unknown as UpdatePayload<UserRepsRow>;
           if (p.eventType === "UPDATE" && p.new) {
@@ -305,7 +315,9 @@ export default function Dashboard() {
       }
 
       const dayKeys = new Set(
-        (events ?? []).map((e) => new Date(e.ts as string).toISOString().slice(0, 10))
+        (events ?? []).map((e) =>
+          new Date(e.ts as string).toISOString().slice(0, 10)
+        )
       );
 
       // streak: walk backward from today while dates exist
@@ -495,7 +507,10 @@ export default function Dashboard() {
         <title>Dashboard | Myelin Map</title>
       </Head>
 
-      <Header title="Your Dashboard 📈" subtitle="A visual record of your comeback" />
+      <Header
+        title="Your Dashboard 📈"
+        subtitle="A visual record of your comeback"
+      />
 
       <main style={{ minHeight: "70vh", padding: "2rem" }}>
         <div style={{ maxWidth: 960, margin: "0 auto" }}>
@@ -554,7 +569,7 @@ export default function Dashboard() {
                       marginBottom: 16,
                     }}
                   >
-                    {/* Stats + Habit card */}
+                    {/* Stats + Habit card (left) */}
                     <div
                       style={{
                         border: "1px solid #ccc",
@@ -664,7 +679,7 @@ export default function Dashboard() {
                         })()}
                       </div>
 
-                      {/* Streak ring (gentle glow) */}
+                      {/* Streak ring */}
                       <div
                         style={{
                           display: "flex",
@@ -676,16 +691,24 @@ export default function Dashboard() {
                         <svg width="72" height="72" viewBox="0 0 72 72">
                           <defs>
                             <filter id="glow">
-                              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                              <feGaussianBlur
+                                stdDeviation="2.5"
+                                result="coloredBlur"
+                              />
                               <feMerge>
                                 <feMergeNode in="coloredBlur" />
                                 <feMergeNode in="SourceGraphic" />
                               </feMerge>
                             </filter>
                           </defs>
-                          {/* background ring */}
-                          <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
-                          {/* progress ring (cap visualization at 30) */}
+                          <circle
+                            cx="36"
+                            cy="36"
+                            r="30"
+                            stroke="#1f2937"
+                            strokeWidth="8"
+                            fill="none"
+                          />
                           {(() => {
                             const cap = 30;
                             const pct = Math.min(1, streak / cap);
@@ -699,7 +722,9 @@ export default function Dashboard() {
                                 stroke="#fbbf24"
                                 strokeWidth="8"
                                 fill="none"
-                                strokeDasharray={`${dash} ${circumference - dash}`}
+                                strokeDasharray={`${dash} ${
+                                  circumference - dash
+                                }`}
                                 strokeLinecap="round"
                                 transform="rotate(-90 36 36)"
                                 filter={streak > 0 ? "url(#glow)" : undefined}
@@ -720,7 +745,7 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    {/* Embedded FloatingCoach + Quick Rep (right card) */}
+                    {/* Coach card (right) */}
                     <div
                       style={{
                         border: "1px solid #ccc",
@@ -729,14 +754,18 @@ export default function Dashboard() {
                         background: "#0f0f0fff",
                       }}
                     >
-                      <h2 style={{ marginTop: 0, color: "#e5e7eb" }}>Coach & Quick Rep</h2>
+                      <h2 style={{ marginTop: 0, color: "#e5e7eb" }}>
+                        Coach & Quick Rep
+                      </h2>
                       <p style={{ marginTop: 0, color: "#94a3b8" }}>
-                        Private coach plus a one-tap rep. Gentle, practical, always on your side.
+                        Private coach plus a one-tap rep. Gentle, practical,
+                        always on your side.
                       </p>
 
                       {/* Embedded habit-aware coach */}
                       {(() => {
-                        const h = habits.find((x) => x.id === activeHabitId) ?? null;
+                        const h =
+                          habits.find((x) => x.id === activeHabitId) ?? null;
                         const extra = h
                           ? `Active habit: ${h.name} (wrap ${Math.max(
                               1,
@@ -756,10 +785,19 @@ export default function Dashboard() {
                         );
                       })()}
 
-                      {/* Divider + the original quick rep action */}
-                      <div style={{ marginTop: 16, borderTop: "1px solid #1f2937", paddingTop: 16 }}>
-                        <h3 style={{ marginTop: 0, color: "#e5e7eb" }}>Log a Rep</h3>
-                        <p style={{ marginTop: 0, color: "#94a3b8" }}>This is how new wiring takes root.</p>
+                      <div
+                        style={{
+                          marginTop: 16,
+                          borderTop: "1px solid #1f2937",
+                          paddingTop: 16,
+                        }}
+                      >
+                        <h3 style={{ marginTop: 0, color: "#e5e7eb" }}>
+                          Log a Rep
+                        </h3>
+                        <p style={{ marginTop: 0, color: "#94a3b8" }}>
+                          This is how new wiring takes root.
+                        </p>
                         <button
                           onClick={logRep}
                           disabled={loading || !activeHabitId}
@@ -770,13 +808,23 @@ export default function Dashboard() {
                         >
                           {loading ? "Logging..." : "Log Rep"}
                         </button>
-                        {nudge && <p style={{ marginTop: 10, color: "#0f766e" }}>{nudge}</p>}
+                        {nudge && (
+                          <p style={{ marginTop: 10, color: "#0f766e" }}>
+                            {nudge}
+                          </p>
+                        )}
                         {!activeHabitId && (
                           <p style={{ marginTop: 8, color: "#9CA3AF" }}>
-                            Creating your first habit… if this persists, refresh.
+                            Creating your first habit… if this persists,
+                            refresh.
                           </p>
                         )}
                       </div>
+                    </div>
+
+                    {/* NEW: Quick Journal widget as a third grid item (spans both columns on wide screens) */}
+                    <div style={{ gridColumn: "1 / -1" }}>
+                      <DashboardJournalWidget />
                     </div>
                   </section>
 
@@ -812,7 +860,12 @@ export default function Dashboard() {
                           .join(" ");
                         return (
                           <>
-                            <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
+                            <polyline
+                              points={pts}
+                              fill="none"
+                              stroke="#10b981"
+                              strokeWidth="2"
+                            />
                             {dailyCounts.map((v, i) => (
                               <circle
                                 key={i}
@@ -827,7 +880,8 @@ export default function Dashboard() {
                       })()}
                     </svg>
                     <small style={{ color: "#475569" }}>
-                      Counts reflect days with activity. One tiny rep is enough to light up a day.
+                      Counts reflect days with activity. One tiny rep is enough
+                      to light up a day.
                     </small>
                   </div>
 
@@ -861,7 +915,8 @@ export default function Dashboard() {
                 >
                   <h2 style={{ marginTop: 0 }}>Your Neural Visualizer 🧬</h2>
                   <p style={{ marginTop: 0, color: "#555" }}>
-                    This view grows with your reps. (Dashboard-only visualizer — keep the fruit tree on Home.)
+                    This view grows with your reps. (Dashboard-only visualizer —
+                    keep the fruit tree on Home.)
                   </p>
                   <div
                     style={{
@@ -874,7 +929,9 @@ export default function Dashboard() {
                     }}
                   >
                     {/* <Visualizer reps={userData.reps} lastRep={userData.last_rep} /> */}
-                    <span style={{ color: "#777" }}>Visualizer placeholder — plug in your component</span>
+                    <span style={{ color: "#777" }}>
+                      Visualizer placeholder — plug in your component
+                    </span>
                   </div>
                 </section>
               )}
@@ -889,7 +946,8 @@ export default function Dashboard() {
                 >
                   <h2 style={{ marginTop: 0 }}>Your Personal Coach 🧠</h2>
                   <p style={{ marginTop: 0, color: "#555" }}>
-                    The public FloatingCoach stays on all pages. This private space can reflect your data and goals.
+                    The public FloatingCoach stays on all pages. This private
+                    space can reflect your data and goals.
                   </p>
                   <div
                     style={{
@@ -901,9 +959,12 @@ export default function Dashboard() {
                     <p style={{ margin: 0 }}>
                       “Based on your last rep on{" "}
                       <strong>
-                        {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
+                        {userData.last_rep
+                          ? new Date(userData.last_rep).toLocaleDateString()
+                          : "—"}
                       </strong>
-                      , here’s a micro-win for today: <em>2-minute breath reset + 1 tiny rep after coffee.</em>”
+                      , here’s a micro-win for today:{" "}
+                      <em>2-minute breath reset + 1 tiny rep after coffee.</em>”
                     </p>
                   </div>
                 </section>
@@ -919,7 +980,8 @@ export default function Dashboard() {
                 >
                   <h2 style={{ marginTop: 0 }}>History & Insights</h2>
                   <p style={{ color: "#555" }}>
-                    We’ll populate this with daily reps, weekly trends, and milestones once we add the events table.
+                    We’ll populate this with daily reps, weekly trends, and
+                    milestones once we add the events table.
                   </p>
                   <ul style={{ marginTop: 8 }}>
                     <li>Milestones (3, 7, 21, 42, 66 days)</li>
@@ -940,19 +1002,26 @@ export default function Dashboard() {
             >
               <h2>Sign In Required</h2>
               <p>
-                Please <Link href="/signin">sign in here</Link> to access your dashboard.
+                Please <Link href="/signin">sign in here</Link> to access your
+                dashboard.
               </p>
             </section>
           )}
 
-          <p style={{ marginTop: 24, textAlign: "center", fontStyle: "italic" }}>
+          <p
+            style={{ marginTop: 24, textAlign: "center", fontStyle: "italic" }}
+          >
             “You are not broken. You are becoming.”
           </p>
         </div>
       </main>
 
       {/* Create & Edit Modals */}
-      <Modal open={createOpen} title="Create a habit" onClose={() => setCreateOpen(false)}>
+      <Modal
+        open={createOpen}
+        title="Create a habit"
+        onClose={() => setCreateOpen(false)}
+      >
         <div style={{ display: "grid", gap: 10 }}>
           <label>
             <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
@@ -1005,7 +1074,14 @@ export default function Dashboard() {
             />
           </label>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
             <button
               onClick={() => setCreateOpen(false)}
               style={{
@@ -1038,7 +1114,11 @@ export default function Dashboard() {
         </div>
       </Modal>
 
-      <Modal open={editOpen} title="Edit habit" onClose={() => setEditOpen(false)}>
+      <Modal
+        open={editOpen}
+        title="Edit habit"
+        onClose={() => setEditOpen(false)}
+      >
         <div style={{ display: "grid", gap: 10 }}>
           <label>
             <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
@@ -1090,7 +1170,14 @@ export default function Dashboard() {
             />
           </label>
 
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
             <button
               onClick={() => setEditOpen(false)}
               style={{
