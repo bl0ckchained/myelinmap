@@ -10,8 +10,13 @@ import HabitLoop from "@/components/HabitLoop";
 import NeuralField from "@/components/NeuralField";
 import HabitAnalytics from "@/components/HabitAnalytics";
 import FloatingCoach from "@/components/FloatingCoach";
-// near the other component imports at the top of pages/dashboard.tsx
 import DashboardJournalWidget from "@/components/DashboardJournalWidget";
+
+// New magical UI components
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import Tabs from "@/components/ui/Tabs";
+import styles from "@/styles/Dashboard.module.css";
 
 // OPTIONAL: if you already have a visualizer component, import it here:
 // import Visualizer from "@/components/Visualizer";
@@ -44,7 +49,7 @@ type UpdatePayload<T> = {
 };
 
 /* ===========================
-   Tiny Modal Component
+   Enhanced Modal Component
    =========================== */
 function Modal({
   open,
@@ -62,56 +67,28 @@ function Modal({
     <div
       role="dialog"
       aria-modal="true"
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 50,
-        padding: "1rem",
-      }}
+      className={styles.modalOverlay}
       onClick={onClose}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 480,
-          background: "#0f172a",
-          color: "#e5e7eb",
-          borderRadius: 12,
-          border: "1px solid #233147",
-          boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
-          padding: "16px",
-        }}
-        onClick={(e) => e.stopPropagation()}
+      <Card
+        variant="glass"
+        className={styles.modalCard}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 8,
-          }}
-        >
-          <h3 style={{ margin: 0 }}>{title}</h3>
-          <button
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>{title}</h3>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
             aria-label="Close"
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "#9ca3af",
-              fontSize: 18,
-              cursor: "pointer",
-            }}
+            className={styles.modalClose}
           >
             ✕
-          </button>
+          </Button>
         </div>
         {children}
-      </div>
+      </Card>
     </div>
   );
 }
@@ -503,8 +480,15 @@ export default function Dashboard() {
     setUserData({ reps: 0, last_rep: null });
   };
 
+  const tabsData = [
+    { id: "overview", label: "Overview", icon: "📊" },
+    { id: "visualizer", label: "Visualizer", icon: "🧬" },
+    { id: "coach", label: "Coach", icon: "🧠" },
+    { id: "history", label: "History", icon: "📈" },
+  ];
+
   return (
-    <>
+    <div className={styles.dashboard}>
       <Head>
         <title>Dashboard | Myelin Map</title>
       </Head>
@@ -514,54 +498,28 @@ export default function Dashboard() {
         subtitle="A visual record of your comeback"
       />
 
-      <main style={{ minHeight: "70vh", padding: "2rem" }}>
-        <div style={{ maxWidth: 960, margin: "0 auto" }}>
-          {user ? (
-            <>
-              {/* Tabs */}
-              <nav
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  marginBottom: 16,
-                  flexWrap: "wrap",
-                }}
+      <main className={styles.container}>
+        {user ? (
+          <>
+            {/* Enhanced Tabs with Sign Out */}
+            <div className={styles.tabsContainer}>
+              <Tabs
+                tabs={tabsData}
+                activeTab={active}
+                onTabChange={(tabId) => setActive(tabId as Tab)}
+                variant="magical"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className={styles.signOutButton}
               >
-                {[
-                  { id: "overview", label: "Overview" },
-                  { id: "visualizer", label: "Visualizer" },
-                  { id: "coach", label: "Coach" },
-                  { id: "history", label: "History" },
-                ].map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setActive(t.id as Tab)}
-                    style={{
-                      padding: "8px 14px",
-                      borderRadius: 8,
-                      border: "1px solid #ccc",
-                      background: active === t.id ? "#111" : "#f8f8f8",
-                      color: active === t.id ? "#fff" : "#333",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-                <div style={{ flex: 1 }} />
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    padding: "8px 14px",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                  }}
-                >
-                  Sign Out
-                </button>
-              </nav>
+                Sign Out
+              </Button>
+            </div>
 
-              {active === "overview" && (
+            {active === "overview" && (
                 <>
                   <section
                     style={{
@@ -1213,15 +1171,6 @@ export default function Dashboard() {
       </Modal>
 
       <Footer />
-
-      {/* Small style niceties */}
-      <style jsx>{`
-        @media (max-width: 820px) {
-          section[style*="grid-template-columns"] {
-            display: block !important;
-          }
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
