@@ -651,7 +651,7 @@ export default function Dashboard() {
                           </div>
                           <div className={styles.streakText}>
                             {streak > 0
-                              ? "You came back. That's braver than never missing."
+                              ? "You came back. That&apos;s braver than never missing."
                               : "Today can be day one. One tiny rep."}
                           </div>
                         </div>
@@ -804,7 +804,7 @@ export default function Dashboard() {
                         ? new Date(userData.last_rep).toLocaleDateString()
                         : "—"}
                     </strong>
-                    , here's a micro-win for today:{" "}
+                    , here&apos;s a micro-win for today:{" "}
                     <em>2-minute breath reset + 1 tiny rep after coffee.</em>"
                   </p>
                 </Card>
@@ -1006,7 +1006,7 @@ export default function Dashboard() {
           </div>
 
           <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
-            You can change goals as you grow. Progress isn't linear — it's kind.
+            You can change goals as you grow. Progress isn&apos;t linear — it&apos;s kind.
           </p>
         </div>
       </Modal>

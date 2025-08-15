@@ -854,3 +854,164 @@ export default function Dashboard() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g., Breath reset"
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
+            <input
+              type="number"
+              min={1}
+              value={newGoal}
+              onChange={(e) => setNewGoal(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
+            <input
+              type="number"
+              min={1}
+              value={newWrap}
+              onChange={(e) => setNewWrap(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
+            <Button
+              variant="secondary"
+              onClick={() => setCreateOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleCreateHabit}
+            >
+              Create
+            </Button>
+          </div>
+
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+            Start small is smart. You can always change this later.
+          </p>
+        </div>
+      </Modal>
+
+      <Modal
+        open={editOpen}
+        title="Edit habit"
+        onClose={() => setEditOpen(false)}
+      >
+        <div style={{ display: "grid", gap: 10 }}>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
+            <input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
+            <input
+              type="number"
+              min={1}
+              value={editGoal}
+              onChange={(e) => setEditGoal(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+          <label>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
+            <input
+              type="number"
+              min={1}
+              value={editWrap}
+              onChange={(e) => setEditWrap(Number(e.target.value))}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
+            />
+          </label>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
+            <Button
+              variant="secondary"
+              onClick={() => setEditOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSaveEdit}
+            >
+              Save
+            </Button>
+          </div>
+
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+            You can change goals as you grow. Progress isn&apos;t linear — it&apos;s kind.
+          </p>
+        </div>
+      </Modal>
+
+      <Footer />
+    </div>
+  );
+}
