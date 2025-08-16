@@ -20,12 +20,11 @@ function StarfieldCanvas() {
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
 
-    const numStars = Math.min(140, Math.floor((width * height) / 18000)); // scale gently
-    // init stars
+    const numStars = Math.min(140, Math.floor((width * height) / 18000));
     starsRef.current = Array.from({ length: numStars }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      z: Math.random() * 0.7 + 0.3, // parallax-ish speed
+      z: Math.random() * 0.7 + 0.3,
     }));
 
     const onResize = () => {
@@ -36,25 +35,29 @@ function StarfieldCanvas() {
 
     const tick = () => {
       ctx.clearRect(0, 0, width, height);
-
-      // faint gradient wash for depth
-      const g = ctx.createRadialGradient(width / 2, height * 0.35, 0, width / 2, height * 0.35, Math.max(width, height));
-      g.addColorStop(0, "rgba(15,23,42,0.0)");   // slate-900-ish center
-      g.addColorStop(1, "rgba(2,6,23,0.15)");    // near-black edges
+      const g = ctx.createRadialGradient(
+        width / 2,
+        height * 0.35,
+        0,
+        width / 2,
+        height * 0.35,
+        Math.max(width, height)
+      );
+      g.addColorStop(0, "rgba(15,23,42,0.0)");
+      g.addColorStop(1, "rgba(2,6,23,0.15)");
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, width, height);
 
-      // draw stars (low alpha to keep it classy)
       for (const s of starsRef.current) {
-        s.y += s.z * 0.25;              // drift downward
-        if (s.y > height) {             // recycle
+        s.y += s.z * 0.25;
+        if (s.y > height) {
           s.x = Math.random() * width;
           s.y = -2;
           s.z = Math.random() * 0.7 + 0.3;
         }
-        const r = 0.4 + s.z * 0.8;      // subtle size
+        const r = 0.4 + s.z * 0.8;
         ctx.globalAlpha = 0.15 + s.z * 0.1;
-        ctx.fillStyle = Math.random() < 0.06 ? "#fbbf24" : "#93c5fd"; // rare warm twinkle
+        ctx.fillStyle = Math.random() < 0.06 ? "#fbbf24" : "#93c5fd";
         ctx.beginPath();
         ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
         ctx.fill();
@@ -79,7 +82,7 @@ function StarfieldCanvas() {
         inset: 0,
         zIndex: 0,
         pointerEvents: "none",
-        opacity: 0.5, // keep it subtle
+        opacity: 0.5,
       }}
     />
   );
@@ -132,23 +135,25 @@ export default function Science() {
   return (
     <>
       <Head>
-        <title>Science of Healing | Myelin Map</title>
+        <title>The Science of Healing | Myelin Map</title>
         <meta
           name="description"
-          content="Discover how trauma reshapes the brain — and how myelin, repetition, and kindness can rewire it for healing. Learn the K.I.N.D. method and why tiny reps change everything."
+          content="Healing is neuroplastic: myelin, repetition, and compassionate practice rewire circuits shaped by trauma and addiction. Learn how amygdala, PFC, and hippocampus heal — and simple ways to start."
         />
       </Head>
 
-      {/* starfield lives behind everything */}
       <StarfieldCanvas />
 
-      <Header title="The Science of Healing" subtitle="Why your brain is never beyond repair" />
+      <Header
+        title="The Science of Healing"
+        subtitle="You are wired to heal — tiny, kind reps change the brain."
+      />
 
       <main
         role="main"
         style={{
           position: "relative",
-          zIndex: 1, // sit above the canvas
+          zIndex: 1,
           maxWidth: "900px",
           margin: "0 auto",
           padding: "2rem 1rem",
@@ -159,150 +164,185 @@ export default function Science() {
           boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
         }}
       >
-        {/* Hero Statement */}
-        <section style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <h1 style={{ fontSize: "2rem", color: "#fbbf24", marginBottom: 8 }}>
-            No matter how deep the pain, your brain can grow new pathways. Every rep counts.
-          </h1>
-          <p style={{ fontSize: "1.1rem", color: "#9ca3af", marginTop: 0 }}>
-            The K.I.N.D. Method blends trauma science, brain rewiring, and self‑compassion so you can rebuild your
-            habits — and your life — one small, repeatable action at a time.
-          </p>
-        </section>
-
-        {/* Trauma & the Brain */}
-        <section id="trauma-brain" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>Trauma and the Brain</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <p>
-            When we experience trauma, the brain optimizes for survival — not growth. The stress system can become
-            over‑sensitive, the amygdala (threat detector) can dominate, and the hippocampus (context and memory) can
-            struggle. That tilt toward vigilance can lock us into loops of avoidance, craving, shame, or collapse.
-          </p>
-          <p>
-            Here’s the hope: your nervous system is plastic. Neuroplasticity means your brain rewires based on what you
-            practice — attention, action, and emotion repeated over time. With the right conditions, the same mechanism
-            that encoded your survival patterns can encode stability, confidence, and connection.
-          </p>
-        </section>
-
-        {/* Myelin & Habits */}
-        <section id="myelin" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>The Magic of Myelin</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <p>
-            Myelin is the brain’s insulation — a fatty layer that wraps neural fibers so signals travel faster and
-            cleaner. Repetition tells oligodendrocytes “this circuit matters,” and they lay down more myelin. That’s why
-            practice makes pathways powerful: the circuit literally becomes easier to fire.
-          </p>
-          <p>
-            Translation: when you repeat a healthy behavior, you’re not just “being disciplined” — you’re{" "}
-            <em>remodeling</em> the wiring that makes that behavior natural.
-          </p>
-        </section>
-
-        {/* Habit Loop */}
-        <section id="habit-loop" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>How Habits Form (Cue → Action → Reward → Rep)</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <ul style={{ listStyle: "disc", paddingLeft: "1.5rem", marginTop: 0 }}>
-            <li>
-              <strong>Cue</strong> — a trigger you can predict (waking up, coffee, doorway, a feeling).
-            </li>
-            <li>
-              <strong>Action</strong> — your tiny behavior (one breath reset, one sip of water, one push‑up).
-            </li>
-            <li>
-              <strong>Reward</strong> — a quick, honest win (name it: “that was a rep,” “I keep promises to myself”).
-            </li>
-            <li>
-              <strong>Rep</strong> — log it. The log is where the magic compounds.
-            </li>
-          </ul>
-          <p style={{ color: "#cbd5e1", marginTop: 8 }}>
-            Keep the action small enough that you can do it on your toughest day. Your job is not to crush it — it’s to
-            <em> return</em>.
-          </p>
-        </section>
-
-        {/* Why Tiny Wins Work */}
-        <section id="why-tiny" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>Why Tiny Wins Work</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <ul style={{ listStyle: "disc", paddingLeft: "1.5rem", marginTop: 0 }}>
-            <li>
-              <strong>Lower friction</strong> — small reps dodge the brain’s threat gate and reduce avoidance.
-            </li>
-            <li>
-              <strong>State shift</strong> — a 20–120 second action can calm arousal or lift energy enough to act again.
-            </li>
-            <li>
-              <strong>Identity builds</strong> — each rep is evidence: “I am someone who shows up.”
-            </li>
-            <li>
-              <strong>Myelin grows</strong> — repetition + consistency = stronger, faster circuits.
-            </li>
-          </ul>
-
-          {/* Pull-quote ribbon */}
+        {/* TL;DR */}
+        <section aria-label="Summary" style={{ marginBottom: "1.75rem" }}>
           <div
             style={{
-              marginTop: 14,
               padding: "12px 14px",
               borderRadius: 12,
               border: "1px solid #233147",
               background:
                 "linear-gradient(180deg, rgba(11,18,32,0.85) 0%, rgba(11,18,32,0.6) 100%)",
-              boxShadow: "0 10px 20px rgba(0,0,0,0.35)",
             }}
           >
-            <p style={{ margin: 0, color: "#cbd5e1", fontStyle: "italic" }}>
-              “Rewiring isn’t a single breakthrough. It’s the quiet victory of today’s rep.”
+            <p style={{ margin: 0, color: "#d1d5db" }}>
+              Neuroplasticity means your brain remodels with what you repeat. Trauma and addiction carve reactive loops;
+              gentle, consistent reps &mdash; logged and celebrated &mdash; lay myelin on healthier pathways.
             </p>
           </div>
         </section>
 
-        {/* KIND Method */}
+        {/* Rewiring overview */}
+        <section id="rewiring" style={{ marginBottom: "2rem" }}>
+          <h2 style={{ color: "#93c5fd" }}>You Are Wired to Heal</h2>
+          <div
+            aria-hidden
+            style={{
+              height: 2,
+              width: 84,
+              margin: "8px 0 14px",
+              borderRadius: 999,
+              background:
+                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
+            }}
+          />
+          <p>
+            Healing is not willpower alone; it is biology. Your brain is a dynamic map that changes with experience.
+            Neuroplasticity &mdash; the brain&apos;s capacity to rewire &mdash; lets you build new, kinder routes while
+            old pathways quiet with disuse.
+          </p>
+        </section>
+
+        {/* Brain systems */}
+        <section id="brain" style={{ marginBottom: "2rem" }}>
+          <h2 style={{ color: "#93c5fd" }}>Trauma and Addiction in the Brain</h2>
+          <div
+            aria-hidden
+            style={{
+              height: 2,
+              width: 84,
+              margin: "8px 0 14px",
+              borderRadius: 999,
+              background:
+                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
+            }}
+          />
+          <h3 style={{ marginBottom: 6 }}>Amygdala &mdash; the &ldquo;smoke detector&rdquo;</h3>
+          <p style={{ marginTop: 0 }}>
+            Rapid threat detection triggers fight/flight/freeze via stress hormones. After trauma, the detector becomes
+            overly sensitive and can alarm in safe contexts. Healing practices teach safety again and turn down the gain.
+          </p>
+
+          <h3 style={{ marginBottom: 6 }}>Prefrontal Cortex (PFC) &mdash; the &ldquo;thinking center&rdquo;</h3>
+          <p style={{ marginTop: 0 }}>
+            The PFC governs planning and emotional regulation. When alarms blare, the brain routes energy away from slow,
+            reflective control toward fast survival. Recovery strengthens PFC influence so it can soothe the amygdala and
+            guide choices.
+          </p>
+
+          <h3 style={{ marginBottom: 6 }}>Hippocampus &mdash; the &ldquo;memory librarian&rdquo;</h3>
+          <p style={{ marginTop: 0 }}>
+            Stress can disrupt memory filing, leaving fragments that intrude as if the past is present. Healing helps
+            integrate and time-stamp memories so they can be known as over.
+          </p>
+        </section>
+
+        {/* Myelin & Hebb */}
+        <section id="myelin" style={{ marginBottom: "2rem" }}>
+          <h2 style={{ color: "#93c5fd" }}>Myelination: Paving New Neural Highways</h2>
+          <div
+            aria-hidden
+            style={{
+              height: 2,
+              width: 84,
+              margin: "8px 0 14px",
+              borderRadius: 999,
+              background:
+                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
+            }}
+          />
+          <p>
+            Repetition signals oligodendrocytes to wrap used axons in myelin, the brain&apos;s insulation. Signals then
+            travel cleaner and up to orders-of-magnitude faster. This is why new behaviors feel effortful at first and
+            easier with practice: the wiring changes.
+          </p>
+          <p>
+            Hebb&apos;s principle &mdash; &ldquo;neurons that fire together, wire together&rdquo; &mdash; is the engine.
+            Consistency beats intensity. A 2-minute practice daily outgrows a heroic session done rarely.
+          </p>
+        </section>
+
+        {/* Habit loop */}
+        <section id="loop" style={{ marginBottom: "2rem" }}>
+          <h2 style={{ color: "#93c5fd" }}>Cue &rarr; Action &rarr; Reward &rarr; Rep</h2>
+          <div
+            aria-hidden
+            style={{
+              height: 2,
+              width: 84,
+              margin: "8px 0 14px",
+              borderRadius: 999,
+              background:
+                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
+            }}
+          />
+          <ul style={{ listStyle: "disc", paddingLeft: "1.5rem", marginTop: 0 }}>
+            <li><strong>Cue</strong>: predictable trigger (coffee, doorway, a feeling).</li>
+            <li><strong>Action</strong>: tiny behavior (one breath reset, one text to a friend).</li>
+            <li><strong>Reward</strong>: name the win: &ldquo;that was a rep&rdquo; / &ldquo;I keep promises to myself&rdquo;.</li>
+            <li><strong>Rep</strong>: log it; the log compounds the habit loop.</li>
+          </ul>
+          <p style={{ color: "#cbd5e1", marginTop: 8 }}>
+            Keep the bar low enough for your hardest day. The job is not to never miss; it&apos;s to return.
+          </p>
+          <p style={{ marginTop: 10 }}>
+            <Link href="/dashboard" style={{ color: "#fbbf24", textDecoration: "underline" }}>
+              Try one tiny rep now &rarr;
+            </Link>
+          </p>
+        </section>
+
+        {/* Practical steps */}
+        <section id="practices" style={{ marginBottom: "2rem" }}>
+          <h2 style={{ color: "#93c5fd" }}>Practical Steps to Rewire</h2>
+          <div
+            aria-hidden
+            style={{
+              height: 2,
+              width: 84,
+              margin: "8px 0 14px",
+              borderRadius: 999,
+              background:
+                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
+            }}
+          />
+          <h3>Mindfulness and Meditation 🧘</h3>
+          <p>
+            Focus training strengthens PFC regulation and quiets amygdala reactivity over time. Observe thoughts and
+            feelings without getting swept away; that stance is itself neuroplastic practice.
+          </p>
+
+          <h3>Somatic (Body-Based) Practices</h3>
+          <p>
+            You cannot think your way out of a body stuck in survival. Bottom-up work (somatic experiencing, yoga,
+            tai chi/Qigong, progressive muscle relaxation) releases tension and signals safety to brainstem and amygdala.
+          </p>
+
+          <h3>Cognitive &amp; Behavioral Skills (CBT/DBT)</h3>
+          <p>
+            Top-down skills engage the PFC to notice and reframe automatic patterns. Rehearsing kinder, more accurate
+            thoughts fires new circuits that become more automatic with myelination.
+          </p>
+
+          <h3>Connection and Co-regulation ❤️</h3>
+          <p>
+            Nervous systems synchronize. Safe others down-shift threat and expand capacity. Isolation feeds alarms;
+            healthy connection is a biological resource, not a luxury.
+          </p>
+
+          <h3>Nutrition, Sleep, and Exercise 🍎</h3>
+          <p>
+            These are the non-negotiable substrate: omega-3s support myelin; good sleep consolidates memory and restores
+            control; movement lowers cortisol and boosts BDNF, the growth fertilizer for circuits.
+          </p>
+          <p style={{ marginTop: 10 }}>
+            <Link href="/dashboard" style={{ color: "#fbbf24", textDecoration: "underline" }}>
+              Set a 2-minute daily rep &rarr;
+            </Link>
+          </p>
+        </section>
+
+        {/* KIND method */}
         <section id="kind" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>The K.I.N.D. Method</h2>
           <div
@@ -317,57 +357,16 @@ export default function Science() {
             }}
           />
           <ul style={{ listStyle: "disc", paddingLeft: "1.5rem", marginTop: 0 }}>
-            <li>
-              <strong>K — Knowledge</strong>: Understand trauma’s effects on attention, energy, and safety. Knowledge
-              lowers shame and raises choice.
-            </li>
-            <li>
-              <strong>I — Identification</strong>: Spot your loops (cues, urges, stories). Name them without judgment:
-              “This is a threat response, not truth.”
-            </li>
-            <li>
-              <strong>N — Neural Rewiring</strong>: Choose one tiny action you can repeat daily. Log every rep. Treat
-              reps like bricks — small alone, unstoppable together.
-            </li>
-            <li>
-              <strong>D — Daily Kindness</strong>: Compassion regulates the system that learns. Talk to yourself the way
-              you’d talk to someone you love who’s trying.
-            </li>
-          </ul>
-          <p style={{ marginTop: 8, color: "#cbd5e1" }}>
-            K.I.N.D. is not about perfection. It’s about creating safety to practice, and practice to change.
-          </p>
-        </section>
-
-        {/* How Reps Compound */}
-        <section id="reps" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>Why Reps Are the Engine</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <p>
-            A single tiny rep won’t change your life. But a string of days where you did not abandon yourself — that
-            changes everything. In Myelin Map, each rep lights a node, builds wraps, and moves your goal forward. It’s
-            visual proof you’re coming back to yourself.
-          </p>
-          <ul style={{ listStyle: "disc", paddingLeft: "1.5rem" }}>
-            <li><strong>1 rep</strong> today creates momentum.</li>
-            <li><strong>7 reps</strong> = 1 wrap (example). You’ll feel the circuit getting easier.</li>
-            <li><strong>21 reps</strong> often = a noticeable shift. You start doing it without the inner fight.</li>
+            <li><strong>K &mdash; Knowledge</strong>: understanding lowers shame and expands choice.</li>
+            <li><strong>I &mdash; Identification</strong>: name loops and cues kindly: &ldquo;this is a threat response, not truth.&rdquo;</li>
+            <li><strong>N &mdash; Neural Rewiring</strong>: one tiny daily action; log every rep.</li>
+            <li><strong>D &mdash; Daily Kindness</strong>: compassion regulates the system that learns.</li>
           </ul>
         </section>
 
-        {/* Gentle Safety Notes */}
+        {/* Safety notes */}
         <section id="safety" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>Trauma‑Aware Notes</h2>
+          <h2 style={{ color: "#93c5fd" }}>Trauma-Aware Notes</h2>
           <div
             aria-hidden
             style={{
@@ -380,46 +379,16 @@ export default function Science() {
             }}
           />
           <ul style={{ listStyle: "disc", paddingLeft: "1.5rem", marginTop: 0 }}>
-            <li>Your pace is right. If it feels too much, make the action smaller.</li>
-            <li>Missing days isn’t failure — it’s data. Reset with one rep.</li>
-            <li>
-              If you’re processing acute trauma or crisis, consider pairing this with a licensed professional’s care.
-            </li>
+            <li>Your pace is right. If it feels like too much, shrink the action.</li>
+            <li>Missed days are data, not failure. Reset with one rep.</li>
+            <li>If you&apos;re in acute crisis, pair this with a licensed professional&apos;s care.</li>
           </ul>
         </section>
 
-        {/* Quick FAQ */}
-        <section id="faq" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ color: "#93c5fd" }}>Quick Questions</h2>
-          <div
-            aria-hidden
-            style={{
-              height: 2,
-              width: 84,
-              margin: "8px 0 14px",
-              borderRadius: 999,
-              background:
-                "linear-gradient(90deg, rgba(147,197,253,0) 0%, rgba(147,197,253,0.8) 50%, rgba(147,197,253,0) 100%)",
-            }}
-          />
-          <p style={{ marginBottom: 8 }}>
-            <strong>How small should I start?</strong> — Small enough that you can do it on your hardest day. Then log
-            it.
-          </p>
-          <p style={{ marginBottom: 8 }}>
-            <strong>Do I need motivation first?</strong> — No. Action creates motivation more reliably than the other
-            way around.
-          </p>
-          <p style={{ marginBottom: 0 }}>
-            <strong>What if I feel shame?</strong> — Name it kindly and do a 20‑second rep. Shame shrinks when you act
-            in alignment with the person you’re becoming.
-          </p>
-        </section>
-
-        {/* CTA */}
-        <section style={{ textAlign: "center", marginTop: "3rem" }}>
+        {/* Closing / CTA */}
+        <section style={{ textAlign: "center", marginTop: "2.5rem" }}>
           <h2 style={{ color: "#fbbf24", fontSize: "1.5rem", marginBottom: 10 }}>
-            You are not broken — you are rewiring.
+            You are not broken &mdash; you are rewiring.
           </h2>
           <p style={{ marginBottom: "1.5rem", color: "#d1d5db" }}>
             Start today. Repeat tomorrow. Then again. Every rep strengthens your new path.
@@ -452,17 +421,17 @@ export default function Science() {
                 "translateY(0)";
             }}
           >
-            Start My Healing Journey →
+            Start My Healing Journey &rarr;
           </Link>
         </section>
       </main>
 
-      {/* Back-to-top */}
       <BackToTop />
-
       <Footer />
     </>
   );
 }
-// Add any additional styles or components here if needed
-// This page is designed to be simple and clean, focusing on the content and user experience.
+// This page blends a trauma-aware narrative, clear neuroscience, and actionable steps.
+// Quotes are HTML-escaped to satisfy react/no-unescaped-entities.
+// The StarfieldCanvas is a subtle, low-alpha background effect without external dependencies.
+// The BackToTop button appears after scrolling down 320px and smoothly scrolls to top
