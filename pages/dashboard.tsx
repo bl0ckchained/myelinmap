@@ -108,6 +108,7 @@ export default function Dashboard() {
   const [dailyCounts, setDailyCounts] = useState<number[]>([
     0, 0, 0, 0, 0, 0, 0,
   ]);
+  const [monthlyCounts, setMonthlyCounts] = useState<number[]>(Array(30).fill(0));
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
 
@@ -319,6 +320,16 @@ export default function Dashboard() {
         arr7[i] = dayKeys.has(key) ? 1 : 0;
       }
       setDailyCounts(arr7);
+
+      // last 30 days calendar
+      const arr30 = Array(30).fill(0);
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - (29 - i));
+        const key = d.toISOString().slice(0, 10);
+        arr30[i] = dayKeys.has(key) ? 1 : 0;
+      }
+      setMonthlyCounts(arr30);
 
       // --- Active habit progress ---
       if (!activeHabitId) return;
@@ -761,6 +772,36 @@ export default function Dashboard() {
                   <small className={styles.sparklineNote}>
                     Counts reflect days with activity. One tiny rep is enough
                     to light up a day.
+                  </small>
+                </Card>
+
+                {/* 30-day calendar (full width) */}
+                <Card variant="default" className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
+                  <h3 className={styles.calendarTitle}>Last 30 Days</h3>
+                  <div className={styles.calendarGrid}>
+                    {monthlyCounts.map((hasActivity, i) => {
+                      const today = new Date();
+                      const date = new Date(today);
+                      date.setDate(today.getDate() - (29 - i));
+                      const dayOfMonth = date.getDate();
+                      const isToday = i === 29;
+                      
+                      return (
+                        <div
+                          key={i}
+                          className={`${styles.calendarDay} ${
+                            hasActivity ? styles.calendarDayActive : styles.calendarDayInactive
+                          } ${isToday ? styles.calendarDayToday : ''}`}
+                          title={`${date.toLocaleDateString()} - ${hasActivity ? 'Active' : 'No activity'}`}
+                        >
+                          <span className={styles.calendarDayNumber}>{dayOfMonth}</span>
+                          {hasActivity && <div className={styles.calendarDayDot} />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <small className={styles.calendarNote}>
+                    Your habit journey over the past month. Each dot represents a day with activity.
                   </small>
                 </Card>
 
