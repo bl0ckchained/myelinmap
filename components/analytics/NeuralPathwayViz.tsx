@@ -83,7 +83,7 @@ export const NeuralPathwayViz: React.FC<NeuralPathwayVizProps> = ({
     <div className={styles.neuralVizContainer}>
       <h3>Neural Pathway Visualization</h3>
       <p className={styles.vizDescription}>
-        Each line represents a habit's neural pathway strength. 
+        Each line represents a habit&apos;s neural pathway strength. 
         Thicker, greener lines indicate stronger myelin development.
       </p>
       <canvas 
