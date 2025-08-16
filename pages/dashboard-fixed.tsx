@@ -1,4 +1,4 @@
-// pages/dashboard.tsx
+// pages/dashboard-fixed.tsx
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
@@ -391,12 +391,12 @@ export default function Dashboard() {
       return;
     }
 
-    // gentle implementation-intention nudges
+    // gentle implementation-intention nudges (safe: string literals, not JSX)
     const nudges = [
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
       "Small + consistent > perfect. One more tiny rep later today.",
-      "Label the win: 'I am someone who reps even when it's hard.'",
+      "Label the win: 'I am someone who reps even when it&apos;s hard.'",
     ];
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
 
@@ -467,7 +467,6 @@ export default function Dashboard() {
     const updated = data as HabitRow;
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
     setEditOpen(false);
-    // no extra local wrap/pct state to maintain
   };
 
   /** Sign out (kept) */
@@ -661,7 +660,7 @@ export default function Dashboard() {
 
                   {/* Coach card (right) */}
                   <Card variant="default" className={`${styles.coachCard} ${styles.coachSection}`}>
-                    <h2 className={styles.coachTitle}>Coach & Quick Rep</h2>
+                    <h2 className={styles.coachTitle}>Coach &amp; Quick Rep</h2>
                     <p className={styles.coachSubtitle}>
                       Private coach plus a one-tap rep. Gentle, practical,
                       always on your side.
@@ -704,9 +703,7 @@ export default function Dashboard() {
                       >
                         {loading ? "Logging..." : "Log Rep"}
                       </Button>
-                      {nudge && (
-                        <p className={styles.nudgeText}>{nudge}</p>
-                      )}
+                      {nudge && <p className={styles.nudgeText}>{nudge}</p>}
                       {!activeHabitId && (
                         <p className={styles.loadingText}>
                           Creating your first habit… if this persists, refresh.
@@ -780,7 +777,7 @@ export default function Dashboard() {
               <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>Your Neural Visualizer 🧬</h2>
                 <p className={styles.placeholderText}>
-                  This view grows with your reps. (Dashboard-only visualizer —
+                  This view grows with your reps. (Dashboard-only visualizer — 
                   keep the fruit tree on Home.)
                 </p>
                 <div className={styles.placeholderContent}>
@@ -798,14 +795,14 @@ export default function Dashboard() {
                 </p>
                 <Card variant="glass">
                   <p>
-                    "Based on your last rep on{" "}
+                    &ldquo;Based on your last rep on{" "}
                     <strong>
                       {userData.last_rep
                         ? new Date(userData.last_rep).toLocaleDateString()
                         : "—"}
                     </strong>
                     , here&apos;s a micro-win for today:{" "}
-                    <em>2-minute breath reset + 1 tiny rep after coffee.</em>"
+                    <em>2-minute breath reset + 1 tiny rep after coffee.</em>&rdquo;
                   </p>
                 </Card>
               </Card>
@@ -813,7 +810,7 @@ export default function Dashboard() {
 
             {active === "history" && (
               <Card variant="default" className={styles.placeholderSection}>
-                <h2 className={styles.placeholderTitle}>History & Insights</h2>
+                <h2 className={styles.placeholderTitle}>History &amp; Insights</h2>
                 <p className={styles.placeholderText}>
                   We&apos;ll populate this with daily reps, weekly trends, and
                   milestones once we add the events table.
@@ -827,7 +824,7 @@ export default function Dashboard() {
             )}
 
             <p className={styles.inspirationalQuote}>
-              "You are not broken. You are becoming."
+              &ldquo;You are not broken. You are becoming.&rdquo;
             </p>
           </>
         ) : (
@@ -907,16 +904,10 @@ export default function Dashboard() {
               marginTop: 8,
             }}
           >
-            <Button
-              variant="secondary"
-              onClick={() => setCreateOpen(false)}
-            >
+            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleCreateHabit}
-            >
+            <Button variant="primary" onClick={handleCreateHabit}>
               Create
             </Button>
           </div>
@@ -991,16 +982,10 @@ export default function Dashboard() {
               marginTop: 8,
             }}
           >
-            <Button
-              variant="secondary"
-              onClick={() => setEditOpen(false)}
-            >
+            <Button variant="secondary" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSaveEdit}
-            >
+            <Button variant="primary" onClick={handleSaveEdit}>
               Save
             </Button>
           </div>
