@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HabitRow } from '../../types/habit';
 import { useHabitPredictions } from '../../hooks/useHabitPredictions';
+import { useHabits } from '../../hooks/useHabits';
 import { HabitPredictionCard } from './HabitPredictionCard';
 import { HabitPredictionDetailModal } from './HabitPredictionDetailModal';
 import styles from '../../styles/Dashboard.module.css';
@@ -12,9 +13,13 @@ interface HabitPredictionsDashboardProps {
 export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps> = ({
   userId
 }) => {
-  const { predictions, behavioralInsights, correlations, loading, error, refreshPredictions } = useHabitPredictions(userId);
+  const { predictions, behavioralInsights, loading: predictionsLoading, error: predictionsError, refreshPredictions } = useHabitPredictions(userId);
+  const { habits, loading: habitsLoading, error: habitsError } = useHabits(userId);
   const [selectedHabit, setSelectedHabit] = useState<HabitRow | null>(null);
   const [filter, setFilter] = useState<'all' | 'high-risk' | 'high-potential'>('all');
+
+  const loading = predictionsLoading || habitsLoading;
+  const error = predictionsError || habitsError;
 
   if (loading) {
     return (
@@ -78,7 +83,7 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
 
       <div className={styles.predictionsGrid}>
         {filteredPredictions.map(([habitId, prediction]) => {
-          const habit = selectedHabit; // This would need to be fetched properly
+          const habit = habits.find(h => h.id === habitId);
           const insight = behavioralInsights[habitId];
           
           if (!habit || !insight) return null;

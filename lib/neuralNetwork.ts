@@ -252,7 +252,7 @@ export class HabitNeuralNetwork extends NeuralNetwork {
       const daysAgo = (Date.now() - new Date(a.date).getTime()) / (1000 * 60 * 60 * 24);
       return daysAgo <= 7;
     });
-    features.push(recentActivities.filter(a => a.completed).length / Math.max(recentActivities.length, 1));
+    features.push(recentActivities.filter(a => a.rep_count > 0).length / Math.max(recentActivities.length, 1));
 
     // Fill remaining features with zeros if needed
     while (features.length < 15) {
@@ -282,7 +282,7 @@ export class HabitNeuralNetwork extends NeuralNetwork {
 
     // Optimal time (normalized hour 0-1)
     const completionTimes = activities
-      .filter(a => a.completed)
+      .filter(a => a.rep_count > 0)
       .map(a => new Date(a.date).getHours());
     
     const optimalTime = completionTimes.length > 0 
