@@ -651,7 +651,7 @@ export default function Dashboard() {
                           </div>
                           <div className={styles.streakText}>
                             {streak > 0
-                              ? "You came back. That's braver than never missing."
+                              ? "You came back. That&apos;s braver than never missing."
                               : "Today can be day one. One tiny rep."}
                           </div>
                         </div>
@@ -804,7 +804,7 @@ export default function Dashboard() {
                         ? new Date(userData.last_rep).toLocaleDateString()
                         : "—"}
                     </strong>
-                    , here's a micro-win for today:{" "}
+                    , here&apos;s a micro-win for today:{" "}
                     <em>2-minute breath reset + 1 tiny rep after coffee.</em>"
                   </p>
                 </Card>
@@ -815,7 +815,7 @@ export default function Dashboard() {
               <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>History & Insights</h2>
                 <p className={styles.placeholderText}>
-                  We'll populate this with daily reps, weekly trends, and
+                  We&apos;ll populate this with daily reps, weekly trends, and
                   milestones once we add the events table.
                 </p>
                 <ul>
