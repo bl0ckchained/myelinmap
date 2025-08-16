@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 import HabitLoop from "@/components/HabitLoop";
 import NeuralField from "@/components/NeuralField";
+import MyelinVisualizer from "@/components/MyelinVisualizer";
 import HabitAnalytics from "@/components/HabitAnalytics";
 import FloatingCoach from "@/components/FloatingCoach";
 import DashboardJournalWidget from "@/components/DashboardJournalWidget";
@@ -587,11 +588,12 @@ export default function Dashboard() {
                           const h = habits.find((x) => x.id === activeHabitId);
                           if (!h) return null;
                           return (
-                            <NeuralField
+                            <MyelinVisualizer
                               repCount={habitRepCount}
                               wrapSize={Math.max(1, h.wrap_size)}
                               pulseKey={loopPulse}
-                              height={260}
+                              height={280}
+                              title={`${h.name} — Myelin Network`}
                             />
                           );
                         })()}
@@ -775,16 +777,52 @@ export default function Dashboard() {
             )}
 
             {active === "visualizer" && (
-              <Card variant="default" className={styles.placeholderSection}>
-                <h2 className={styles.placeholderTitle}>Your Neural Visualizer 🧬</h2>
-                <p className={styles.placeholderText}>
-                  This view grows with your reps. (Dashboard-only visualizer —
-                  keep the fruit tree on Home.)
-                </p>
-                <div className={styles.placeholderContent}>
-                  <span>Visualizer placeholder — plug in your component</span>
-                </div>
-              </Card>
+              <div className={styles.visualizerGrid}>
+                {/* Enhanced Myelin Visualizer */}
+                {(() => {
+                  const h = habits.find((x) => x.id === activeHabitId);
+                  if (!h) return (
+                    <Card variant="default" className={styles.placeholderSection}>
+                      <h2 className={styles.placeholderTitle}>Select a Habit</h2>
+                      <p className={styles.placeholderText}>
+                        Choose an active habit to see your neural network visualization.
+                      </p>
+                    </Card>
+                  );
+                  return (
+                    <MyelinVisualizer
+                      repCount={habitRepCount}
+                      wrapSize={Math.max(1, h.wrap_size)}
+                      pulseKey={loopPulse}
+                      height={400}
+                      title={`${h.name} — Advanced Myelin Network`}
+                    />
+                  );
+                })()}
+
+                {/* Original Neural Field for comparison */}
+                {(() => {
+                  const h = habits.find((x) => x.id === activeHabitId);
+                  if (!h) return null;
+                  return (
+                    <div style={{ marginTop: 20 }}>
+                      <Card variant="default">
+                        <div style={{ padding: 16 }}>
+                          <h3 style={{ color: "#94a3b8", marginBottom: 12, fontSize: 14 }}>
+                            Classic Neural Field View
+                          </h3>
+                          <NeuralField
+                            repCount={habitRepCount}
+                            wrapSize={Math.max(1, h.wrap_size)}
+                            pulseKey={loopPulse}
+                            height={260}
+                          />
+                        </div>
+                      </Card>
+                    </div>
+                  );
+                })()}
+              </div>
             )}
 
             {active === "coach" && (
