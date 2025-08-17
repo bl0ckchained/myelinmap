@@ -15,19 +15,78 @@ const navLinks = [
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
-    <header className="bg-gray-900 text-white text-center py-12 px-4">
-      <h1 className="text-4xl font-bold">{title}</h1>
-      {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
-      <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+    <header
+      style={{
+        backgroundColor: "#111827", // gray-900
+        color: "#ffffff",
+        textAlign: "center",
+        padding: "3rem 1rem",
+      }}
+    >
+      {/* Title and Subtitle */}
+      <h1 style={{ fontSize: "2.25rem", fontWeight: "bold", margin: 0 }}>
+        {title}
+      </h1>
+      {subtitle && (
+        <p
+          style={{
+            fontSize: "1.125rem",
+            marginTop: "0.5rem",
+            maxWidth: "40rem",
+            marginLeft: "auto",
+            marginRight: "auto",
+          }}
+        >
+          {subtitle}
+        </p>
+      )}
+
+      {/* Navigation */}
+      <nav
+        style={{
+          marginTop: "2rem",
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: "0.75rem",
+          fontSize: "0.875rem",
+        }}
+      >
         {navLinks.map(({ href, label, hoverColor }) => (
           <Link key={href} href={href} legacyBehavior>
             <a
-              className={`
-                px-4 py-2 rounded-full bg-gray-800 text-white
-                ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md
-                transform hover:-translate-y-1 hover:scale-105
-              `}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "9999px",
+                color: "#ffffff",
+                backgroundColor: "#1f2937", // gray-800
+                textDecoration: "none",
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                transition: "all 0.3s",
+              }}
+              onMouseOver={(e) => {
+                const colorMap: { [key: string]: string } = {
+                  "hover:bg-emerald-500": "#10b981",
+                  "hover:bg-amber-400": "#fbbf24",
+                  "hover:bg-lime-400": "#a3e635",
+                  "hover:bg-cyan-500": "#06b6d4",
+                  "hover:bg-pink-400": "#f472b6",
+                  "hover:bg-rose-400": "#fb7185",
+                  "hover:bg-blue-400": "#60a5fa",
+                };
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  colorMap[hoverColor] || "#10b981";
+                (e.currentTarget as HTMLAnchorElement).style.color = "#000000";
+                (e.currentTarget as HTMLAnchorElement).style.transform =
+                  "translateY(-4px) scale(1.05)";
+              }}
+              onMouseOut={(e) => {
+                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
+                  "#1f2937";
+                (e.currentTarget as HTMLAnchorElement).style.color = "#ffffff";
+                (e.currentTarget as HTMLAnchorElement).style.transform =
+                  "translateY(0) scale(1)";
+              }}
             >
               {label}
             </a>
@@ -41,47 +100,42 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
 // --- Embedded Footer Component ---
 const Footer = () => {
   return (
-    <footer className="text-center p-8 bg-gray-900 text-white text-sm">
-      <div className="space-y-2 mb-4">
-        <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
-        </p>
-        <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
-        </p>
+    <footer
+      style={{
+        textAlign: "center",
+        padding: "2rem",
+        backgroundColor: "#111827",
+        color: "#fff",
+        fontSize: "0.875rem",
+      }}
+    >
+      <div style={{ marginBottom: "1.5rem" }}>
+        <p style={{ color: "#9ca3af", marginTop: "0.5rem" }}>Special thanks to Matt Stewart — your belief helped light this path.</p>
+        <p>🧠 Designed to wire greatness into your day 🧠</p>
       </div>
-      <div className="space-y-2 mb-4">
-        <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
-          Consultants LLC
-        </p>
+
+      <div style={{ marginBottom: "1.5rem" }}>
+        <p>&copy; {new Date().getFullYear()} MyelinMap.com — Made with 💙 in Michigan · Powered by Quantum Step Consultants LLC</p>
         <p>
           <Link href="/legalpage" legacyBehavior>
-            <a className="underline hover:text-blue-300">
-              Privacy Policy & Terms
-            </a>
+            <a style={{ textDecoration: "underline", color: "#bfdbfe" }}>Privacy Policy & Terms</a>
           </Link>
         </p>
       </div>
-      <div className="flex justify-center items-center gap-2">
-        <span className="text-gray-400">Join our journey</span>
+
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+        <span style={{ color: "#9ca3af" }}>Join our journey</span>
         <a
           href="https://www.youtube.com/@myelinmap"
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:opacity-80 transition"
           aria-label="YouTube Channel"
+          style={{ transition: "opacity 0.3s", color: "#ef4444", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="text-red-500"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
           </svg>
+          <span>YouTube</span>
         </a>
       </div>
     </footer>

@@ -1,32 +1,14 @@
-# Enhanced Myelin Visualizer - COMPLETED ✅
+# Fix Header and Footer Alignment in Resources Page
 
-## What We Accomplished
+## Tasks to Complete:
+- [x] Fix embedded Header component centering in resources.tsx
+- [x] Fix embedded Footer component centering in resources.tsx
+- [ ] Test the page to verify proper alignment
 
-### 1. Fixed ESLint Build Errors
-- ✅ Fixed `pages/dashboard-fixed.tsx` - Replaced unescaped quotes and apostrophes
-- ✅ Fixed `pages/dashboard.tsx` - Replaced unescaped quotes and apostrophes  
-- ✅ Verified build process - All ESLint errors resolved!
-
-### 2. Created Magical Myelin Visualizer 🧠✨
-- ✅ Built `components/MyelinVisualizer.tsx` - Advanced neural network visualization
-- ✅ Integrated into dashboard overview section
-- ✅ Enhanced visualizer tab with both new and classic views
-- ✅ Added real-time myelin formation effects when logging reps
-
-### Key Features of the New Visualizer:
-- **Dynamic Neural Network**: Neurons and pathways that grow with rep count
-- **Myelin Wrapping Animation**: Visual myelin sheaths that strengthen over time  
-- **Signal Transmission**: Golden signals that pulse through pathways during reps
-- **Myelin Density Tracking**: Shows percentage of network myelination
-- **Responsive Messages**: "🧠 Myelin forming... Neural pathway strengthened!"
-- **Magical Effects**: Glowing neurons, pulsing connections, and smooth animations
-
-### Technical Implementation:
-- Canvas-based rendering for smooth 60fps animations
-- Responsive design that adapts to different screen sizes
-- Real-time updates based on habit data (rep count, wrap size)
-- Proper TypeScript typing and error handling
-- Integrated with existing dashboard state management
-
-### Status:
-🎉 **FULLY COMPLETED** - The Vercel gods are now smiling! Build successful, visualizer is magical and classy, showing beautiful myelin formation as users build habits.
+## Progress:
+- [x] Analyzed the issue - embedded components in resources.tsx are left-aligned
+- [x] Identified that other pages use properly centered Header.tsx and Footer.tsx components
+- [x] Created plan to update embedded components to match separate component styling
+- [x] Update embedded Header component - Replaced Tailwind classes with inline styles matching Header.tsx
+- [x] Update embedded Footer component - Replaced Tailwind classes with inline styles matching Footer.tsx
+- [ ] Verify changes work correctly
