@@ -105,10 +105,12 @@ export default function Dashboard() {
   const [active, setActive] = useState<Tab>("overview");
 
   /** --- Lightweight counts from your original implementation (kept) --- */
-  const [dailyCounts, setDailyCounts] = useState<number[]>([
-    0, 0, 0, 0, 0, 0, 0,
-  ]);
-  const [monthlyCounts, setMonthlyCounts] = useState<number[]>(Array(30).fill(0));
+  const [dailyCounts, setDailyCounts] = useState<number[]>(
+    Array(7).fill(0)
+  );
+  const [monthlyCounts, setMonthlyCounts] = useState<number[]>(
+    Array(30).fill(0)
+  );
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
 
@@ -311,7 +313,7 @@ export default function Dashboard() {
       }
       setStreak(s);
 
-      // last 7 days mini-series
+      // last 7 days mini-series (index 6 = today)
       const arr7 = Array(7).fill(0);
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today);
@@ -321,7 +323,7 @@ export default function Dashboard() {
       }
       setDailyCounts(arr7);
 
-      // last 30 days calendar
+      // last 30 days calendar (index 29 = today)
       const arr30 = Array(30).fill(0);
       for (let i = 29; i >= 0; i--) {
         const d = new Date(today);
@@ -346,7 +348,6 @@ export default function Dashboard() {
 
       const total = typeof count === "number" ? count : 0;
       setHabitRepCount(total);
-      // (No extra local wrap/pct state to update here — UI computes from habitRepCount)
     };
 
     compute();
@@ -408,7 +409,7 @@ export default function Dashboard() {
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
       "Small + consistent > perfect. One more tiny rep later today.",
-      "Label the win: 'I am someone who reps even when it&apos;s hard.'",
+      "Label the win: 'I am someone who reps even when it's hard.'",
     ];
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
 
@@ -479,7 +480,6 @@ export default function Dashboard() {
     const updated = data as HabitRow;
     setHabits((prev) => prev.map((h) => (h.id === updated.id ? updated : h)));
     setEditOpen(false);
-    // no extra local wrap/pct state to maintain
   };
 
   /** Sign out (kept) */
@@ -539,7 +539,7 @@ export default function Dashboard() {
                         Email: <strong>{user.email}</strong>
                       </p>
 
-                        {/* Habit selector + actions */}
+                      {/* Habit selector + actions */}
                       <div className={styles.habitControls}>
                         <label htmlFor="habit" className={styles.habitLabel}>
                           Active habit:
@@ -664,7 +664,7 @@ export default function Dashboard() {
                           </div>
                           <div className={styles.streakText}>
                             {streak > 0
-                              ? "You came back. That&apos;s braver than never missing."
+                              ? "You came back. That's braver than never missing."
                               : "Today can be day one. One tiny rep."}
                           </div>
                         </div>
@@ -673,7 +673,10 @@ export default function Dashboard() {
                   </Card>
 
                   {/* Coach card (right) */}
-                  <Card variant="default" className={`${styles.coachCard} ${styles.coachSection}`}>
+                  <Card
+                    variant="default"
+                    className={`${styles.coachCard} ${styles.coachSection}`}
+                  >
                     <h2 className={styles.coachTitle}>Coach &amp; Quick Rep</h2>
                     <p className={styles.coachSubtitle}>
                       Private coach plus a one-tap rep. Gentle, practical,
@@ -733,7 +736,10 @@ export default function Dashboard() {
                 </div>
 
                 {/* 7-day sparkline (full width) */}
-                <Card variant="default" className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}>
+                <Card
+                  variant="default"
+                  className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}
+                >
                   <h3 className={styles.sparklineTitle}>Last 7 Days</h3>
                   <svg
                     width="100%"
@@ -776,7 +782,10 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 30-day calendar (full width) */}
-                <Card variant="default" className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
+                <Card
+                  variant="default"
+                  className={`${styles.fullWidthCard} ${styles.calendarContainer}`}
+                >
                   <h3 className={styles.calendarTitle}>Last 30 Days</h3>
                   <div className={styles.calendarGrid}>
                     {monthlyCounts.map((hasActivity, i) => {
@@ -785,23 +794,32 @@ export default function Dashboard() {
                       date.setDate(today.getDate() - (29 - i));
                       const dayOfMonth = date.getDate();
                       const isToday = i === 29;
-                      
+
                       return (
                         <div
                           key={i}
                           className={`${styles.calendarDay} ${
-                            hasActivity ? styles.calendarDayActive : styles.calendarDayInactive
-                          } ${isToday ? styles.calendarDayToday : ''}`}
-                          title={`${date.toLocaleDateString()} - ${hasActivity ? 'Active' : 'No activity'}`}
+                            hasActivity
+                              ? styles.calendarDayActive
+                              : styles.calendarDayInactive
+                          } ${isToday ? styles.calendarDayToday : ""}`}
+                          title={`${date.toLocaleDateString()} - ${
+                            hasActivity ? "Active" : "No activity"
+                          }`}
                         >
-                          <span className={styles.calendarDayNumber}>{dayOfMonth}</span>
-                          {hasActivity && <div className={styles.calendarDayDot} />}
+                          <span className={styles.calendarDayNumber}>
+                            {dayOfMonth}
+                          </span>
+                          {hasActivity && (
+                            <div className={styles.calendarDayDot} />
+                          )}
                         </div>
                       );
                     })}
                   </div>
                   <small className={styles.calendarNote}>
-                    Your habit journey over the past month. Each dot represents a day with activity.
+                    Your habit journey over the past month. Each dot represents
+                    a day with activity.
                   </small>
                 </Card>
 
@@ -822,14 +840,15 @@ export default function Dashboard() {
                 {/* Enhanced Myelin Visualizer */}
                 {(() => {
                   const h = habits.find((x) => x.id === activeHabitId);
-                  if (!h) return (
-                    <Card variant="default" className={styles.placeholderSection}>
-                      <h2 className={styles.placeholderTitle}>Select a Habit</h2>
-                      <p className={styles.placeholderText}>
-                        Choose an active habit to see your neural network visualization.
-                      </p>
-                    </Card>
-                  );
+                  if (!h)
+                    return (
+                      <Card variant="default" className={styles.placeholderSection}>
+                        <h2 className={styles.placeholderTitle}>Select a Habit</h2>
+                        <p className={styles.placeholderText}>
+                          Choose an active habit to see your neural network visualization.
+                        </p>
+                      </Card>
+                    );
                   return (
                     <MyelinVisualizer
                       repCount={habitRepCount}
@@ -849,7 +868,13 @@ export default function Dashboard() {
                     <div style={{ marginTop: 20 }}>
                       <Card variant="default">
                         <div style={{ padding: 16 }}>
-                          <h3 style={{ color: "#94a3b8", marginBottom: 12, fontSize: 14 }}>
+                          <h3
+                            style={{
+                              color: "#94a3b8",
+                              marginBottom: 12,
+                              fontSize: 14,
+                            }}
+                          >
                             Classic Neural Field View
                           </h3>
                           <NeuralField
@@ -881,7 +906,7 @@ export default function Dashboard() {
                         ? new Date(userData.last_rep).toLocaleDateString()
                         : "—"}
                     </strong>
-                    , here&apos;s a micro-win for today:{" "}
+                    , here's a micro-win for today:{" "}
                     <em>2-minute breath reset + 1 tiny rep after coffee.</em>
                   </p>
                 </Card>
@@ -892,7 +917,7 @@ export default function Dashboard() {
               <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>History &amp; Insights</h2>
                 <p className={styles.placeholderText}>
-                  We&apos;ll populate this with daily reps, weekly trends, and
+                  We'll populate this with daily reps, weekly trends, and
                   milestones once we add the events table.
                 </p>
                 <ul>
@@ -911,8 +936,11 @@ export default function Dashboard() {
           <Card variant="glass" className={styles.signInSection}>
             <h2 className={styles.signInTitle}>Sign In Required</h2>
             <p className={styles.signInText}>
-              Please <Link href="/signin" className={styles.signInLink}>sign in here</Link> to access your
-              dashboard.
+              Please{" "}
+              <Link href="/signin" className={styles.signInLink}>
+                sign in here
+              </Link>{" "}
+              to access your dashboard.
             </p>
           </Card>
         )}
@@ -1071,7 +1099,7 @@ export default function Dashboard() {
           </div>
 
           <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
-            You can change goals as you grow. Progress isn&apos;t linear — it&apos;s kind.
+            You can change goals as you grow. Progress isn't linear — it's kind.
           </p>
         </div>
       </Modal>
