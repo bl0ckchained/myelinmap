@@ -2,10 +2,7 @@ import React from "react";
 import Head from "next/head";
 import Link from "next/link";
 
-// This is a self-contained version of the Rewire page, combining the main
-// page logic with the Header and Footer components to resolve import issues.
-
-// --- Embedded Header Component ---
+// --- Embedded Header Component (centered with container) ---
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
@@ -16,13 +13,15 @@ const navLinks = [
 
 const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
-    <header className="bg-gray-900 text-white text-center py-12 px-4">
-      <h1 className="text-4xl font-bold">{title}</h1>
-      {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
-      <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
-        {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href} legacyBehavior>
-            <a
+    <header className="bg-gray-900 text-white py-12">
+      <div className="max-w-6xl mx-auto px-4 text-center">
+        <h1 className="text-4xl font-bold">{title}</h1>
+        {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
+        <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+          {navLinks.map(({ href, label, hoverColor }) => (
+            <Link
+              key={href}
+              href={href}
               className={`
                 px-4 py-2 rounded-full bg-gray-800 text-white
                 ${hoverColor} hover:text-black
@@ -31,59 +30,63 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
               `}
             >
               {label}
-            </a>
-          </Link>
-        ))}
-      </nav>
+            </Link>
+          ))}
+        </nav>
+      </div>
     </header>
   );
 };
 
-// --- Embedded Footer Component ---
+// --- Embedded Footer Component (centered with container) ---
 const Footer = () => {
   return (
-    <footer className="text-center p-8 bg-gray-900 text-white text-sm">
-      <div className="space-y-2 mb-4">
-        <p className="text-gray-400 mt-2">
-          Special thanks to Matt Stewart &mdash; your belief helped light this path.
-        </p>
-        <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
-        </p>
-      </div>
-      <div className="space-y-2 mb-4">
-        <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
-          Consultants LLC
-        </p>
-        <p>
-          <Link href="/legalpage" legacyBehavior>
-            <a className="underline hover:text-blue-300">
-              Privacy Policy & Terms
-            </a>
-          </Link>
-        </p>
-      </div>
-      <div className="flex justify-center items-center gap-2">
-        <span className="text-gray-400">Join our journey</span>
-        <a
-          href="https://www.youtube.com/@myelinmap"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:opacity-80 transition"
-          aria-label="YouTube Channel"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="26"
-            height="26"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="text-red-500"
+    <footer className="bg-gray-900 text-white py-8">
+      <div className="max-w-6xl mx-auto px-4 text-center text-sm">
+        <div className="space-y-2 mb-4">
+          <p className="text-gray-400 mt-2">
+            Special thanks to Matt Stewart &mdash; your belief helped light this path.
+          </p>
+          <p>
+            <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day{" "}
+            <span role="img" aria-label="brain emoji">🧠</span>
+          </p>
+        </div>
+
+        <div className="space-y-2 mb-4">
+          <p>
+            &copy; {new Date().getFullYear()} MyelinMap.com Made with{" "}
+            <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+            Consultants LLC
+          </p>
+          <p>
+            <Link href="/legalpage" className="underline hover:text-blue-300">
+              Privacy Policy &amp; Terms
+            </Link>
+          </p>
+        </div>
+
+        <div className="flex justify-center items-center gap-2">
+          <span className="text-gray-400">Join our journey</span>
+          <a
+            href="https://www.youtube.com/@myelinmap"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition"
+            aria-label="YouTube Channel"
           >
-            <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
-          </svg>
-        </a>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="text-red-500"
+            >
+              <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
+            </svg>
+          </a>
+        </div>
       </div>
     </footer>
   );
