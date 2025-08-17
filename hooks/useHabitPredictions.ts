@@ -1,6 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import { HabitRow, HabitProgress, DailyActivity } from '../types/habit';
-import { HabitPredictionEngine, HabitPrediction, BehavioralInsight, HabitCorrelation } from '../lib/habitPredictions';
+// hooks/useHabitPredictions.ts
+import { useState, useEffect, useCallback, useMemo } from "react";
+import type { HabitRow, HabitProgress, DailyActivity } from "../types/habit";
+import {
+  HabitPredictionEngine,
+  type HabitPrediction,
+  type BehavioralInsight,
+  type HabitCorrelation,
+} from "../lib/habitPredictions";
 
 interface HabitPredictionsData {
   predictions: Record<string, HabitPrediction>;
@@ -10,94 +16,145 @@ interface HabitPredictionsData {
   error: string | null;
 }
 
-export const useHabitPredictions = (userId: string): HabitPredictionsData & {
-  refreshPredictions: () => Promise<void>;
-} => {
+export const useHabitPredictions = (
+  userId: string
+): HabitPredictionsData & { refreshPredictions: () => Promise<void> } => {
   const [data, setData] = useState<HabitPredictionsData>({
     predictions: {},
     behavioralInsights: {},
     correlations: [],
     loading: true,
-    error: null
+    error: null,
   });
 
-  const predictionEngine = HabitPredictionEngine.getInstance();
+  // Keep a stable engine instance
+  const predictionEngine = useMemo(
+    () => HabitPredictionEngine.getInstance(),
+    []
+  );
 
   const fetchPredictions = useCallback(async () => {
+    if (!userId) {
+      setData((prev) => ({ ...prev, loading: false, error: "Missing userId" }));
+      return;
+    }
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    setData((prev) => ({ ...prev, loading: true, error: null }));
+
     try {
-      setData(prev => ({ ...prev, loading: true, error: null }));
+      // Fetch in parallel
+      const [habitsRes, progressRes, activitiesRes] = await Promise.all([
+        fetch(`/api/habits?user_id=${encodeURIComponent(userId)}`, {
+          signal,
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        }),
+        fetch(`/api/habit-progress?user_id=${encodeURIComponent(userId)}`, {
+          signal,
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        }),
+        fetch(`/api/daily-activities?user_id=${encodeURIComponent(userId)}`, {
+          signal,
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        }),
+      ]);
 
-      // Fetch habits
-      const habitsResponse = await fetch(`/api/habits?user_id=${userId}`);
-      if (!habitsResponse.ok) throw new Error('Failed to fetch habits');
-      const habits: HabitRow[] = await habitsResponse.json();
+      if (!habitsRes.ok) throw new Error("Failed to fetch habits");
+      if (!progressRes.ok) throw new Error("Failed to fetch progress");
+      if (!activitiesRes.ok) throw new Error("Failed to fetch daily activities");
 
-      // Fetch progress
-      const progressResponse = await fetch(`/api/habit-progress?user_id=${userId}`);
-      if (!progressResponse.ok) throw new Error('Failed to fetch progress');
-      const progress: Record<string, HabitProgress> = await progressResponse.json();
+      const [habitsJson, progressJson, activitiesJson] = await Promise.all([
+        habitsRes.json(),
+        progressRes.json(),
+        activitiesRes.json(),
+      ]);
 
-      // Fetch daily activities
-      const activitiesResponse = await fetch(`/api/daily-activities?user_id=${userId}`);
-      if (!activitiesResponse.ok) throw new Error('Failed to fetch daily activities');
-      const dailyActivities: DailyActivity[] = await activitiesResponse.json();
+      // Narrow types defensively
+      const habits = (Array.isArray(habitsJson) ? habitsJson : []) as HabitRow[];
+      const progress = (progressJson ?? {}) as Record<string, HabitProgress>;
+      const dailyActivities = (Array.isArray(activitiesJson)
+        ? activitiesJson
+        : []) as DailyActivity[];
 
-      // Generate predictions
       const predictions: Record<string, HabitPrediction> = {};
       const behavioralInsights: Record<string, BehavioralInsight> = {};
 
-      habits.forEach(habit => {
+      for (const habit of habits) {
         const habitProgress = progress[habit.id];
-        if (habitProgress) {
-          const prediction = predictionEngine.predictHabitSuccess(
-            habit,
-            habitProgress,
-            dailyActivities.filter(a => a.habit_id === habit.id)
-          );
-          predictions[habit.id] = prediction;
+        if (!habitProgress) continue;
 
-          const insight = predictionEngine.analyzeBehavioralPsychology(
-            habit,
-            habitProgress,
-            dailyActivities.filter(a => a.habit_id === habit.id)
-          );
-          behavioralInsights[habit.id] = insight;
-        }
-      });
+        const perHabitActivities = dailyActivities.filter(
+          (a) => a.habit_id === habit.id
+        );
 
-      // Calculate correlations
-      const correlations = predictionEngine.calculateHabitCorrelations(
-        habits,
-        progress,
-        dailyActivities
-      );
+        // Engine calls
+        predictions[habit.id] = predictionEngine.predictHabitSuccess(
+          habit,
+          habitProgress,
+          perHabitActivities
+        );
 
-      setData({
-        predictions,
-        behavioralInsights,
-        correlations,
-        loading: false,
-        error: null
-      });
-    } catch (error) {
-      setData(prev => ({
+        behavioralInsights[habit.id] = predictionEngine.analyzeBehavioralPsychology(
+          habit,
+          habitProgress,
+          perHabitActivities
+        );
+      }
+
+      // Correlations (guard if engine method is optional)
+      const correlations: HabitCorrelation[] =
+        typeof predictionEngine.calculateHabitCorrelations === "function"
+          ? predictionEngine.calculateHabitCorrelations(
+              habits,
+              progress,
+              dailyActivities
+            )
+          : [];
+
+      // Only set state if still mounted / not aborted
+      if (!signal.aborted) {
+        setData({
+          predictions,
+          behavioralInsights,
+          correlations,
+          loading: false,
+          error: null,
+        });
+      }
+    } catch (err) {
+      if ((err as Error).name === "AbortError") return; // ignore aborts
+      setData((prev) => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error:
+          err instanceof Error ? err.message : "Unknown error occurred fetching predictions",
       }));
     }
-  }, [userId]);
+
+    // Return a cleanup function so React can abort if this invocation is superseded
+    return () => controller.abort();
+  }, [userId, predictionEngine]);
 
   useEffect(() => {
-    fetchPredictions();
+    let active = true;
+    (async () => {
+      const cleanup = await fetchPredictions();
+      // if fetchPredictions returned a cleanup (it will), call it when effect ends
+      if (!active && typeof cleanup === "function") cleanup();
+    })();
+    return () => {
+      active = false;
+    };
   }, [fetchPredictions]);
 
   const refreshPredictions = useCallback(async () => {
     await fetchPredictions();
   }, [fetchPredictions]);
 
-  return {
-    ...data,
-    refreshPredictions
-  };
+  return { ...data, refreshPredictions };
 };
