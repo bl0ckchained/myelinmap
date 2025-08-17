@@ -1,3 +1,4 @@
+// lib/habitPredictions.ts
 import { HabitRow, HabitProgress, DailyActivity } from "../types/habit";
 
 export interface HabitPrediction {
@@ -84,10 +85,9 @@ export class HabitPredictionEngine {
       habit,
       historicalData
     );
-    const rewardImpact = this.calculateRewardImpact(habit, historicalData);
+    const rewardImpact = this.calculateRewardImpact(habit); // <- updated
     const automaticityScore = this.calculateAutomaticity(habit, progress);
-    const formationStage =
-      this.determineFormationStage(automaticityScore);
+    const formationStage = this.determineFormationStage(automaticityScore);
     const psychologicalBarriers = this.identifyBarriers(habit, progress);
 
     return {
@@ -102,11 +102,11 @@ export class HabitPredictionEngine {
 
   calculateHabitCorrelations(
     habits: HabitRow[],
-    progressData: Record<string, HabitProgress>,
+    _progressData: Record<string, HabitProgress>,
     dailyActivities: DailyActivity[]
   ): HabitCorrelation[] {
     const result: HabitCorrelation[] = [];
-    // Build per-habit sets of YYYY-MM-DD where reps > 0
+    // Per-habit set of YYYY-MM-DD with reps > 0
     const dayMap = new Map<string, Set<string>>();
     for (const h of habits) {
       const days = new Set<string>();
@@ -137,7 +137,6 @@ export class HabitPredictionEngine {
         if (strength >= 0.35) relationshipType = "positive";
         else if (unionSize > 0 && intersectionSize === 0) relationshipType = "negative";
 
-        // Confidence scales with amount of data
         const confidence = Math.max(
           10,
           Math.min(100, (set1.size + set2.size) * 3)
@@ -166,7 +165,7 @@ export class HabitPredictionEngine {
   ): number {
     const streakBonus = Math.min(streak * 2, 20); // cap 20
     const rateBonus = completionRate * 0.8;
-    return 50 + streakBonus + rateBonus; // center around 50
+    return 50 + streakBonus + rateBonus; // center ~50
   }
 
   private analyzeOptimalTiming(
@@ -200,7 +199,7 @@ export class HabitPredictionEngine {
     }
     if (habit.goal_reps > 20) risks.push("High target complexity");
 
-    // recent drop-off: fewer reps in last 7 days than prior 7 days
+    // Recent drop-off: last 7 days vs prior 7 days
     const now = Date.now();
     const last7 = historicalData.filter(
       (a) => now - new Date(a.date).getTime() <= 7 * 86400000
@@ -247,7 +246,6 @@ export class HabitPredictionEngine {
     _habit: HabitRow,
     historicalData: DailyActivity[]
   ): number {
-    // proxy: more consistent logged reps => higher trigger effectiveness
     const activeDays = new Set(
       historicalData
         .filter((a) => (a.rep_count ?? 0) > 0)
@@ -256,8 +254,8 @@ export class HabitPredictionEngine {
     return Math.min(100, 40 + activeDays * 3);
   }
 
-  private calculateRewardImpact(habit: HabitRow, _historicalData: DailyActivity[]): number {
-    // proxy: slightly higher when wrap_size is small (more frequent “wins”)
+  // 🔧 Removed unused `historicalData` param to satisfy ESLint
+  private calculateRewardImpact(habit: HabitRow): number {
     const wrapBonus = habit.wrap_size <= 5 ? 20 : habit.wrap_size <= 10 ? 10 : 0;
     return Math.min(100, 55 + wrapBonus);
   }
@@ -282,7 +280,6 @@ export class HabitPredictionEngine {
     return "automatic";
   }
 
-  // ✅ This is the method your error said “does not exist”
   private identifyBarriers(habit: HabitRow, progress: HabitProgress): string[] {
     const barriers: string[] = [];
     if (habit.goal_reps > 20) barriers.push("Complexity barrier");

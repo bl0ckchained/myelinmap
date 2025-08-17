@@ -56,7 +56,7 @@ export const useEnhancedAnalytics = (userId: string): EnhancedAnalyticsData & {
 
       // Calculate analytics
       const analytics = calculateEnhancedAnalytics(habits, progress, dailyReps);
-      const insights = generateInsights(analytics, habits);
+      const insights = generateInsights(analytics);
 
       setData({
         habits,
