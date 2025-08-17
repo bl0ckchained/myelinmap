@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+
 // pages/dashboard.tsx
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
