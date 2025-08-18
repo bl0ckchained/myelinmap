@@ -1,8 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-// --- Embedded Header Component ---
+/* ---------------- Navigation ---------------- */
+
 const navLinks = [
   { href: "/", label: "🏠 Home", hoverColor: "hover:bg-emerald-500" },
   { href: "/rewire", label: "🔥 7-Day Challenge", hoverColor: "hover:bg-amber-400" },
@@ -17,31 +18,43 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <header
       style={{
-        backgroundColor: "#111827", // gray-900
-        color: "#ffffff",
+        background:
+          "linear-gradient(180deg, rgba(7,10,15,.85), rgba(7,10,15,.6)), radial-gradient(1000px 400px at 10% -10%, rgba(0,255,170,.12), transparent 60%)",
+        color: "#eaf2ff",
         textAlign: "center",
         padding: "3rem 1rem",
+        borderBottom: "1px solid rgba(255,255,255,.08)",
       }}
     >
-      {/* Title and Subtitle */}
-      <h1 style={{ fontSize: "2.25rem", fontWeight: "bold", margin: 0 }}>
+      <h1
+        style={{
+          fontSize: "2.5rem",
+          fontWeight: 800,
+          margin: 0,
+          background:
+            "linear-gradient(90deg, #00ffaa, #8bd3ff, #d9a7ff)",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          textShadow: "0 6px 30px rgba(0,255,170,.08)",
+        }}
+      >
         {title}
       </h1>
       {subtitle && (
         <p
           style={{
             fontSize: "1.125rem",
-            marginTop: "0.5rem",
-            maxWidth: "40rem",
-            marginLeft: "auto",
-            marginRight: "auto",
+            marginTop: "0.6rem",
+            maxWidth: "44rem",
+            marginInline: "auto",
+            color: "#b7c5d6",
           }}
         >
           {subtitle}
         </p>
       )}
 
-      {/* Navigation */}
       <nav
         style={{
           marginTop: "2rem",
@@ -49,23 +62,24 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
           flexWrap: "wrap",
           justifyContent: "center",
           gap: "0.75rem",
-          fontSize: "0.875rem",
+          fontSize: ".9rem",
         }}
       >
         {navLinks.map(({ href, label, hoverColor }) => (
           <Link key={href} href={href} legacyBehavior>
             <a
               style={{
-                padding: "0.5rem 1rem",
+                padding: "0.55rem 1rem",
                 borderRadius: "9999px",
                 color: "#ffffff",
-                backgroundColor: "#1f2937", // gray-800
+                backgroundColor: "#1f2937",
                 textDecoration: "none",
-                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                transition: "all 0.3s",
+                border: "1px solid rgba(255,255,255,.08)",
+                boxShadow: "0 10px 30px rgba(0,0,0,.25)",
+                transition: "all 200ms ease",
               }}
               onMouseOver={(e) => {
-                const colorMap: { [key: string]: string } = {
+                const colorMap: { [k: string]: string } = {
                   "hover:bg-emerald-500": "#10b981",
                   "hover:bg-amber-400": "#fbbf24",
                   "hover:bg-lime-400": "#a3e635",
@@ -74,18 +88,16 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
                   "hover:bg-rose-400": "#fb7185",
                   "hover:bg-blue-400": "#60a5fa",
                 };
-                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                  colorMap[hoverColor] || "#10b981";
-                (e.currentTarget as HTMLAnchorElement).style.color = "#000000";
-                (e.currentTarget as HTMLAnchorElement).style.transform =
-                  "translateY(-4px) scale(1.05)";
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.backgroundColor = colorMap[hoverColor] || "#10b981";
+                el.style.color = "#000";
+                el.style.transform = "translateY(-3px) scale(1.03)";
               }}
               onMouseOut={(e) => {
-                (e.currentTarget as HTMLAnchorElement).style.backgroundColor =
-                  "#1f2937";
-                (e.currentTarget as HTMLAnchorElement).style.color = "#ffffff";
-                (e.currentTarget as HTMLAnchorElement).style.transform =
-                  "translateY(0) scale(1)";
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.backgroundColor = "#1f2937";
+                el.style.color = "#fff";
+                el.style.transform = "translateY(0) scale(1)";
               }}
             >
               {label}
@@ -97,42 +109,73 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
-// --- Embedded Footer Component ---
+/* ---------------- Footer ---------------- */
+
 const Footer = () => {
   return (
     <footer
       style={{
         textAlign: "center",
         padding: "2rem",
-        backgroundColor: "#111827",
-        color: "#fff",
-        fontSize: "0.875rem",
+        background:
+          "linear-gradient(180deg, rgba(7,10,15,.4), rgba(7,10,15,.75))",
+        color: "#b7c5d6",
+        fontSize: "0.95rem",
+        borderTop: "1px solid rgba(255,255,255,.08)",
+        marginTop: "4rem",
       }}
     >
-      <div style={{ marginBottom: "1.5rem" }}>
-        <p style={{ color: "#9ca3af", marginTop: "0.5rem" }}>Special thanks to Matt Stewart — your belief helped light this path.</p>
-        <p>🧠 Designed to wire greatness into your day 🧠</p>
+      <div style={{ marginBottom: "1.2rem" }}>
+        <p style={{ color: "#9ca3af", marginTop: ".4rem" }}>
+          Special thanks to Matt Stewart — your belief helped light this path.
+        </p>
+        <p style={{ color: "#eaf2ff" }}>🧠 Designed to wire greatness into your day 🧠</p>
       </div>
 
-      <div style={{ marginBottom: "1.5rem" }}>
-        <p>&copy; {new Date().getFullYear()} MyelinMap.com — Made with 💙 in Michigan · Powered by Quantum Step Consultants LLC</p>
+      <div style={{ marginBottom: "1.2rem", color: "#eaf2ff" }}>
+        <p>
+          &copy; {new Date().getFullYear()} MyelinMap.com — Made with 💙 in
+          Michigan · Powered by Quantum Step Consultants LLC
+        </p>
         <p>
           <Link href="/legalpage" legacyBehavior>
-            <a style={{ textDecoration: "underline", color: "#bfdbfe" }}>Privacy Policy & Terms</a>
+            <a style={{ textDecoration: "underline", color: "#8bd3ff" }}>
+              Privacy Policy &amp; Terms
+            </a>
           </Link>
         </p>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-        <span style={{ color: "#9ca3af" }}>Join our journey</span>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: ".6rem",
+          flexWrap: "wrap",
+        }}
+      >
+        <span>Join our journey</span>
         <a
           href="https://www.youtube.com/@myelinmap"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="YouTube Channel"
-          style={{ transition: "opacity 0.3s", color: "#ef4444", display: "inline-flex", alignItems: "center", gap: "0.35rem" }}
+          style={{
+            transition: "opacity 0.3s",
+            color: "#ef4444",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: ".35rem",
+          }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M19.615 3.184c-1.007-.372-5.615-.372-5.615-.372s-4.608 0-5.615.372a3.21 3.21 0 0 0-2.262 2.262c-.373 1.007-.373 3.108-.373 3.108s0 2.101.373 3.108a3.21 3.21 0 0 0 2.262 2.262c1.007.372 5.615.372 5.615.372s4.608 0 5.615-.372a3.21 3.21 0 0 0 2.262-2.262c.373-1.007.373-3.108.373-3.108s0-2.101-.373-3.108a3.21 3.21 0 0 0-2.262-2.262zm-10.615 8.816v-5l5 2.5-5 2.5z" />
           </svg>
           <span>YouTube</span>
@@ -142,38 +185,89 @@ const Footer = () => {
   );
 };
 
-// --- Helper Component for Accordion Menus ---
-interface AccordionContent {
-  title: string;
-  description: string;
-}
-interface AccordionProps {
-  title: string;
-  content: AccordionContent[];
-}
+/* ---------------- Accordion (Tailwind-free) ---------------- */
+
+interface AccordionContent { title: string; description: string; }
+interface AccordionProps { title: string; content: AccordionContent[]; }
+
 const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  // Recompute height when opening or on resize so animation fits content
+  useEffect(() => {
+    const measure = () => {
+      if (innerRef.current) setHeight(innerRef.current.scrollHeight);
+    };
+    measure();
+    if (isOpen) {
+      window.addEventListener("resize", measure);
+      return () => window.removeEventListener("resize", measure);
+    }
+  }, [isOpen, content]);
+
   return (
-    <div className="w-full bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+    <div
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), #0c121a",
+        border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 16,
+        boxShadow:
+          "0 10px 30px rgba(0,0,0,.35), 0 0 30px rgba(0,255,170,.12), 0 0 60px rgba(139,211,255,.08)",
+        overflow: "hidden",
+      }}
+    >
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-6 py-4 text-left font-bold text-white transition-colors duration-200 hover:bg-gray-700 rounded-xl"
+        aria-expanded={isOpen}
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 20px",
+          background: "transparent",
+          color: "#eaf2ff",
+          fontWeight: 800,
+          fontSize: "1.05rem",
+          cursor: "pointer",
+          border: "none",
+        }}
       >
         <span>{title}</span>
-        <span className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+        <span
+          aria-hidden
+          style={{
+            display: "inline-block",
+            transition: "transform .25s ease",
+            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            color: "#8bd3ff",
+          }}
+        >
           ▼
         </span>
       </button>
+
       <div
-        className={`overflow-y-auto transition-all duration-500 ease-in-out ${
-          isOpen ? 'max-h-[20rem] opacity-100 p-6' : 'max-h-0 opacity-0 p-0'
-        }`}
+        style={{
+          overflow: "hidden",
+          maxHeight: isOpen ? height : 0,
+          opacity: isOpen ? 1 : 0,
+          transition: "max-height .45s ease, opacity .35s ease, padding .3s ease",
+          padding: isOpen ? "0 20px 16px 20px" : "0 20px",
+        }}
       >
-        <div className="space-y-4">
-          {content.map((item, index) => (
-            <div key={index}>
-              <h3 className="font-semibold text-emerald-300">{item.title}</h3>
-              <p className="text-gray-300 mt-1">{item.description}</p>
+        <div ref={innerRef} style={{ paddingTop: 6 }}>
+          {content.map((item, i) => (
+            <div key={i} style={{ marginBottom: 12 }}>
+              <h3 style={{ margin: 0, color: "#56ffa3", fontWeight: 700 }}>
+                {item.title}
+              </h3>
+              <p style={{ margin: "6px 0 0", color: "#b7c5d6", lineHeight: 1.7 }}>
+                {item.description}
+              </p>
             </div>
           ))}
         </div>
@@ -182,7 +276,8 @@ const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
   );
 };
 
-// --- Helper Component for Resource Links ---
+/* ---------------- Resource Link ---------------- */
+
 const ResourceLink = ({
   href,
   title,
@@ -192,23 +287,65 @@ const ResourceLink = ({
   href: string;
   title: string;
   description: string;
-  color: string;
-}) => (
-  <li>
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-lg block transition-transform duration-200 transform hover:translate-x-2"
-    >
-      {/* Note: if Tailwind purge removes dynamic colors, we can safelist or map fixed classes */}
-      <span className={`text-${color} font-semibold hover:underline`}>{title}</span>
-      <p className="text-gray-400 text-sm mt-1">{description}</p>
-    </a>
-  </li>
-);
+  color: string; // expects tailwind-like keys; we map to hex
+}) => {
+  const colorMap: Record<string, string> = {
+    "emerald-300": "#6ee7b7",
+    "emerald-400": "#34d399",
+    "blue-400": "#60a5fa",
+    "cyan-400": "#22d3ee",
+    "purple-400": "#c084fc",
+  };
+  const accent = colorMap[color] || "#8bd3ff";
 
-// --- Main Resources Component ---
+  return (
+    <li style={{ listStyle: "none" }}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "block",
+          padding: "12px 14px",
+          borderRadius: 12,
+          textDecoration: "none",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), #0c121a",
+          border: "1px solid rgba(255,255,255,.08)",
+          boxShadow: "0 10px 20px rgba(0,0,0,.35)",
+          transition: "transform .15s ease, border-color .2s ease",
+        }}
+        onMouseOver={(e) => {
+          const el = e.currentTarget as HTMLAnchorElement;
+          el.style.transform = "translateX(6px)";
+          el.style.borderColor = "rgba(139,211,255,.35)";
+        }}
+        onMouseOut={(e) => {
+          const el = e.currentTarget as HTMLAnchorElement;
+          el.style.transform = "translateX(0)";
+          el.style.borderColor = "rgba(255,255,255,.08)";
+        }}
+      >
+        <span
+          style={{
+            display: "inline-block",
+            fontWeight: 700,
+            fontSize: "1.05rem",
+            color: accent,
+          }}
+        >
+          {title}
+        </span>
+        <p style={{ margin: "6px 0 0", color: "#9fb0c4", fontSize: ".95rem" }}>
+          {description}
+        </p>
+      </a>
+    </li>
+  );
+};
+
+/* ---------------- Main Page ---------------- */
+
 export default function Resources() {
   const selfLoveContent = [
     { title: "Forgive Yourself", description: "Acknowledge past behaviors as an outgrowth of illness, not a moral failing. Focus on staying well and moving forward without dwelling on past mistakes." },
@@ -265,11 +402,8 @@ export default function Resources() {
   return (
     <>
       <Head>
-        <title>Resources &mdash; Myelin Map</title>
-        <meta
-          name="description"
-          content="A curated collection of support tools and resources for your growth journey."
-        />
+        <title>Resources — Myelin Map</title>
+        <meta name="description" content="A curated collection of support tools and resources for your growth journey." />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
@@ -278,25 +412,51 @@ export default function Resources() {
         subtitle="Whether you're rewiring your brain, battling addiction, or building discipline, you're not alone."
       />
 
-      <main className="bg-gray-900 text-white px-6 py-20 min-h-screen">
-        <section className="max-w-4xl mx-auto space-y-16">
-
-          <h1 className="text-4xl font-bold mb-6 text-center text-white">
-            <span role="img" aria-label="brain emoji">🧠</span> Just Some Great Advice
+      <main
+        style={{
+          maxWidth: "64rem",
+          margin: "0 auto",
+          padding: "3rem 1.25rem",
+          color: "#eaf2ff",
+        }}
+      >
+        <section style={{ display: "grid", gap: 24 }}>
+          <h1
+            style={{
+              textAlign: "center",
+              fontSize: "2rem",
+              fontWeight: 800,
+              marginBottom: "0.5rem",
+            }}
+          >
+            🧠 Just Some Great Advice
           </h1>
 
-          <Accordion title="Actionable Self-Love & Self-Compassion Practices" content={selfLoveContent} />
-          <Accordion title="Essential Practical Advice for Overcoming Addiction" content={essentialAdviceContent} />
+          <Accordion
+            title="Actionable Self-Love & Self-Compassion Practices"
+            content={selfLoveContent}
+          />
+          <Accordion
+            title="Essential Practical Advice for Overcoming Addiction"
+            content={essentialAdviceContent}
+          />
 
-          {/* Science & Brain Rewiring Section (uses scienceLinks) */}
+          {/* Science & Brain Rewiring */}
           <div>
-            <h2 className="text-3xl font-bold text-emerald-300 mb-6">
-              <span role="img" aria-label="microscope emoji">🔬</span> Science & Brain Rewiring
+            <h2
+              style={{
+                fontSize: "1.6rem",
+                fontWeight: 800,
+                margin: "1.2rem 0 .6rem",
+                color: "#56ffa3",
+              }}
+            >
+              🔬 Science & Brain Rewiring
             </h2>
-            <ul className="list-none space-y-6">
-              {scienceLinks.map((link, index) => (
+            <ul style={{ display: "grid", gap: 12, padding: 0, margin: 0 }}>
+              {scienceLinks.map((link, i) => (
                 <ResourceLink
-                  key={index}
+                  key={i}
                   href={link.href}
                   title={link.title}
                   description={link.description}
@@ -306,53 +466,92 @@ export default function Resources() {
             </ul>
           </div>
 
-          {/* Addiction Recovery & Mental Health Section */}
+          {/* Addiction Recovery & Mental Health */}
           <div>
-            <h2 className="text-3xl font-bold text-emerald-400 mb-6">
-              <span role="img" aria-label="meditating person emoji">🧘‍♂️</span> Addiction Recovery & Mental Health
+            <h2
+              style={{
+                fontSize: "1.6rem",
+                fontWeight: 800,
+                margin: "1.2rem 0 .6rem",
+                color: "#8bd3ff",
+              }}
+            >
+              🧘‍♂️ Addiction Recovery & Mental Health
             </h2>
-            <ul className="list-none space-y-6">
-              {recoveryLinks.map((link, index) => (
-                <ResourceLink key={index} href={link.href} title={link.title} description={link.description} color="blue-400" />
+            <ul style={{ display: "grid", gap: 12, padding: 0, margin: 0 }}>
+              {recoveryLinks.map((link, i) => (
+                <ResourceLink
+                  key={i}
+                  href={link.href}
+                  title={link.title}
+                  description={link.description}
+                  color="blue-400"
+                />
               ))}
             </ul>
           </div>
 
-          {/* Student & Self-Education Tools Section */}
+          {/* Student & Self-Education Tools */}
           <div>
-            <h2 className="text-3xl font-bold text-cyan-400 mb-6">
-              <span role="img" aria-label="books emoji">📚</span> Student & Self-Education Tools
+            <h2
+              style={{
+                fontSize: "1.6rem",
+                fontWeight: 800,
+                margin: "1.2rem 0 .6rem",
+                color: "#22d3ee",
+              }}
+            >
+              📚 Student & Self-Education Tools
             </h2>
-            <ul className="list-none space-y-6">
-              {educationLinks.map((link, index) => (
-                <ResourceLink key={index} href={link.href} title={link.title} description={link.description} color="blue-400" />
+            <ul style={{ display: "grid", gap: 12, padding: 0, margin: 0 }}>
+              {educationLinks.map((link, i) => (
+                <ResourceLink
+                  key={i}
+                  href={link.href}
+                  title={link.title}
+                  description={link.description}
+                  color="blue-400"
+                />
               ))}
             </ul>
           </div>
 
-          {/* Spiritual & Emotional Support Section */}
+          {/* Spiritual & Emotional Support */}
           <div>
-            <h2 className="text-3xl font-bold text-purple-400 mb-6">
-              <span role="img" aria-label="praying hands emoji">🙏</span> Spiritual & Emotional Support
+            <h2
+              style={{
+                fontSize: "1.6rem",
+                fontWeight: 800,
+                margin: "1.2rem 0 .6rem",
+                color: "#d9a7ff",
+              }}
+            >
+              🙏 Spiritual & Emotional Support
             </h2>
-            <ul className="list-none space-y-6">
-              {supportLinks.map((link, index) => (
-                <ResourceLink key={index} href={link.href} title={link.title} description={link.description} color="blue-400" />
+            <ul style={{ display: "grid", gap: 12, padding: 0, margin: 0 }}>
+              {supportLinks.map((link, i) => (
+                <ResourceLink
+                  key={i}
+                  href={link.href}
+                  title={link.title}
+                  description={link.description}
+                  color="blue-400"
+                />
               ))}
             </ul>
           </div>
 
-          {/* Call to Action */}
-          <div className="text-center mt-12">
-            <p className="text-gray-400 text-lg">
+          {/* CTA */}
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <p style={{ color: "#9fb0c4", fontSize: "1.05rem" }}>
               Know a great resource?{" "}
               <a
                 href="mailto:chaddrummonds1976@gmail.com"
-                className="text-blue-400 hover:underline"
+                style={{ color: "#8bd3ff", textDecoration: "underline" }}
               >
                 Suggest it here
               </a>{" "}
-              <span role="img" aria-label="love letter emoji">💌</span>
+              💌
             </p>
           </div>
         </section>
@@ -362,7 +561,5 @@ export default function Resources() {
     </>
   );
 }
-// End of Resources Page Component
 // --- IGNORE ---
-// This is a Next.js page component that serves as the resources page for Myelin Map.
-// It includes a header, main content with various resource sections, and a footer.
+// This file defines the Resources page for Myelin Map.
