@@ -56,14 +56,26 @@ export default function JournalPage() {
     return () => sub?.subscription.unsubscribe();
   }, []);
 
-  // --- Draft autosave (per-mode)
-  useEffect(() => {
-    const key = `mm.journal.draft.${mode}`;
+// Load cached draft when the mode changes (runs once per mode)
+useEffect(() => {
+  const key = `mm.journal.draft.${mode}`;
+  try {
     const cached = localStorage.getItem(key);
-    if (cached !== null) setDraft(cached);
-    const iv = setInterval(() => localStorage.setItem(key, draft), 600);
-    return () => clearInterval(iv);
-  }, [mode, draft]);
+    setDraft(cached ?? "");
+  } catch {}
+}, [mode]);
+
+// Debounced autosave when draft changes
+useEffect(() => {
+  const key = `mm.journal.draft.${mode}`;
+  const t = setTimeout(() => {
+    try {
+      localStorage.setItem(key, draft);
+    } catch {}
+  }, 300);
+  return () => clearTimeout(t);
+}, [mode, draft]);
+
 
   // --- Initial load
   useEffect(() => {
@@ -208,25 +220,33 @@ export default function JournalPage() {
 
      <main className={`${styles.page} ${styles.theme}`}>
 
-        <div className={styles.wrap}>
-          {/* Mode bar */}
-          <div className={styles.modebar} role="toolbar" aria-label="Journal modes">
-            {(["free", "gratitude", "trigger", "urge", "wins"] as ModeKey[]).map((m) => (
-              <button
-                key={m}
-                className={`${styles.chip} ${mode === m ? styles.chipActive : ""}`}
-                onClick={() => {
-                  setMode(m);
-                  if (!draft.trim()) setDraft(PLACEHOLDERS[m]); // prefill only if empty
-                }}
-              >
-                {m === "free" ? "Free" :
-                 m === "gratitude" ? "Gratitude" :
-                 m === "trigger" ? "Trigger→Response" :
-                 m === "urge" ? "Urge Surfing" : "Win Stack"}
-              </button>
-            ))}
-          </div>
+<div className={styles.wrap}>
+  {/* Mode bar */}
+  <div className={styles.modebar} role="toolbar" aria-label="Journal modes">
+    {(["free", "gratitude", "trigger", "urge", "wins"] as ModeKey[]).map((m) => (
+      <button
+        key={m}
+        type="button"
+        className={`${styles.chip} ${mode === m ? styles.chipActive : ""}`}
+        aria-pressed={mode === m}
+        title={PLACEHOLDERS[m].split("\n")[0]} // quick hint on hover
+        onClick={() => setMode(m)}
+      >
+        {m === "free"
+          ? "Free"
+          : m === "gratitude"
+          ? "Gratitude"
+          : m === "trigger"
+          ? "Trigger→Response"
+          : m === "urge"
+          ? "Urge Surfing"
+          : "Win Stack"}
+      </button>
+    ))}
+  </div>
+
+  {/* Composer ... (leave your existing composer code here) */}
+
 
           {/* Composer */}
           <section className={styles.composer} aria-label="New journal entry">
