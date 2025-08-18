@@ -1,25 +1,211 @@
+/* ===== Myelin Map · Magical & Classy Base ===== */
+
+/* ---------- CSS Variables (theme) ---------- */
+:root {
+  /* Core palette */
+  --bg-0: #070a0f;             /* deep space */
+  --bg-1: #0c121a;             /* card base */
+  --bg-2: #121a24;             /* hover base */
+
+  --ink-0: #eaf2ff;            /* high contrast text */
+  --ink-1: #b7c5d6;            /* secondary text */
+  --ink-2: #8393a7;            /* muted */
+
+  --accent: #00ffaa;           /* keep your signature green */
+  --accent-2: #8bd3ff;         /* soft cyan */
+  --accent-3: #d9a7ff;         /* lilac pop */
+  --danger: #ff6b6b;
+  --ok: #56ffa3;
+  --warn: #ffd166;
+
+  /* Decor + effects */
+  --ring: 0 0 0 3px rgba(0,255,170,.25);
+  --card-border: 1px solid rgba(255,255,255,.06);
+  --radius-lg: 16px;
+  --radius-sm: 10px;
+
+  /* Layout */
+  --max: 1100px;
+  --pad: 18px;
+
+  /* Typography */
+  --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* Shadows */
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, .35);
+  --shadow-glow: 0 0 30px rgba(0,255,170,.12), 0 0 60px rgba(139,211,255,.08);
+}
+
+/* ---------- Global Reset-ish ---------- */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
 body {
-  background-color: #000;
-  color: #fff;
-  font-family: Arial, sans-serif;
   margin: 0;
-  padding: 0;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(0,255,170,.08), transparent 60%),
+    radial-gradient(1000px 500px at 120% 10%, rgba(217,167,255,.06), transparent 60%),
+    linear-gradient(180deg, #05070a 0%, var(--bg-0) 100%);
+  color: var(--ink-0);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-main {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
-h1, h2, h3 {
-  color: #00ffaa;
+/* ---------- Layout Helpers ---------- */
+main { max-width: var(--max); margin: 0 auto; padding: 40px var(--pad); }
+.container { max-width: var(--max); margin: 0 auto; padding: 24px var(--pad); }
+.section { margin: 28px 0; }
+.center { text-align: center; }
+.stack > * + * { margin-top: 12px; }
+
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: 1fr; }
+.grid-3 { grid-template-columns: 1fr; }
+@media (min-width: 880px) {
+  .grid-2 { grid-template-columns: 2fr 1fr; }
+  .grid-3 { grid-template-columns: 2fr 1fr 1fr; }
 }
 
-a {
-  color: #77f;
-  text-decoration: none;
+/* ---------- Typography ---------- */
+h1, h2, h3 { line-height: 1.15; margin: 0 0 12px; font-weight: 800; letter-spacing: .2px; }
+h1 {
+  font-size: clamp(32px, 4.5vw, 54px);
+  /* magical gradient text without blinding the user */
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 6px 30px rgba(0,255,170,.08);
 }
-a:hover {
-  text-decoration: underline;
+h2 { font-size: clamp(22px, 2.4vw, 30px); color: var(--ink-0); }
+h3 { font-size: clamp(18px, 2vw, 22px); color: var(--ink-0); }
+
+p { color: var(--ink-1); line-height: 1.7; margin: 0 0 12px; }
+.small { font-size: .92rem; color: var(--ink-2); }
+
+code, kbd, pre { font-family: var(--mono); }
+kbd {
+  background: #0e1620; border: 1px solid rgba(255,255,255,.08); border-radius: 6px;
+  padding: 2px 6px; font-size: .85rem; color: var(--ink-0);
 }
+
+/* Blog-like prose */
+.prose p { margin: 0 0 1rem; }
+.prose ul, .prose ol { margin: .5rem 0 1rem 1.25rem; color: var(--ink-1); }
+.prose li { margin: .25rem 0; }
+
+/* ---------- Links ---------- */
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 6px; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)) , var(--bg-1);
+  border: var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-soft), var(--shadow-glow);
+}
+.card:hover { transform: translateY(-1px); transition: transform .18s ease; }
+.card header { margin-bottom: 10px; }
+.card .muted { color: var(--ink-2); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 14px; border-radius: var(--radius-sm);
+  background: #0f1620; color: var(--ink-0);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+  cursor: pointer; text-decoration: none; transition: transform .08s ease, background .2s ease, border-color .2s ease;
+}
+.btn:hover { background: var(--bg-2); border-color: rgba(255,255,255,.16); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: none; box-shadow: var(--ring); }
+.btn.primary {
+  background: linear-gradient(180deg, rgba(0,255,170,.18), rgba(0,255,170,.06));
+  border-color: rgba(0,255,170,.35);
+}
+.btn.danger { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.08); }
+
+/* ---------- Inputs ---------- */
+input[type="text"], input[type="email"], input[type="password"], textarea, select {
+  width: 100%; color: var(--ink-0); background: #0e151d; border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px; padding: 10px 12px; outline: none;
+}
+textarea { min-height: 140px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: #6f8196; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { box-shadow: var(--ring); }
+
+/* ---------- Badges / Pills ---------- */
+.badge {
+  display: inline-block; padding: 4px 10px; border-radius: 999px;
+  background: rgba(0,255,170,.12); color: var(--accent); border: 1px solid rgba(0,255,170,.28);
+  font-weight: 600; font-size: .82rem;
+}
+
+/* ---------- Tables (for analytics) ---------- */
+.table {
+  width: 100%; border-collapse: collapse; border: var(--card-border);
+  background: var(--bg-1); border-radius: var(--radius-lg); overflow: hidden;
+}
+.table th, .table td { padding: 12px; text-align: left; }
+.table thead th { background: #0e1620; color: var(--ink-0); font-weight: 700; }
+.table tbody tr { border-top: 1px solid rgba(255,255,255,.06); }
+.table tbody tr:hover { background: #0f1722; }
+
+/* ---------- Header / Footer ---------- */
+.header, header.site {
+  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(7,10,15,.7), rgba(7,10,15,.4));
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.footer, footer.site {
+  border-top: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(7,10,15,.4), rgba(7,10,15,.7));
+  color: var(--ink-2);
+}
+
+/* ---------- Utility Accents ---------- */
+.hr { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); border: 0; }
+.glow { box-shadow: var(--shadow-glow); }
+.muted { color: var(--ink-2); }
+.hidden { display: none !important; }
+
+/* ---------- Aurora (optional body class) ---------- */
+.aurora::before {
+  content: ""; position: fixed; inset: -20% -20% auto -20%; height: 120%;
+  background: conic-gradient(from 180deg at 55% 45%, rgba(0,255,170,.12), rgba(139,211,255,.1), rgba(217,167,255,.1), rgba(0,255,170,.12));
+  filter: blur(80px); pointer-events: none; opacity: .55; z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before { opacity: .35; }
+}
+
+/* ---------- Toast-ish (tiny helper) ---------- */
+.toast {
+  position: fixed; right: 20px; bottom: 20px; padding: 12px 14px; border-radius: 12px;
+  background: #0f1620; color: var(--ink-0); border: 1px solid rgba(255,255,255,.08);
+  box-shadow: var(--shadow-soft); z-index: 9999;
+}
+
+/* ---------- Forms: inline group ---------- */
+.inline { display: flex; gap: 10px; flex-wrap: wrap; }
+.inline .grow { flex: 1 1 auto; }
+
+/* ---------- Accessibility niceties ---------- */
+:focus:not(:focus-visible) { outline: none; }
+sr-only, .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ---------- Tiny Animations (gentle) ---------- */
+.fade-in { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+.spin-slow { animation: spin 20s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform:
+  rotate(360deg); } }
