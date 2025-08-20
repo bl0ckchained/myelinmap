@@ -14,6 +14,7 @@ import DashboardJournalWidget from "@/components/DashboardJournalWidget";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Tabs from "@/components/ui/Tabs";
+import styles from "../styles/Dashboard.module.css";
 
 type Tab = "overview" | "visualizer" | "coach" | "history";
 type UserRepsRow = {
@@ -51,27 +52,101 @@ function Modal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-300"
+      className={styles.modalOverlay}
       onClick={onClose}
     >
       <Card
-        variant="glass"
-        className="max-w-md w-full p-6 bg-gradient-to-br from-blue-900/80 to-purple-900/80 backdrop-blur-lg"
+        className={styles.modalCard}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>{title}</h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-300 hover:text-white"
+            className={styles.modalClose}
           >
             ✕
           </Button>
         </div>
         {children}
+      </Card>
+    </div>
+  );
+}
+
+function GroundingModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className={styles.modalOverlay}
+      onClick={onClose}
+    >
+      <Card
+        className={styles.modalCard}
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+      >
+        <div className={styles.modalHeader}>
+          <h3 className={styles.modalTitle}>4-7-8 Breathing Exercise</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close"
+            className={styles.modalClose}
+          >
+            ✕
+          </Button>
+        </div>
+        <div className="text-center">
+          <p className={styles.repSubtitle}>
+            Follow the circle to breathe: Inhale for 4s, hold for 7s, exhale for 8s.
+          </p>
+          <div
+            className="w-24 h-24 mx-auto my-4 rounded-full"
+            style={{
+              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.1) 100%)",
+              animation: "pulse 19s ease-in-out infinite",
+            }}
+          />
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            className={styles.modalClose}
+          >
+            Done
+          </Button>
+        </div>
+        <style jsx>{`
+          @keyframes pulse {
+            0% {
+              transform: scale(1);
+              opacity: 0.8;
+            }
+            21% {
+              transform: scale(1.2);
+              opacity: 1;
+            }
+            58% {
+              transform: scale(1.2);
+              opacity: 1;
+            }
+            100% {
+              transform: scale(1);
+              opacity: 0.8;
+            }
+          }
+        `}</style>
       </Card>
     </div>
   );
@@ -99,6 +174,7 @@ export default function Dashboard() {
   const [wrapBurst, setWrapBurst] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [groundingOpen, setGroundingOpen] = useState(false);
   const [newName, setNewName] = useState("Breath reset");
   const [newGoal, setNewGoal] = useState<number>(21);
   const [newWrap, setNewWrap] = useState<number>(7);
@@ -106,7 +182,6 @@ export default function Dashboard() {
   const [editGoal, setEditGoal] = useState<number>(21);
   const [editWrap, setEditWrap] = useState<number>(7);
 
-  // New: Affirmation state
   const affirmations = useMemo(
     () => [
       "I am enough, exactly as I am.",
@@ -121,14 +196,12 @@ export default function Dashboard() {
   const clampInt = (v: number, min: number, max: number) =>
     Math.max(min, Math.min(max, Math.floor(v)));
 
-  // New: Set daily affirmation
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const index = new Date().getDate() % affirmations.length;
+    const date = new Date();
+    const index = date.getDate() % affirmations.length;
     setDailyAffirmation(affirmations[index]);
   }, [affirmations]);
 
-  // Existing effects (unchanged, but memoized where possible)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -187,13 +260,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!user) return;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
     const arr = Array(7).fill(0);
     if (userData.last_rep) {
       const lr = new Date(userData.last_rep);
       lr.setHours(0, 0, 0, 0);
-      const diffDays = Math.round((today.getTime() - lr.getTime()) / 86400000);
+      const diffDays = Math.round((date.getTime() - lr.getTime()) / 86400000);
       if (diffDays === 0) arr[6] = 1;
       setStreak(diffDays === 0 ? 1 : 0);
     } else {
@@ -258,12 +331,12 @@ export default function Dashboard() {
           new Date(e.ts as string).toISOString().slice(0, 10)
         )
       );
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
       let s = 0;
       for (let i = 0; i < 365; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
         const key = d.toISOString().slice(0, 10);
         if (dayKeys.has(key)) s++;
         else break;
@@ -271,16 +344,16 @@ export default function Dashboard() {
       setStreak(s);
       const arr7 = Array(7).fill(0);
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - (6 - i));
+        const d = new Date(now);
+        d.setDate(now.getDate() - (6 - i));
         const key = d.toISOString().slice(0, 10);
         arr7[i] = dayKeys.has(key) ? 1 : 0;
       }
       setDailyCounts(arr7);
       const arr30 = Array(30).fill(0);
       for (let i = 29; i >= 0; i--) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - (29 - i));
+        const d = new Date(now);
+        d.setDate(now.getDate() - (29 - i));
         const key = d.toISOString().slice(0, 10);
         arr30[i] = dayKeys.has(key) ? 1 : 0;
       }
@@ -336,7 +409,7 @@ export default function Dashboard() {
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
       "Small + consistent > perfect. One more tiny rep later today.",
-      "Label the win: 'I am someone who reps even when it's hard.'",
+      "Label the win: 'I am someone who reps even when it&apos;s hard.'",
     ];
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
     setUserData((prev) => ({
@@ -411,53 +484,59 @@ export default function Dashboard() {
     { id: "history", label: "History", icon: "📈" },
   ];
 
+  const inspirationalQuote = "You are not broken. You are becoming.";
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-900 to-gray-900 text-white font-sans">
+    <div className={styles.dashboard}>
       <Head>
         <title>Dashboard | Myelin Map</title>
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
       </Head>
       <Header
         title="Your Dashboard 🌟"
         subtitle="A sanctuary for your comeback"
+        className={styles.header}
+        titleClassName={styles.title}
+        subtitleClassName={styles.subtitle}
       />
-      <main className="container mx-auto px-4 py-8">
+      <main className={`${styles.container} ${styles.mainContent}`}>
         {user ? (
           <>
-            <div className="flex justify-between items-center mb-6">
+            <div className={styles.tabsContainer}>
               <Tabs
                 tabs={tabsData}
                 activeTab={active}
                 onTabChange={(tabId) => setActive(tabId as Tab)}
                 variant="magical"
-                className="transition-all duration-300"
+                className={styles.fadeIn}
               />
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-gray-300 hover:text-white"
+                className={styles.signOutButton}
               >
                 Sign Out
               </Button>
             </div>
             {active === "overview" && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <Card className="bg-gradient-to-br from-blue-800/80 to-purple-800/80 backdrop-blur-md p-6">
-                    <h2 className="text-2xl font-semibold mb-4">Welcome Back 🧠</h2>
-                    <p className="text-gray-300 mb-4">
-                      Email: <strong>{user.email}</strong>
-                    </p>
-                    <div className="mb-4">
-                      <label htmlFor="habit" className="block text-gray-300 mb-2">
+                <div className={styles.overviewGrid}>
+                  <Card className={styles.statsCard}>
+                    <div className={styles.welcomeSection}>
+                      <h2 className={styles.coachTitle}>Welcome Back 🧠</h2>
+                      <p className={styles.userEmail}>
+                        Email: <strong>{user.email}</strong>
+                      </p>
+                    </div>
+                    <div className={styles.habitControls}>
+                      <label htmlFor="habit" className={styles.habitLabel}>
                         Active habit:
                       </label>
                       <select
                         id="habit"
                         value={activeHabitId ?? ""}
                         onChange={(e) => setActiveHabitId(e.target.value)}
-                        className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                        className={styles.habitSelect}
                       >
                         {habits.map((h) => (
                           <option key={h.id} value={h.id}>
@@ -465,7 +544,7 @@ export default function Dashboard() {
                           </option>
                         ))}
                       </select>
-                      <div className="flex gap-2 mt-2">
+                      <div className={styles.habitActions}>
                         <Button
                           variant="secondary"
                           size="sm"
@@ -483,7 +562,7 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     </div>
-                    <div className="space-y-6">
+                    <div className={styles.visualSection}>
                       {(() => {
                         const h = habits.find((x) => x.id === activeHabitId);
                         if (!h) return null;
@@ -507,8 +586,8 @@ export default function Dashboard() {
                         );
                       })()}
                     </div>
-                    <div className="flex items-center mt-6">
-                      <div className="relative">
+                    <div className={styles.streakContainer}>
+                      <div className={styles.streakRing}>
                         <svg width="72" height="72" viewBox="0 0 72 72" aria-label={`Streak: ${streak} days`}>
                           <defs>
                             <filter id="glow">
@@ -537,34 +616,34 @@ export default function Dashboard() {
                                 cx="36"
                                 cy="36"
                                 r="30"
-                                stroke="#fbbf24"
+                                stroke="#fbbf36"
                                 strokeWidth="8"
                                 fill="none"
                                 strokeDasharray={`${dash} ${circumference - dash}`}
                                 strokeLinecap="round"
                                 transform="rotate(-90 36 36)"
                                 filter={streak > 0 ? "url(#glow)" : undefined}
-                                className="transition-all duration-500"
+                                className={styles.fadeIn}
                               />
                             );
                           })()}
                         </svg>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-lg font-semibold">
+                      <div className={styles.streakInfo}>
+                        <div className={styles.streakNumber}>
                           {streak} day{streak === 1 ? "" : "s"} streak
                         </div>
-                        <div className="text-gray-400">
+                        <div className={styles.streakText}>
                           {streak > 0
-                            ? "You came back. That's braver than never missing."
+                            ? "You came back. That&apos;s braver than never missing."
                             : "Today can be day one. One tiny rep."}
                         </div>
                       </div>
                     </div>
                   </Card>
-                  <Card className="bg-gradient-to-br from-blue-800/80 to-purple-800/80 backdrop-blur-md p-6">
-                    <h2 className="text-2xl font-semibold mb-4">Coach & Quick Rep</h2>
-                    <p className="text-gray-300 mb-4">
+                  <Card className={styles.coachCard}>
+                    <h2 className={styles.coachTitle}>Coach & Quick Rep</h2>
+                    <p className={styles.coachSubtitle}>
                       Private coach plus a one-tap rep. Gentle, practical, always on your side.
                     </p>
                     {(() => {
@@ -583,9 +662,9 @@ export default function Dashboard() {
                         />
                       );
                     })()}
-                    <div className="mt-4">
-                      <h3 className="text-lg font-semibold mb-2">Log a Rep</h3>
-                      <p className="text-gray-400 mb-2">
+                    <div className={styles.repSection}>
+                      <h3 className={styles.repTitle}>Log a Rep</h3>
+                      <p className={styles.repSubtitle}>
                         This is how new wiring takes root.
                       </p>
                       <Button
@@ -593,35 +672,42 @@ export default function Dashboard() {
                         onClick={logRep}
                         disabled={loading || !activeHabitId}
                         loading={loading}
-                        className="bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-all duration-300"
+                        className={styles.repButton}
                       >
                         {loading ? "Logging..." : "Log Rep"}
                       </Button>
-                      {nudge && <p className="text-gray-300 mt-2">{nudge}</p>}
+                      {nudge && <p className={styles.nudgeText}>{nudge}</p>}
                       {!activeHabitId && (
-                        <p className="text-gray-400 mt-2">
+                        <p className={styles.loadingText}>
                           Creating your first habit… if this persists, refresh.
                         </p>
                       )}
                     </div>
-                    {/* New: Affirmation Widget */}
-                    <div className="mt-6 p-4 bg-blue-900/50 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-2">Daily Affirmation</h3>
-                      <p className="text-gray-200 italic">"{dailyAffirmation}"</p>
+                    <div className={styles.inspirationalQuote}>
+                      &quot;{dailyAffirmation}&quot;
+                    </div>
+                    <div className={styles.repSection}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setGroundingOpen(true)}
+                        className={styles.repButton}
+                      >
+                        Grounding Exercise
+                      </Button>
                     </div>
                   </Card>
-                  <div className="col-span-1 md:col-span-2">
+                  <div className={styles.journalCard}>
                     <DashboardJournalWidget />
                   </div>
                 </div>
-                <Card className="bg-gray-800/80 p-6 mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Last 7 Days</h3>
+                <Card className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}>
+                  <h3 className={styles.sparklineTitle}>Last 7 Days</h3>
                   <svg
                     width="100%"
                     height="48"
                     viewBox="0 0 140 48"
                     preserveAspectRatio="none"
-                    className="mb-2"
+                    className={styles.sparklineSvg}
                     aria-label="Last 7 days activity"
                   >
                     {(() => {
@@ -637,7 +723,7 @@ export default function Dashboard() {
                             fill="none"
                             stroke="#10b981"
                             strokeWidth="2"
-                            className="transition-all duration-500"
+                            className={styles.fadeIn}
                           />
                           {dailyCounts.map((v, i) => (
                             <circle
@@ -652,40 +738,39 @@ export default function Dashboard() {
                       );
                     })()}
                   </svg>
-                  <small className="text-gray-400">
+                  <small className={styles.sparklineNote}>
                     Counts reflect days with activity. One tiny rep is enough to light up a day.
                   </small>
                 </Card>
-                <Card className="bg-gray-800/80 p-6 mb-6">
-                  <h3 className="text-lg font-semibold mb-2">Last 30 Days</h3>
-                  <div className="grid grid-cols-7 gap-2">
+                <Card className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
+                  <h3 className={styles.calendarTitle}>Last 30 Days</h3>
+                  <div className={styles.calendarGrid}>
                     {monthlyCounts.map((hasActivity, i) => {
-                      const today = new Date();
-                      const date = new Date(today);
-                      date.setDate(today.getDate() - (29 - i));
+                      const date = new Date();
+                      date.setDate(date.getDate() - (29 - i));
                       const dayOfMonth = date.getDate();
                       const isToday = i === 29;
                       return (
                         <div
                           key={i}
-                          className={`p-2 rounded text-center ${
-                            hasActivity ? "bg-green-500" : "bg-gray-700"
-                          } ${isToday ? "ring-2 ring-yellow-400" : ""}`}
+                          className={`${styles.calendarDay} ${
+                            hasActivity ? styles.calendarDayActive : styles.calendarDayInactive
+                          } ${isToday ? styles.calendarDayToday : ""}`}
                           title={`${date.toLocaleDateString()} - ${
                             hasActivity ? "Active" : "No activity"
                           }`}
                         >
-                          <span>{dayOfMonth}</span>
-                          {hasActivity && <div className="w-1 h-1 bg-white rounded-full mx-auto mt-1" />}
+                          <span className={styles.calendarDayNumber}>{dayOfMonth}</span>
+                          {hasActivity && <div className={styles.calendarDayDot} />}
                         </div>
                       );
                     })}
                   </div>
-                  <small className="text-gray-400 mt-2 block">
+                  <small className={styles.calendarNote}>
                     Your habit journey over the past month. Each dot represents a day with activity.
                   </small>
                 </Card>
-                <Card className="bg-gray-800/80 p-6">
+                <Card className={styles.fullWidthCard}>
                   <HabitAnalytics
                     habits={habits}
                     habitRepCount={habitRepCount}
@@ -696,14 +781,14 @@ export default function Dashboard() {
               </>
             )}
             {active === "visualizer" && (
-              <div className="space-y-6">
+              <div className={styles.visualizerGrid}>
                 {(() => {
                   const h = habits.find((x) => x.id === activeHabitId);
                   if (!h)
                     return (
-                      <Card className="bg-gray-800/80 p-6">
-                        <h2 className="text-xl font-semibold mb-2">Select a Habit</h2>
-                        <p className="text-gray-300">
+                      <Card className={styles.placeholderSection}>
+                        <h2 className={styles.placeholderTitle}>Select a Habit</h2>
+                        <p className={styles.placeholderText}>
                           Choose an active habit to see your neural network visualization.
                         </p>
                       </Card>
@@ -722,8 +807,8 @@ export default function Dashboard() {
                   const h = habits.find((x) => x.id === activeHabitId);
                   if (!h) return null;
                   return (
-                    <Card className="bg-gray-800/80 p-6">
-                      <h3 className="text-lg font-semibold mb-2">Classic Neural Field View</h3>
+                    <Card className={styles.fullWidthCard}>
+                      <h3 className={styles.sparklineTitle}>Classic Neural Field View</h3>
                       <NeuralField
                         repCount={habitRepCount}
                         wrapSize={Math.max(1, h.wrap_size)}
@@ -736,12 +821,12 @@ export default function Dashboard() {
               </div>
             )}
             {active === "coach" && (
-              <Card className="bg-gray-800/80 p-6">
-                <h2 className="text-xl font-semibold mb-2">Your Personal Coach 🧠</h2>
-                <p className="text-gray-300 mb-4">
+              <Card className={styles.coachSection}>
+                <h2 className={styles.coachTitle}>Your Personal Coach 🧠</h2>
+                <p className={styles.coachSubtitle}>
                   The public FloatingCoach stays on all pages. This private space can reflect your data and goals.
                 </p>
-                <Card className="bg-blue-900/50 p-4">
+                <Card className={styles.fullWidthCard}>
                   <p>
                     Based on your last rep on{" "}
                     <strong>
@@ -749,35 +834,35 @@ export default function Dashboard() {
                         ? new Date(userData.last_rep).toLocaleDateString()
                         : "—"}
                     </strong>
-                    , here's a micro-win for today:{" "}
+                    , here&apos;s a micro-win for today:{" "}
                     <em>2-minute breath reset + 1 tiny rep after coffee.</em>
                   </p>
                 </Card>
               </Card>
             )}
             {active === "history" && (
-              <Card className="bg-gray-800/80 p-6">
-                <h2 className="text-xl font-semibold mb-2">History & Insights</h2>
-                <p className="text-gray-300 mb-4">
-                  We'll populate this with daily reps, weekly trends, and milestones once we add the events table.
+              <Card className={styles.placeholderSection}>
+                <h2 className={styles.placeholderTitle}>History & Insights</h2>
+                <p className={styles.placeholderText}>
+                  We&apos;ll populate this with daily reps, weekly trends, and milestones once we add the events table.
                 </p>
-                <ul className="list-disc pl-5 text-gray-300">
+                <ul className={styles.placeholderContent}>
                   <li>Milestones (3, 7, 21, 42, 66 days)</li>
                   <li>Week-over-week improvements</li>
                   <li>Correlation with mood/craving (future)</li>
                 </ul>
               </Card>
             )}
-            <p className="text-center text-gray-300 italic mt-8">
-              &ldquo;You are not broken. You are becoming.&rdquo;
+            <p className={styles.inspirationalQuote}>
+              &quot;{inspirationalQuote}&quot;
             </p>
           </>
         ) : (
-          <Card className="bg-gradient-to-br from-blue-800/80 to-purple-800/80 backdrop-blur-md p-6 text-center">
-            <h2 className="text-xl font-semibold mb-2">Sign In Required</h2>
-            <p className="text-gray-300">
+          <Card className={styles.signInSection}>
+            <h2 className={styles.signInTitle}>Sign In Required</h2>
+            <p className={styles.signInText}>
               Please{" "}
-              <Link href="/signin" className="text-yellow-400 hover:underline">
+              <Link href="/signin" className={styles.signInLink}>
                 sign in here
               </Link>{" "}
               to access your dashboard.
@@ -786,108 +871,105 @@ export default function Dashboard() {
         )}
       </main>
       <Modal open={createOpen} title="Create a habit" onClose={() => setCreateOpen(false)}>
-        <div className="grid gap-4">
+        <div className={styles.habitControls}>
           <label>
-            <div className="text-gray-300 mb-1">Name</div>
+            <div className={styles.habitLabel}>Name</div>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g., Breath reset"
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
           <label>
-            <div className="text-gray-300 mb-1">Goal reps</div>
+            <div className={styles.habitLabel}>Goal reps</div>
             <input
               type="number"
               min={1}
               value={newGoal}
               onChange={(e) => setNewGoal(Number(e.target.value))}
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
           <label>
-            <div className="text-gray-300 mb-1">Wrap size</div>
+            <div className={styles.habitLabel}>Wrap size</div>
             <input
               type="number"
               min={1}
               value={newWrap}
               onChange={(e) => setNewWrap(Number(e.target.value))}
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
-          <div className="flex gap-2 justify-end">
+          <div className={styles.habitActions}>
             <Button
               variant="secondary"
               onClick={() => setCreateOpen(false)}
-              className="bg-gray-700 hover:bg-gray-600"
             >
               Cancel
             </Button>
             <Button
               variant="primary"
               onClick={handleCreateHabit}
-              className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
             >
               Create
             </Button>
           </div>
-          <p className="text-gray-400 text-sm">
+          <p className={styles.streakText}>
             Start small is smart. You can always change this later.
           </p>
         </div>
       </Modal>
       <Modal open={editOpen} title="Edit habit" onClose={() => setEditOpen(false)}>
-        <div className="grid gap-4">
+        <div className={styles.habitControls}>
           <label>
-            <div className="text-gray-300 mb-1">Name</div>
+            <div className={styles.habitLabel}>Name</div>
             <input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
           <label>
-            <div className="text-gray-300 mb-1">Goal reps</div>
+            <div className={styles.habitLabel}>Goal reps</div>
             <input
               type="number"
               min={1}
               value={editGoal}
               onChange={(e) => setEditGoal(Number(e.target.value))}
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
           <label>
-            <div className="text-gray-300 mb-1">Wrap size</div>
+            <div className={styles.habitLabel}>Wrap size</div>
             <input
               type="number"
               min={1}
               value={editWrap}
               onChange={(e) => setEditWrap(Number(e.target.value))}
-              className="w-full p-2 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className={styles.habitSelect}
             />
           </label>
-          <div className="flex gap-2 justify-end">
+          <div className={styles.habitActions}>
             <Button
               variant="secondary"
               onClick={() => setEditOpen(false)}
-              className="bg-gray-700 hover:bg-gray-600"
             >
               Cancel
             </Button>
             <Button
               variant="primary"
               onClick={handleSaveEdit}
-              className="bg-yellow-400 text-gray-900 hover:bg-yellow-500"
             >
               Save
             </Button>
           </div>
-          <p className="text-gray-400 text-sm">
-            You can change goals as you grow. Progress isn't linear — it's kind.
+          <p className={styles.streakText}>
+            You can change goals as you grow. Progress isn&apos;t linear — it&apos;s kind.
           </p>
         </div>
       </Modal>
+      <GroundingModal open={groundingOpen} onClose={() => setGroundingOpen(false)} />
       <Footer />
     </div>
   );
