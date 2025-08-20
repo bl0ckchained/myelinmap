@@ -1,51 +1,158 @@
-.section {
+/* Existing styles (e.g., .header, .title, .subtitle, .nav, .navLink) remain unchanged */
+
+/* Footer styles, merged from HeaderFooter.module.css */
+.footer {
   width: 100%;
-  background: #111827; /* gray-900 */
+  background: radial-gradient(circle at bottom, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.1));
   color: #ffffff;
-}
-
-.inner {
-  max-width: 1100px;      /* <-- central column width */
-  margin-inline: auto;    /* <-- centers on every page */
-  padding: 48px 16px;     /* 3rem 1rem */
-  text-align: center;     /* keep header text centered */
-}
-
-.title {
-  margin: 0;
-  font-size: clamp(1.8rem, 2.8vw, 2.25rem);
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: 0.2px;
-}
-
-.subtitle {
-  margin: 8px auto 0;
-  max-width: 40rem;
-  font-size: 1.125rem;
-  color: #cbd5e1;
-}
-
-.nav {
-  margin-top: 32px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
+  padding: 3rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: center;
   font-size: 0.875rem;
+  backdrop-filter: blur(10px);
 }
 
-.navLink {
-  padding: 8px 16px;
-  border-radius: 9999px;
+.container {
+  max-width: 1100px;
+  margin-inline: auto;
+  padding: 0 1rem;
+}
+
+.footerContent {
+  margin-bottom: 1.5rem;
+}
+
+.footerText {
+  color: #9ca3af;
+  margin-top: 0.5rem;
+}
+
+.footerTagline {
   color: #ffffff;
-  background-color: #1f2937; /* gray-800 */
-  text-decoration: none;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: transform 200ms ease, box-shadow 200ms ease, background-color 150ms ease;
-  will-change: transform;
+  font-weight: 500;
 }
 
-.navLink:hover {
-  box-shadow: 0 6px 10px rgba(0,0,0,0.18);
+.footerNotice {
+  margin: 0 auto 1rem;
+  max-width: 680px;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.noticeSuccess {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.noticeCancel {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.footerLinks {
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+}
+
+.footerCopyright {
+  background: linear-gradient(90deg, #7ee0c3, #10b981);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+
+.footerLink {
+  text-decoration: underline;
+  color: #bfdbfe;
+  transition: color 0.3s ease;
+}
+
+.footerLink:hover {
+  color: #10b981;
+}
+
+.footerSocial {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.coffeeButton {
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.coffeeButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(16, 185, 129, 0.3);
+}
+
+.coffeeButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.footerJoin {
+  color: #9ca3af;
+}
+
+.youtubeLink {
+  color: #ef4444;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.youtubeLink:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.youtubeIcon {
+  fill: currentColor;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .footerSocial {
+    flex-direction: column;
+  }
+  .footerNotice {
+    max-width: 100%;
+  }
+  .nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .navLink {
+    width: fit-content;
+  }
+}
+
+/* Animations */
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

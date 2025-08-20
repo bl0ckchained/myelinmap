@@ -1,30 +1,19 @@
-// components/FloatingCoach.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import styles from "../styles/Dashboard.module.css";
 
-/** Chat message shape (prevents literal -> string widening) */
 type ChatMsg = { role: "user" | "assistant" | "system"; content: string };
-
 type HabitCtx = { name: string; wrap_size: number } | null;
 
 type Props = {
-  /** "floating" renders the FAB + popover; "embedded" renders a card (great for Dashboard) */
   variant?: "floating" | "embedded";
-  /** Start open (only meaningful for floating) */
   startOpen?: boolean;
-  /** Key used for localStorage persistence */
   storageKey?: string;
-  /** Optional context to personalize suggestions */
   activeHabit?: HabitCtx;
   habitRepCount?: number;
-  /** Extra system prompt lines to append */
   systemContextExtra?: string;
-  /** Embedded-only: chat viewport height (px) */
   height?: number;
-  /** Embedded-only: container className hook */
   className?: string;
-  /** Optional callback to log a rep (e.g., increments habit counter) */
   onLogRep?: () => void | Promise<void>;
-  /** Optional title for header; defaults to "Coach" */
   title?: string;
 };
 
@@ -45,28 +34,30 @@ export default function FloatingCoach({
     {
       role: "assistant",
       content:
-        "Welcome. I'm here and on your side. What's present for you right now?",
+        "Hey there. I’m your Myelin Coach, here for you no matter what’s on your mind. What’s one thing you’d like to explore today?",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Build system context dynamically from habit data
+  // Build system context dynamically
   const systemContext = useMemo(() => {
     const name = activeHabit?.name ?? "your tiny habit";
     const wrap = activeHabit?.wrap_size ?? 7;
     const reps = habitRepCount ?? 0;
 
     return [
-      "You are Myelin Coach — a calm, compassionate, trauma-aware helper.",
-      "Tone: brief, warm, non-judgmental. Empower, don't pressure. Tiny steps > perfection.",
+      "You are Myelin Coach — a calm, compassionate, trauma-aware helper for any question or challenge.",
+      "Tone: brief, warm, non-judgmental. Empower, don’t pressure. Tiny steps > perfection.",
       "K.I.N.D. method: Knowledge, Identification, Neural Rewiring, Daily Kindness.",
-      "If the user expresses shame or relapse, normalize it and suggest one tiny rep.",
+      "Support users with any topic: habits, emotions, grounding, or general advice.",
+      "If the user expresses shame or relapse, normalize it and suggest one tiny, actionable step.",
       "Offer specific, 1–2 sentence suggestions; avoid long lectures.",
       `Active habit: ${name} (wrap ${wrap}). Total reps: ${reps}.`,
-      "Suggest implementation intentions (After [cue], I will [tiny action]).",
+      "Suggest implementation intentions (After [cue], I will [tiny action]) when relevant.",
       systemContextExtra.trim(),
     ]
       .filter(Boolean)
@@ -80,7 +71,6 @@ export default function FloatingCoach({
         typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
       if (saved) {
         const parsed = JSON.parse(saved) as ChatMsg[];
-        // Guard: ensure parsed looks like ChatMsg[]
         if (
           Array.isArray(parsed) &&
           parsed.every(
@@ -93,7 +83,7 @@ export default function FloatingCoach({
     } catch {
       // ignore
     }
-  }, [storageKey]); // ✅ remove unused eslint-disable; deps are correct
+  }, [storageKey]);
 
   // Persist chat
   useEffect(() => {
@@ -104,13 +94,20 @@ export default function FloatingCoach({
     }
   }, [chatLog, storageKey]);
 
-  // Auto-scroll to bottom on new messages (only when visible)
+  // Auto-scroll to bottom
   useEffect(() => {
     if (variant === "floating" && !open) return;
     const el = scrollBoxRef.current;
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [chatLog, loading, open, variant]);
+
+  // Focus textarea when floating window opens
+  useEffect(() => {
+    if (variant === "floating" && open) {
+      textareaRef.current?.focus();
+    }
+  }, [open, variant]);
 
   const sendMessage = async () => {
     const text = input.trim();
@@ -141,7 +138,7 @@ export default function FloatingCoach({
         {
           role: "assistant",
           content:
-            "The Coach hit a hiccup and is taking a breath. Try again shortly — you didn't do anything wrong.",
+            "I hit a small bump, but I’m still here for you. Try asking again, or let’s find one tiny step to take right now.",
         },
       ]);
     } finally {
@@ -152,68 +149,47 @@ export default function FloatingCoach({
   const quickInsert = (text: string) =>
     setInput((prev) => (prev ? `${prev} ${text}` : text));
 
-  /** ---------- UI Pieces ---------- */
-
   const ChatWindow = (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        width: variant === "floating" ? 320 : "100%",
-        height: variant === "floating" ? 460 : "auto",
-        background:
-          variant === "floating"
-            ? "#0b1020"
-            : "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
-        color: "#e5e7eb",
-        borderRadius: 16,
-        border: "1px solid rgba(148,163,184,0.18)",
-        boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
-        padding: 12,
-      }}
-      className={className}
-    >
+    <div className={`${styles.coachContainer} ${className || ""} ${styles.fadeIn}`}>
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          marginBottom: 8,
-        }}
-      >
-        <span style={{ fontSize: 20 }} aria-hidden>🧘</span>
+      <div className={styles.coachHeader}>
+        <span className={styles.coachIcon} aria-hidden>🧘</span>
         <strong aria-live="polite">{title?.trim() || "Coach"}</strong>
-
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          {/* Optional: Log Rep button if provided */}
+        <div className={styles.coachActions}>
           {onLogRep && (
             <button
               onClick={() => void onLogRep()}
               title="Log a rep"
-              aria-label="Log a rep"
-              style={chipStyle}
+              aria-label="Log a habit repetition"
+              className={styles.coachChip}
             >
               ⚡ Log rep
             </button>
           )}
-
-          {/* Quick prompts (compact) */}
           <button
             onClick={() =>
-              quickInsert("I'm overwhelmed. Help me find one tiny step.")
+              quickInsert("I’m feeling stuck. What’s one small thing I can do?")
             }
-            title="Tiny step"
-            style={chipStyle}
+            title="Ask for a small step"
+            className={styles.coachChip}
           >
-            Tiny step
+            Feeling stuck
+          </button>
+          <button
+            onClick={() =>
+              quickInsert("Can you suggest a 2-minute grounding exercise?")
+            }
+            title="Ask for a grounding tip"
+            className={styles.coachChip}
+          >
+            Grounding tip
           </button>
           <button
             onClick={() =>
               quickInsert("Can you help me plan a 2-minute habit after coffee?")
             }
             title="Plan after coffee"
-            style={chipStyle}
+            className={styles.coachChip}
           >
             After coffee
           </button>
@@ -223,68 +199,37 @@ export default function FloatingCoach({
       {/* Scrollable log */}
       <div
         ref={scrollBoxRef}
-        style={{
-          flex: 1,
-          height: variant === "embedded" ? height : "auto",
-          overflowY: "auto",
-          border: "1px solid rgba(148,163,184,0.15)",
-          borderRadius: 12,
-          padding: 12,
-          background: "#0b1020",
-        }}
+        className={styles.coachLog}
         role="log"
-        aria-live="polite"
+        aria-live="assertive"
         aria-relevant="additions"
       >
         {chatLog.map((m, i) => (
           <div
             key={i}
-            style={{
-              marginBottom: 12,
-              textAlign: m.role === "user" ? "right" : "left",
-            }}
+            className={`${styles.coachMessage} ${
+              m.role === "user" ? styles.userMessage : styles.assistantMessage
+            } ${styles.fadeIn}`}
           >
-            <div
-              style={{
-                display: "inline-block",
-                maxWidth: "85%",
-                padding: "10px 12px",
-                borderRadius: 12,
-                lineHeight: 1.5,
-                whiteSpace: "pre-wrap",
-                background:
-                  m.role === "user"
-                    ? "linear-gradient(180deg, #2563eb, #1d4ed8)"
-                    : "linear-gradient(180deg, rgba(16,185,129,.18), rgba(16,185,129,.12))",
-                color: m.role === "user" ? "#fff" : "#d1fae5",
-                border:
-                  m.role === "user"
-                    ? "1px solid rgba(37,99,235,.7)"
-                    : "1px solid rgba(16,185,129,.25)",
-              }}
-            >
-              <div style={{ opacity: 0.75, fontSize: 12, marginBottom: 4 }}>
-                {m.role === "user" ? "You" : "Coach"}
-              </div>
-              {m.content}
+            <div className={styles.messageLabel}>
+              {m.role === "user" ? "You" : "Coach"}
             </div>
+            {m.content}
           </div>
         ))}
-
         {loading && (
-          <div style={{ textAlign: "left", color: "#a7f3d0" }}>
-            <span style={{ opacity: 0.8 }}>Coach is thinking</span>
-            <span aria-hidden style={{ marginLeft: 6 }}>
-              ···
-            </span>
+          <div className={styles.coachLoading}>
+            <span>Coach is thinking</span>
+            <span aria-hidden> ···</span>
           </div>
         )}
         <div ref={chatEndRef} />
       </div>
 
       {/* Composer */}
-      <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+      <div className={styles.coachComposer}>
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -294,38 +239,23 @@ export default function FloatingCoach({
             }
           }}
           rows={2}
-          placeholder="Tell the Coach what's hard… (Shift+Enter for newline)"
-          style={inputStyle}
+          placeholder="Tell the Coach what's on your mind… (Shift+Enter for newline)"
+          className={styles.coachInput}
           disabled={loading}
-          aria-label="Message Coach"
+          aria-label="Message Myelin Coach"
         />
         <button
           onClick={sendMessage}
           disabled={loading || !input.trim()}
-          style={{
-            padding: "10px 14px",
-            borderRadius: 12,
-            background: "#10b981",
-            color: "#062019",
-            fontWeight: 700,
-            cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-            opacity: loading || !input.trim() ? 0.6 : 1,
-          }}
-          aria-label="Send message"
+          className={styles.coachSendButton}
+          aria-label="Send message to Coach"
         >
           {loading ? "…" : "Send"}
         </button>
       </div>
 
       {/* Utilities */}
-      <div
-        style={{
-          display: "flex",
-          gap: 10,
-          justifyContent: "flex-end",
-          marginTop: 6,
-        }}
-      >
+      <div className={styles.coachUtilities}>
         <button
           onClick={() => {
             const text = chatLog
@@ -335,7 +265,7 @@ export default function FloatingCoach({
               .join("\n");
             navigator.clipboard.writeText(text).catch(() => {});
           }}
-          style={utilBtnStyle}
+          className={styles.coachUtilButton}
           aria-label="Copy conversation"
         >
           Copy
@@ -350,7 +280,7 @@ export default function FloatingCoach({
               },
             ]);
           }}
-          style={utilBtnStyle}
+          className={styles.coachUtilButton}
           aria-label="Clear conversation"
         >
           Clear
@@ -363,55 +293,21 @@ export default function FloatingCoach({
     return <>{ChatWindow}</>;
   }
 
-  // Floating variant (FAB + popover)
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          bottom: "1.25rem",
-          right: "1.25rem",
-          zIndex: 9999,
-        }}
-      >
+      <div className={styles.coachFab}>
         <button
           onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle AI Coach"
-          style={{
-            backgroundColor: "#059669",
-            color: "#fff",
-            borderRadius: "9999px",
-            padding: "1.1rem",
-            border: "2px solid #facc15",
-            boxShadow:
-              "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
-            transition: "transform 0.2s",
-            cursor: "pointer",
-            animation: "mm-float 3s ease-in-out infinite",
-            willChange: "transform",
-          }}
+          aria-label="Toggle Myelin Coach"
+          className={`${styles.coachToggle} ${styles.slideIn}`}
         >
-          <span style={{ fontSize: "1.6rem" }} aria-hidden>🧘</span>
+          <span className={styles.coachIcon} aria-hidden>🧘</span>
         </button>
-
-        {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
+        {open && <div className={styles.coachPopover}>{ChatWindow}</div>}
       </div>
-
-      {/* minimal keyframes */}
       <style jsx global>{`
-        @keyframes mm-float {
-          0% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
         @media (prefers-reduced-motion: reduce) {
-          button[aria-label="Toggle AI Coach"] {
+          .${styles.coachToggle} {
             animation: none !important;
           }
         }
@@ -419,33 +315,3 @@ export default function FloatingCoach({
     </>
   );
 }
-
-/* ---------- tiny style helpers ---------- */
-const chipStyle: React.CSSProperties = {
-  borderRadius: 999,
-  padding: "4px 10px",
-  fontSize: 12,
-  background: "rgba(148,163,184,0.15)",
-  color: "#e5e7eb",
-  border: "1px solid rgba(148,163,184,0.25)",
-  cursor: "pointer",
-};
-
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: "10px 12px",
-  borderRadius: 12,
-  border: "1px solid #334155",
-  background: "#0f172a",
-  color: "#e5e7eb",
-  resize: "none",
-};
-
-const utilBtnStyle: React.CSSProperties = {
-  background: "transparent",
-  border: "none",
-  color: "#94a3b8",
-  cursor: "pointer",
-};
-  
-
