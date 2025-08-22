@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+/* eslint-disable react/no-unescaped-entities */
+// pages/dashboard.tsx
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Head from "next/head";
 import { User, type PostgrestError } from "@supabase/supabase-js";
@@ -11,17 +13,25 @@ import MyelinVisualizer from "@/components/MyelinVisualizer";
 import HabitAnalytics from "@/components/HabitAnalytics";
 import FloatingCoach from "@/components/FloatingCoach";
 import DashboardJournalWidget from "@/components/DashboardJournalWidget";
+
+// New magical UI components
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Tabs from "@/components/ui/Tabs";
-import styles from "../styles/Dashboard.module.css";
 
+import styles from "@/styles/Dashboard.module.css";
+
+/** Tabs for the dashboard UI */
 type Tab = "overview" | "visualizer" | "coach" | "history";
+
+/** Narrow row type for your existing totals table (user_reps) */
 type UserRepsRow = {
   user_id: string;
   reps: number;
   last_rep: string | null;
 };
+
+/** Row type for the new 'habits' table */
 type HabitRow = {
   id: string;
   user_id: string;
@@ -30,12 +40,17 @@ type HabitRow = {
   wrap_size: number;
   created_at: string;
 };
+
+/** Typed realtime payload helper */
 type UpdatePayload<T> = {
   eventType: "INSERT" | "UPDATE" | "DELETE" | "SELECT";
   new: T | null;
   old: T | null;
 };
 
+/* ===========================
+   Enhanced Modal Component
+   =========================== */
 function Modal({
   open,
   title,
@@ -49,13 +64,9 @@ function Modal({
 }) {
   if (!open) return null;
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className={styles.modalOverlay}
-      onClick={onClose}
-    >
+    <div role="dialog" aria-modal="true" className={styles.modalOverlay} onClick={onClose}>
       <Card
+        variant="glass"
         className={styles.modalCard}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
@@ -77,164 +88,91 @@ function Modal({
   );
 }
 
-function GroundingModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
-  if (!open) return null;
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className={styles.modalOverlay}
-      onClick={onClose}
-    >
-      <Card
-        className={styles.modalCard}
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
-        <div className={styles.modalHeader}>
-          <h3 className={styles.modalTitle}>4-7-8 Breathing Exercise</h3>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            aria-label="Close"
-            className={styles.modalClose}
-          >
-            ✕
-          </Button>
-        </div>
-        <div className="text-center">
-          <p className={styles.repSubtitle}>
-            Follow the circle to breathe: Inhale for 4s, hold for 7s, exhale for 8s.
-          </p>
-          <div
-            className="w-24 h-24 mx-auto my-4 rounded-full"
-            style={{
-              background: "linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(52, 211, 153, 0.1) 100%)",
-              animation: "pulse 19s ease-in-out infinite",
-            }}
-          />
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            className={styles.modalClose}
-          >
-            Done
-          </Button>
-        </div>
-        <style jsx>{`
-          @keyframes pulse {
-            0% {
-              transform: scale(1);
-              opacity: 0.8;
-            }
-            21% {
-              transform: scale(1.2);
-              opacity: 1;
-            }
-            58% {
-              transform: scale(1.2);
-              opacity: 1;
-            }
-            100% {
-              transform: scale(1);
-              opacity: 0.8;
-            }
-          }
-        `}</style>
-      </Card>
-    </div>
-  );
-}
-
 export default function Dashboard() {
+  /* --- Auth & core page state --- */
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<{
-    reps: number;
-    last_rep: string | null;
-  }>({
+  const [userData, setUserData] = useState<UserRepsRow>({
     reps: 0,
     last_rep: null,
+    user_id: "",
   });
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState<Tab>("overview");
+
+  /* --- Lightweight counts from your original implementation (kept) --- */
   const [dailyCounts, setDailyCounts] = useState<number[]>(Array(7).fill(0));
   const [monthlyCounts, setMonthlyCounts] = useState<number[]>(Array(30).fill(0));
   const [streak, setStreak] = useState<number>(0);
   const [nudge, setNudge] = useState<string>("");
+
+  /* --- Habits state & progress for active habit --- */
   const [habits, setHabits] = useState<HabitRow[]>([]);
   const [activeHabitId, setActiveHabitId] = useState<string | null>(null);
-  const [habitRepCount, setHabitRepCount] = useState<number>(0);
-  const [loopPulse, setLoopPulse] = useState(0);
-  const [wrapBurst, setWrapBurst] = useState(false);
+  const [habitRepCount, setHabitRepCount] = useState<number>(0); // total reps for active habit
+
+  /* --- HabitLoop / NeuralField animation triggers --- */
+  const [loopPulse, setLoopPulse] = useState(0); // bump after each rep
+  const [wrapBurst, setWrapBurst] = useState(false); // true briefly when a wrap completes
+
+  /* ===========================
+     Create/Edit modal state
+     =========================== */
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [groundingOpen, setGroundingOpen] = useState(false);
+  // create form
   const [newName, setNewName] = useState("Breath reset");
   const [newGoal, setNewGoal] = useState<number>(21);
   const [newWrap, setNewWrap] = useState<number>(7);
+  // edit form
   const [editName, setEditName] = useState("");
   const [editGoal, setEditGoal] = useState<number>(21);
   const [editWrap, setEditWrap] = useState<number>(7);
 
-  const affirmations = useMemo(
-    () => [
-      "I am enough, exactly as I am.",
-      "Every small step is rewiring my future.",
-      "I am healing, one kind choice at a time.",
-      "My past does not define my potential.",
-    ],
-    []
-  );
-  const [dailyAffirmation, setDailyAffirmation] = useState<string>("");
-
   const clampInt = (v: number, min: number, max: number) =>
     Math.max(min, Math.min(max, Math.floor(v)));
 
-  useEffect(() => {
-    const date = new Date();
-    const index = date.getDate() % affirmations.length;
-    setDailyAffirmation(affirmations[index]);
-  }, [affirmations]);
+  /* ---------------------------
+   *  Effects & Handlers
+   * -------------------------- */
 
+  /* Watch authentication state */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
     return () => listener?.subscription.unsubscribe();
   }, []);
 
+  /* Fetch user totals (user_reps) + subscribe to updates (kept, with better typing) */
   useEffect(() => {
     if (!user) return;
+
     const fetchUserData = async () => {
       const { data, error } = await supabase
         .from("user_reps")
-        .select("*")
+        .select("user_id,reps,last_rep")
         .eq("user_id", user.id)
         .single();
+
+      // PGRST116 = No rows found with .single()
       if ((error as PostgrestError | null)?.code === "PGRST116") {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
           .insert({ user_id: user.id, reps: 0, last_rep: null })
-          .select()
+          .select("user_id,reps,last_rep")
           .single();
-        if (!insertError && initialData)
-          setUserData(initialData as UserRepsRow);
+
+        if (!insertError && initialData) setUserData(initialData as UserRepsRow);
       } else if (!error && data) {
         setUserData(data as UserRepsRow);
       }
     };
+
     fetchUserData();
+
     const subscription = supabase
       .channel(`user_reps:${user.id}`)
       .on(
@@ -253,21 +191,23 @@ export default function Dashboard() {
         }
       )
       .subscribe();
+
     return () => {
       supabase.removeChannel(subscription);
     };
   }, [user]);
 
+  /** KEPT: minimal streak + last-7-days based on last_rep (overwritten later by precise values) */
   useEffect(() => {
     if (!user) return;
-    const date = new Date();
-    date.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const arr = Array(7).fill(0);
     if (userData.last_rep) {
       const lr = new Date(userData.last_rep);
       lr.setHours(0, 0, 0, 0);
-      const diffDays = Math.round((date.getTime() - lr.getTime()) / 86400000);
-      if (diffDays === 0) arr[6] = 1;
+      const diffDays = Math.round((today.getTime() - lr.getTime()) / 86400000);
+      if (diffDays === 0) arr[6] = 1; // crude: mark today if last_rep is today
       setStreak(diffDays === 0 ? 1 : 0);
     } else {
       setStreak(0);
@@ -275,19 +215,23 @@ export default function Dashboard() {
     setDailyCounts(arr);
   }, [user, userData.last_rep]);
 
+  /* Load user habits (or auto-create a default one) */
   useEffect(() => {
     if (!user) return;
     const loadHabits = async () => {
       const { data, error } = await supabase
         .from("habits")
-        .select("id, user_id, name, goal_reps, wrap_size, created_at")
+        .select("id,user_id,name,goal_reps,wrap_size,created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true });
+
       if (error) {
         console.error("Load habits error:", error);
         return;
       }
+
       if (!data || data.length === 0) {
+        // create a gentle default so first-time users see something meaningful
         const { data: created, error: insErr } = await supabase
           .from("habits")
           .insert({
@@ -296,8 +240,9 @@ export default function Dashboard() {
             goal_reps: 21,
             wrap_size: 7,
           })
-          .select()
+          .select("id,user_id,name,goal_reps,wrap_size,created_at")
           .single();
+
         if (!insErr && created) {
           const row = created as HabitRow;
           setHabits([row]);
@@ -312,9 +257,14 @@ export default function Dashboard() {
     loadHabits();
   }, [user]);
 
+  /*
+   * Accurate: Compute streak (distinct days with rep_events),
+   * last-7-days counts, and progress for the ACTIVE habit.
+   */
   useEffect(() => {
     if (!user) return;
     const compute = async () => {
+      // --- Streak + last 7 days from rep_events ---
       const since60 = new Date();
       since60.setDate(since60.getDate() - 60);
       const { data: events, error: evErr } = await supabase
@@ -323,46 +273,55 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .gte("ts", since60.toISOString())
         .order("ts", { ascending: false });
+
       if (evErr) {
         console.error("rep_events streak error:", evErr);
       }
+
       const dayKeys = new Set(
-        (events ?? []).map((e) =>
-          new Date(e.ts as string).toISOString().slice(0, 10)
-        )
+        (events ?? []).map((e) => new Date(e.ts as string).toISOString().slice(0, 10))
       );
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
+
+      // streak: walk backward from today while dates exist
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       let s = 0;
       for (let i = 0; i < 365; i++) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
         const key = d.toISOString().slice(0, 10);
         if (dayKeys.has(key)) s++;
         else break;
       }
       setStreak(s);
+
+      // last 7 days mini-series (index 6 = today)
       const arr7 = Array(7).fill(0);
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - (6 - i));
+        const d = new Date(today);
+        d.setDate(today.getDate() - (6 - i));
         const key = d.toISOString().slice(0, 10);
         arr7[i] = dayKeys.has(key) ? 1 : 0;
       }
       setDailyCounts(arr7);
+
+      // last 30 days calendar (index 29 = today)
       const arr30 = Array(30).fill(0);
       for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - (29 - i));
+        const d = new Date(today);
+        d.setDate(today.getDate() - (29 - i));
         const key = d.toISOString().slice(0, 10);
         arr30[i] = dayKeys.has(key) ? 1 : 0;
       }
       setMonthlyCounts(arr30);
+
+      // --- Active habit progress ---
       if (!activeHabitId) return;
       const { count, error: cntErr } = await supabase
         .from("rep_events")
-        .select("id", { count: "exact", head: true })
+        .select("*", { count: "exact", head: true })
         .eq("habit_id", activeHabitId);
+
       if (cntErr) {
         console.error("rep_events count error:", cntErr);
         return;
@@ -373,64 +332,89 @@ export default function Dashboard() {
     compute();
   }, [user, activeHabitId, habits, userData.last_rep]);
 
+  /*
+   * Log a rep:
+   * - Inserts into rep_events (accurate history/streaks)
+   * - Updates user_reps totals (kept)
+   * - Triggers HabitLoop pulse + wrap celebration
+   */
   const logRep = async () => {
     if (!user || !activeHabitId) return;
     setLoading(true);
+
+    // 1) write event for analytics/streaks
     const { error: evErr } = await supabase
       .from("rep_events")
       .insert({ user_id: user.id, habit_id: activeHabitId });
+
     if (evErr) {
       console.error("Error inserting rep_event:", evErr);
       setLoading(false);
       return;
     }
+
+    // trigger visual pulses & wrap celebration
     setLoopPulse((n) => n + 1);
-    const activeHabit = habits.find((h) => h.id === activeHabitId);
-    if (activeHabit) {
-      const size = Math.max(1, activeHabit.wrap_size);
-      const nextTotal = habitRepCount + 1;
-      if (nextTotal % size === 0) {
-        setWrapBurst(true);
-        setTimeout(() => setWrapBurst(false), 1000);
+    {
+      const activeHabit = habits.find((h) => h.id === activeHabitId);
+      if (activeHabit) {
+        const size = Math.max(1, activeHabit.wrap_size);
+        const nextTotal = habitRepCount + 1;
+        if (nextTotal % size === 0) {
+          setWrapBurst(true);
+          setTimeout(() => setWrapBurst(false), 1000);
+        }
       }
     }
+
+    // 2) bump totals table (kept logic)
     const newRepCount = userData.reps + 1;
     const now = new Date();
     const { error: updErr } = await supabase
       .from("user_reps")
       .update({ reps: newRepCount, last_rep: now.toISOString() })
       .eq("user_id", user.id);
+
     setLoading(false);
     if (updErr) {
       console.error("Error updating user_reps:", updErr);
       return;
     }
+
+    // gentle implementation-intention nudges
     const nudges = [
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
       "Small + consistent > perfect. One more tiny rep later today.",
-      "Label the win: 'I am someone who reps even when it&apos;s hard.'",
+      "Label the win: 'I am someone who reps even when it's hard.'",
     ];
     setNudge(nudges[Math.floor(Math.random() * nudges.length)]);
+
+    // local UI refresh (no full reload)
     setUserData((prev) => ({
       ...prev,
       reps: newRepCount,
       last_rep: now.toISOString(),
     }));
+
+    // optimistically bump progress for active habit
     setHabitRepCount((c) => c + 1);
   };
 
+  /* Habit create/edit handlers */
   const handleCreateHabit = async () => {
     if (!user) return;
     const name = newName.trim().slice(0, 80);
     const goal = clampInt(newGoal, 1, 9999);
     const wrap = clampInt(newWrap, 1, 9999);
     if (!name) return;
+
     const { data, error } = await supabase
       .from("habits")
       .insert({ user_id: user.id, name, goal_reps: goal, wrap_size: wrap })
-      .select()
+      .select("id,user_id,name,goal_reps,wrap_size,created_at")
       .single();
+
     if (error) {
       console.error("create habit error:", error);
       return;
@@ -439,6 +423,7 @@ export default function Dashboard() {
     setHabits((prev) => [...prev, row]);
     setActiveHabitId(row.id);
     setCreateOpen(false);
+    // reset counts for the new active habit
     setHabitRepCount(0);
   };
 
@@ -456,12 +441,14 @@ export default function Dashboard() {
     const name = editName.trim().slice(0, 80);
     const goal = clampInt(editGoal, 1, 9999);
     const wrap = clampInt(editWrap, 1, 9999);
+
     const { data, error } = await supabase
       .from("habits")
       .update({ name, goal_reps: goal, wrap_size: wrap })
       .eq("id", activeHabitId)
-      .select()
+      .select("id,user_id,name,goal_reps,wrap_size,created_at")
       .single();
+
     if (error) {
       console.error("update habit error:", error);
       return;
@@ -471,10 +458,11 @@ export default function Dashboard() {
     setEditOpen(false);
   };
 
+  /* Sign out (kept) */
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setUserData({ reps: 0, last_rep: null });
+    setUserData({ reps: 0, last_rep: null, user_id: "" });
   };
 
   const tabsData = [
@@ -484,90 +472,79 @@ export default function Dashboard() {
     { id: "history", label: "History", icon: "📈" },
   ];
 
-  const inspirationalQuote = "You are not broken. You are becoming.";
-
   return (
     <div className={styles.dashboard}>
       <Head>
         <title>Dashboard | Myelin Map</title>
       </Head>
-      <Header
-        title="Your Dashboard 🌟"
-        subtitle="A sanctuary for your comeback"
-        className={styles.header}
-        titleClassName={styles.title}
-        subtitleClassName={styles.subtitle}
-      />
-      <main className={`${styles.container} ${styles.mainContent}`}>
+
+      <Header title="Your Dashboard 📈" subtitle="A visual record of your comeback" />
+
+      <main className={styles.container}>
         {user ? (
           <>
+            {/* Enhanced Tabs with Sign Out */}
             <div className={styles.tabsContainer}>
               <Tabs
                 tabs={tabsData}
                 activeTab={active}
                 onTabChange={(tabId) => setActive(tabId as Tab)}
                 variant="magical"
-                className={styles.fadeIn}
               />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className={styles.signOutButton}
-              >
+              <Button variant="ghost" size="sm" onClick={handleLogout} className={styles.signOutButton}>
                 Sign Out
               </Button>
             </div>
+
             {active === "overview" && (
               <>
                 <div className={styles.overviewGrid}>
-                  <Card className={styles.statsCard}>
+                  {/* Stats + Habit card (left) */}
+                  <Card variant="magical" className={styles.statsCard}>
                     <div className={styles.welcomeSection}>
-                      <h2 className={styles.coachTitle}>Welcome Back 🧠</h2>
+                      <h2 className={styles.title}>Welcome Back 🧠</h2>
                       <p className={styles.userEmail}>
                         Email: <strong>{user.email}</strong>
                       </p>
-                    </div>
-                    <div className={styles.habitControls}>
-                      <label htmlFor="habit" className={styles.habitLabel}>
-                        Active habit:
-                      </label>
-                      <select
-                        id="habit"
-                        value={activeHabitId ?? ""}
-                        onChange={(e) => setActiveHabitId(e.target.value)}
-                        className={styles.habitSelect}
-                      >
-                        {habits.map((h) => (
-                          <option key={h.id} value={h.id}>
-                            {h.name} (goal {h.goal_reps})
-                          </option>
-                        ))}
-                      </select>
-                      <div className={styles.habitActions}>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => setCreateOpen(true)}
+
+                      {/* Habit selector + actions */}
+                      <div className={styles.habitControls}>
+                        <label htmlFor="habit" className={styles.habitLabel}>
+                          Active habit:
+                        </label>
+                        <select
+                          id="habit"
+                          value={activeHabitId ?? ""}
+                          onChange={(e) => setActiveHabitId(e.target.value)}
+                          className={styles.habitSelect}
                         >
-                          + New Habit
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={openEditForActive}
-                          disabled={!activeHabitId}
-                        >
-                          Edit
-                        </Button>
+                          {habits.map((h) => (
+                            <option key={h.id} value={h.id}>
+                              {h.name} (goal {h.goal_reps})
+                            </option>
+                          ))}
+                        </select>
+                        <div className={styles.habitActions}>
+                          <Button variant="secondary" size="sm" onClick={() => setCreateOpen(true)}>
+                            + New Habit
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={openEditForActive}
+                            disabled={!activeHabitId}
+                          >
+                            Edit
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <div className={styles.visualSection}>
-                      {(() => {
-                        const h = habits.find((x) => x.id === activeHabitId);
-                        if (!h) return null;
-                        return (
-                          <>
+
+                      {/* The loop + neural field */}
+                      <div className={styles.visualSection}>
+                        {(() => {
+                          const h = habits.find((x) => x.id === activeHabitId);
+                          if (!h) return null;
+                          return (
                             <HabitLoop
                               repCount={habitRepCount}
                               wrapSize={Math.max(1, h.wrap_size)}
@@ -575,6 +552,15 @@ export default function Dashboard() {
                               celebrate={wrapBurst}
                               title={`${h.name} — Habit Loop`}
                             />
+                          );
+                        })()}
+                      </div>
+
+                      <div className={styles.visualSection}>
+                        {(() => {
+                          const h = habits.find((x) => x.id === activeHabitId);
+                          if (!h) return null;
+                          return (
                             <MyelinVisualizer
                               repCount={habitRepCount}
                               wrapSize={Math.max(1, h.wrap_size)}
@@ -582,75 +568,77 @@ export default function Dashboard() {
                               height={280}
                               title={`${h.name} — Myelin Network`}
                             />
-                          </>
-                        );
-                      })()}
-                    </div>
-                    <div className={styles.streakContainer}>
-                      <div className={styles.streakRing}>
-                        <svg width="72" height="72" viewBox="0 0 72 72" aria-label={`Streak: ${streak} days`}>
-                          <defs>
-                            <filter id="glow">
-                              <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
-                              <feMerge>
-                                <feMergeNode in="coloredBlur" />
-                                <feMergeNode in="SourceGraphic" />
-                              </feMerge>
-                            </filter>
-                          </defs>
-                          <circle
-                            cx="36"
-                            cy="36"
-                            r="30"
-                            stroke="#1f2937"
-                            strokeWidth="8"
-                            fill="none"
-                          />
-                          {(() => {
-                            const cap = 30;
-                            const pct = Math.min(1, streak / cap);
-                            const circumference = 2 * Math.PI * 30;
-                            const dash = pct * circumference;
-                            return (
-                              <circle
-                                cx="36"
-                                cy="36"
-                                r="30"
-                                stroke="#fbbf36"
-                                strokeWidth="8"
-                                fill="none"
-                                strokeDasharray={`${dash} ${circumference - dash}`}
-                                strokeLinecap="round"
-                                transform="rotate(-90 36 36)"
-                                filter={streak > 0 ? "url(#glow)" : undefined}
-                                className={styles.fadeIn}
-                              />
-                            );
-                          })()}
-                        </svg>
+                          );
+                        })()}
                       </div>
-                      <div className={styles.streakInfo}>
-                        <div className={styles.streakNumber}>
-                          {streak} day{streak === 1 ? "" : "s"} streak
+
+                      {/* Streak ring */}
+                      <div className={styles.streakContainer}>
+                        <div className={styles.streakRing}>
+                          <svg width="72" height="72" viewBox="0 0 72 72">
+                            <defs>
+                              <filter id="glow">
+                                <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                                <feMerge>
+                                  <feMergeNode in="coloredBlur" />
+                                  <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                              </filter>
+                            </defs>
+                            <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
+                            {(() => {
+                              const cap = 30;
+                              const pct = Math.min(1, streak / cap);
+                              const circumference = 2 * Math.PI * 30;
+                              const dash = pct * circumference;
+                              return (
+                                <circle
+                                  cx="36"
+                                  cy="36"
+                                  r="30"
+                                  stroke="#fbbf24"
+                                  strokeWidth="8"
+                                  fill="none"
+                                  strokeDasharray={`${dash} ${circumference - dash}`}
+                                  strokeLinecap="round"
+                                  transform="rotate(-90 36 36)"
+                                  filter={streak > 0 ? "url(#glow)" : undefined}
+                                />
+                              );
+                            })()}
+                          </svg>
                         </div>
-                        <div className={styles.streakText}>
-                          {streak > 0
-                            ? "You came back. That&apos;s braver than never missing."
-                            : "Today can be day one. One tiny rep."}
+                        <div className={styles.streakInfo}>
+                          <div className={styles.streakNumber}>
+                            {streak} day{streak === 1 ? "" : "s"} streak
+                          </div>
+                          <div className={styles.streakText}>
+                            {streak > 0
+                              ? "You came back. That's braver than never missing."
+                              : "Today can be day one. One tiny rep."}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </Card>
-                  <Card className={styles.coachCard}>
+
+                  {/* Coach card (right) */}
+                  <Card variant="default" className={`${styles.coachCard} ${styles.coachSection}`}>
                     <h2 className={styles.coachTitle}>Coach & Quick Rep</h2>
                     <p className={styles.coachSubtitle}>
                       Private coach plus a one-tap rep. Gentle, practical, always on your side.
                     </p>
+
+                    {/* Embedded habit-aware coach */}
                     {(() => {
                       const h = habits.find((x) => x.id === activeHabitId) ?? null;
                       const extra = h
-                        ? `Active habit: ${h.name} (wrap ${Math.max(1, h.wrap_size)}). Total reps: ${habitRepCount}. Offer tiny, specific implementation intentions. Normalize lapses; suggest one tiny rep.`
-                        : `No active habit selected. Encourage choosing a tiny habit and planning an implementation intention.`;
+                        ? `Active habit: ${h.name} (wrap ${Math.max(
+                            1,
+                            h.wrap_size
+                          )}). Total reps: ${habitRepCount}. Offer tiny, specific implementation intentions. Normalize lapses; suggest one tiny rep.`
+                        : "No active habit selected. Encourage choosing a tiny habit and planning an implementation intention.";
+
                       return (
                         <FloatingCoach
                           variant="embedded"
@@ -662,11 +650,10 @@ export default function Dashboard() {
                         />
                       );
                     })()}
+
                     <div className={styles.repSection}>
                       <h3 className={styles.repTitle}>Log a Rep</h3>
-                      <p className={styles.repSubtitle}>
-                        This is how new wiring takes root.
-                      </p>
+                      <p className={styles.repSubtitle}>This is how new wiring takes root.</p>
                       <Button
                         variant="primary"
                         onClick={logRep}
@@ -683,33 +670,18 @@ export default function Dashboard() {
                         </p>
                       )}
                     </div>
-                    <div className={styles.inspirationalQuote}>
-                      &quot;{dailyAffirmation}&quot;
-                    </div>
-                    <div className={styles.repSection}>
-                      <Button
-                        variant="secondary"
-                        onClick={() => setGroundingOpen(true)}
-                        className={styles.repButton}
-                      >
-                        Grounding Exercise
-                      </Button>
-                    </div>
                   </Card>
+
+                  {/* Journal widget (spans both columns) */}
                   <div className={styles.journalCard}>
                     <DashboardJournalWidget />
                   </div>
                 </div>
-                <Card className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}>
+
+                {/* 7-day sparkline (full width) */}
+                <Card variant="default" className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}>
                   <h3 className={styles.sparklineTitle}>Last 7 Days</h3>
-                  <svg
-                    width="100%"
-                    height="48"
-                    viewBox="0 0 140 48"
-                    preserveAspectRatio="none"
-                    className={styles.sparklineSvg}
-                    aria-label="Last 7 days activity"
-                  >
+                  <svg width="100%" height="48" viewBox="0 0 140 48" preserveAspectRatio="none" className={styles.sparklineSvg}>
                     {(() => {
                       const max = Math.max(1, ...dailyCounts);
                       const stepX = 140 / 6;
@@ -718,13 +690,7 @@ export default function Dashboard() {
                         .join(" ");
                       return (
                         <>
-                          <polyline
-                            points={pts}
-                            fill="none"
-                            stroke="#10b981"
-                            strokeWidth="2"
-                            className={styles.fadeIn}
-                          />
+                          <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
                           {dailyCounts.map((v, i) => (
                             <circle
                               key={i}
@@ -742,23 +708,31 @@ export default function Dashboard() {
                     Counts reflect days with activity. One tiny rep is enough to light up a day.
                   </small>
                 </Card>
-                <Card className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
+
+                {/* 30-day calendar (full width) */}
+                <Card variant="default" className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
                   <h3 className={styles.calendarTitle}>Last 30 Days</h3>
                   <div className={styles.calendarGrid}>
                     {monthlyCounts.map((hasActivity, i) => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - (29 - i));
+                      const today = new Date();
+                      const date = new Date(today);
+                      date.setDate(today.getDate() - (29 - i));
                       const dayOfMonth = date.getDate();
                       const isToday = i === 29;
+
+                      const dayClass = [
+                        styles.calendarDay,
+                        hasActivity ? styles.calendarDayActive : styles.calendarDayInactive,
+                        isToday ? styles.calendarDayToday : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ");
+
                       return (
                         <div
                           key={i}
-                          className={`${styles.calendarDay} ${
-                            hasActivity ? styles.calendarDayActive : styles.calendarDayInactive
-                          } ${isToday ? styles.calendarDayToday : ""}`}
-                          title={`${date.toLocaleDateString()} - ${
-                            hasActivity ? "Active" : "No activity"
-                          }`}
+                          className={dayClass}
+                          title={`${date.toLocaleDateString()} - ${hasActivity ? "Active" : "No activity"}`}
                         >
                           <span className={styles.calendarDayNumber}>{dayOfMonth}</span>
                           {hasActivity && <div className={styles.calendarDayDot} />}
@@ -770,7 +744,9 @@ export default function Dashboard() {
                     Your habit journey over the past month. Each dot represents a day with activity.
                   </small>
                 </Card>
-                <Card className={styles.fullWidthCard}>
+
+                {/* Habit Analytics Section */}
+                <Card variant="default" className={styles.fullWidthCard}>
                   <HabitAnalytics
                     habits={habits}
                     habitRepCount={habitRepCount}
@@ -780,13 +756,15 @@ export default function Dashboard() {
                 </Card>
               </>
             )}
+
             {active === "visualizer" && (
               <div className={styles.visualizerGrid}>
+                {/* Enhanced Myelin Visualizer */}
                 {(() => {
                   const h = habits.find((x) => x.id === activeHabitId);
                   if (!h)
                     return (
-                      <Card className={styles.placeholderSection}>
+                      <Card variant="default" className={styles.placeholderSection}>
                         <h2 className={styles.placeholderTitle}>Select a Habit</h2>
                         <p className={styles.placeholderText}>
                           Choose an active habit to see your neural network visualization.
@@ -803,62 +781,68 @@ export default function Dashboard() {
                     />
                   );
                 })()}
+
+                {/* Original Neural Field for comparison */}
                 {(() => {
                   const h = habits.find((x) => x.id === activeHabitId);
                   if (!h) return null;
                   return (
-                    <Card className={styles.fullWidthCard}>
-                      <h3 className={styles.sparklineTitle}>Classic Neural Field View</h3>
-                      <NeuralField
-                        repCount={habitRepCount}
-                        wrapSize={Math.max(1, h.wrap_size)}
-                        pulseKey={loopPulse}
-                        height={260}
-                      />
-                    </Card>
+                    <div style={{ marginTop: 20 }}>
+                      <Card variant="default">
+                        <div style={{ padding: 16 }}>
+                          <h3 style={{ color: "#94a3b8", marginBottom: 12, fontSize: 14 }}>
+                            Classic Neural Field View
+                          </h3>
+                          <NeuralField
+                            repCount={habitRepCount}
+                            wrapSize={Math.max(1, h.wrap_size)}
+                            pulseKey={loopPulse}
+                            height={260}
+                          />
+                        </div>
+                      </Card>
+                    </div>
                   );
                 })()}
               </div>
             )}
+
             {active === "coach" && (
-              <Card className={styles.coachSection}>
-                <h2 className={styles.coachTitle}>Your Personal Coach 🧠</h2>
-                <p className={styles.coachSubtitle}>
+              <Card variant="default" className={styles.placeholderSection}>
+                <h2 className={styles.placeholderTitle}>Your Personal Coach 🧠</h2>
+                <p className={styles.placeholderText}>
                   The public FloatingCoach stays on all pages. This private space can reflect your data and goals.
                 </p>
-                <Card className={styles.fullWidthCard}>
+                <Card variant="glass">
                   <p>
                     Based on your last rep on{" "}
                     <strong>
-                      {userData.last_rep
-                        ? new Date(userData.last_rep).toLocaleDateString()
-                        : "—"}
+                      {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
                     </strong>
-                    , here&apos;s a micro-win for today:{" "}
-                    <em>2-minute breath reset + 1 tiny rep after coffee.</em>
+                    , here's a micro-win for today: <em>2-minute breath reset + 1 tiny rep after coffee.</em>
                   </p>
                 </Card>
               </Card>
             )}
+
             {active === "history" && (
-              <Card className={styles.placeholderSection}>
+              <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>History & Insights</h2>
                 <p className={styles.placeholderText}>
-                  We&apos;ll populate this with daily reps, weekly trends, and milestones once we add the events table.
+                  We'll populate this with daily reps, weekly trends, and milestones once we add the events table.
                 </p>
-                <ul className={styles.placeholderContent}>
+                <ul>
                   <li>Milestones (3, 7, 21, 42, 66 days)</li>
                   <li>Week-over-week improvements</li>
                   <li>Correlation with mood/craving (future)</li>
                 </ul>
               </Card>
             )}
-            <p className={styles.inspirationalQuote}>
-              &quot;{inspirationalQuote}&quot;
-            </p>
+
+            <p className={styles.inspirationalQuote}>“You are not broken. You are becoming.”</p>
           </>
         ) : (
-          <Card className={styles.signInSection}>
+          <Card variant="glass" className={styles.signInSection}>
             <h2 className={styles.signInTitle}>Sign In Required</h2>
             <p className={styles.signInText}>
               Please{" "}
@@ -870,106 +854,139 @@ export default function Dashboard() {
           </Card>
         )}
       </main>
+
+      {/* Create & Edit Modals */}
       <Modal open={createOpen} title="Create a habit" onClose={() => setCreateOpen(false)}>
-        <div className={styles.habitControls}>
+        <div style={{ display: "grid", gap: 10 }}>
           <label>
-            <div className={styles.habitLabel}>Name</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g., Breath reset"
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
           <label>
-            <div className={styles.habitLabel}>Goal reps</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
             <input
               type="number"
               min={1}
               value={newGoal}
               onChange={(e) => setNewGoal(Number(e.target.value))}
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
           <label>
-            <div className={styles.habitLabel}>Wrap size</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
             <input
               type="number"
               min={1}
               value={newWrap}
               onChange={(e) => setNewWrap(Number(e.target.value))}
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
-          <div className={styles.habitActions}>
-            <Button
-              variant="secondary"
-              onClick={() => setCreateOpen(false)}
-            >
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+            <Button variant="secondary" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleCreateHabit}
-            >
+            <Button variant="primary" onClick={handleCreateHabit}>
               Create
             </Button>
           </div>
-          <p className={styles.streakText}>
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
             Start small is smart. You can always change this later.
           </p>
         </div>
       </Modal>
+
       <Modal open={editOpen} title="Edit habit" onClose={() => setEditOpen(false)}>
-        <div className={styles.habitControls}>
+        <div style={{ display: "grid", gap: 10 }}>
           <label>
-            <div className={styles.habitLabel}>Name</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Name</div>
             <input
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
           <label>
-            <div className={styles.habitLabel}>Goal reps</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Goal reps</div>
             <input
               type="number"
               min={1}
               value={editGoal}
               onChange={(e) => setEditGoal(Number(e.target.value))}
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
           <label>
-            <div className={styles.habitLabel}>Wrap size</div>
+            <div style={{ color: "#9ca3af", marginBottom: 4 }}>Wrap size</div>
             <input
               type="number"
               min={1}
               value={editWrap}
               onChange={(e) => setEditWrap(Number(e.target.value))}
-              className={styles.habitSelect}
+              style={{
+                width: "100%",
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: "1px solid #233147",
+                background: "#0b1220",
+                color: "#e5e7eb",
+              }}
             />
           </label>
-          <div className={styles.habitActions}>
-            <Button
-              variant="secondary"
-              onClick={() => setEditOpen(false)}
-            >
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+            <Button variant="secondary" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSaveEdit}
-            >
+            <Button variant="primary" onClick={handleSaveEdit}>
               Save
             </Button>
           </div>
-          <p className={styles.streakText}>
-            You can change goals as you grow. Progress isn&apos;t linear — it&apos;s kind.
+          <p style={{ color: "#9ca3af", margin: "6px 0 0" }}>
+            You can change goals as you grow. Progress isn't linear — it's kind.
           </p>
         </div>
       </Modal>
-      <GroundingModal open={groundingOpen} onClose={() => setGroundingOpen(false)} />
+
       <Footer />
     </div>
   );

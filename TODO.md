@@ -1,14 +1,23 @@
-# Fix Header and Footer Alignment in Resources Page
+# Code Fixes TODO
 
-## Tasks to Complete:
-- [x] Fix embedded Header component centering in resources.tsx
-- [x] Fix embedded Footer component centering in resources.tsx
-- [ ] Test the page to verify proper alignment
+## Phase 1: Critical Syntax Fixes (In Progress)
+- [ ] Fix ESLint comment syntax in pages/dashboard.tsx
+- [ ] Fix template literal syntax throughout dashboard.tsx
+- [ ] Fix JSX style object syntax issues
+- [ ] Fix FloatingCoach.tsx template literal issues
+- [ ] Standardize import paths to use @/ aliases
 
-## Progress:
-- [x] Analyzed the issue - embedded components in resources.tsx are left-aligned
-- [x] Identified that other pages use properly centered Header.tsx and Footer.tsx components
-- [x] Created plan to update embedded components to match separate component styling
-- [x] Update embedded Header component - Replaced Tailwind classes with inline styles matching Header.tsx
-- [x] Update embedded Footer component - Replaced Tailwind classes with inline styles matching Footer.tsx
-- [ ] Verify changes work correctly
+## Phase 2: Error Handling & Type Safety
+- [ ] Improve error handling in API calls and database operations
+- [ ] Add proper TypeScript types where missing
+- [ ] Fix React hooks dependency arrays where needed
+- [ ] Add error boundaries for better user experience
+
+## Phase 3: Code Quality & Performance
+- [ ] Remove unused console.error statements or replace with proper logging
+- [ ] Optimize React components for better performance
+- [ ] Fix accessibility issues
+- [ ] Clean up unused imports and variables
+
+## Completed
+- [x] Created TODO.md file
