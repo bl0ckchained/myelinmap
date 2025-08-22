@@ -87,7 +87,10 @@ export default function FloatingCoach({
       const saved = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
       if (saved) {
         const parsed = JSON.parse(saved) as ChatMsg[];
-        if (Array.isArray(parsed) && parsed.every((m) => typeof m?.role === "string" && typeof m?.content === "string")) {
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((m) => typeof m?.role === "string" && typeof m?.content === "string")
+        ) {
           setChatLog(parsed);
         }
       }
@@ -189,7 +192,9 @@ export default function FloatingCoach({
           marginBottom: 8,
         }}
       >
-        <span style={{ fontSize: 20 }} aria-hidden={true}>🧘</span>
+        <span style={{ fontSize: 20 }} aria-hidden={true}>
+          🧘
+        </span>
         <strong aria-live="polite">{title?.trim() || "Coach"}</strong>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           {onLogRep && (
@@ -356,56 +361,38 @@ export default function FloatingCoach({
     </div>
   );
 
+  // === RETURN A SINGLE ROOT ELEMENT ALWAYS ===
   if (variant === "embedded") {
-    return <>{ChatWindow}</>;
+    return <div>{ChatWindow}</div>;
   }
 
-  // Floating variant (FAB + popover)
   return (
-    <>
-      <div
+    <div
+      // single root, contains both the FAB and (conditionally) the chat
+      style={{ position: "fixed", bottom: "1.25rem", right: "1.25rem", zIndex: 9999 }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Toggle AI Coach"
         style={{
-          position: "fixed",
-          bottom: "1.25rem",
-          right: "1.25rem",
-          zIndex: 9999,
+          backgroundColor: "#059669",
+          color: "#fff",
+          borderRadius: "9999px",
+          padding: "1.1rem",
+          border: "2px solid #facc15",
+          boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
+          transition: "transform 0.2s",
+          cursor: "pointer",
+          animation: "mm-float 3s ease-in-out infinite",
+          willChange: "transform",
         }}
       >
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle AI Coach"
-          style={{
-            backgroundColor: "#059669",
-            color: "#fff",
-            borderRadius: "9999px",
-            padding: "1.1rem",
-            border: "2px solid #facc15",
-            boxShadow:
-              "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
-            transition: "transform 0.2s",
-            cursor: "pointer",
-            animation: "mm-float 3s ease-in-out infinite",
-            willChange: "transform",
-          }}
-        >
-          <span style={{ fontSize: "1.6rem" }} aria-hidden={true}>🧘</span>
-        </button>
-        {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
-      </div>
-
-      <style jsx global>{`
-        @keyframes mm-float {
-          0% { transform: translateY(0); }
-          50% { transform: translateY(-6px); }
-          100% { transform: translateY(0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          button[aria-label="Toggle AI Coach"] {
-            animation: none !important;
-          }
-        }
-      `}</style>
-    </>
+        <span style={{ fontSize: "1.6rem" }} aria-hidden={true}>
+          🧘
+        </span>
+      </button>
+      {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
+    </div>
   );
 }
 
@@ -436,4 +423,3 @@ const utilBtnStyle: React.CSSProperties = {
   color: "#94a3b8",
   cursor: "pointer",
 };
-// End of components/FloatingCoach.tsx

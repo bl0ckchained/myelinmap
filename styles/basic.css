@@ -209,3 +209,107 @@ sr-only, .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; mar
 .spin-slow { animation: spin 20s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform:
   rotate(360deg); } }
+  /* ---------- Floating Coach FAB animation ---------- */
+@keyframes mm-float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button[aria-label="Toggle AI Coach"] {
+    animation: none !important;
+  }
+}
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 600px) {
+  main, .container { padding: 20px; }
+  .section { margin: 20px 0; }
+  h1 { font-size: 28px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; }
+}
+@media (max-width: 400px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .btn { padding: 8px 12px; font-size: .9rem; }
+  input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    padding: 8px 10px; font-size: .9rem;
+  }
+}
+@media (max-width: 320px) {
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+  .btn { padding: 6px 10px; font-size: .85rem; }
+  input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    padding: 6px 8px; font-size: .85rem;
+  }
+}
+/* ---------- Print styles (for blog posts) ---------- */
+@media print {  
+  body { background: #fff; color: #000; }
+  main, .container { padding: 0; }
+  .card, .table { box-shadow: none; border: none; }
+  a { color: #000; text-decoration: underline; }
+  h1, h2, h3 { page-break-after: avoid; }
+  .hidden, .sr-only { display: none !important; }
+  .btn, input, textarea, select { display: none; }
+}
+/* ---------- Custom Scrollbar (optional) ---------- */
+body::-webkit-scrollbar {
+  width: 8px; height: 8px;
+}
+body::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.2); border-radius: 4px;
+}
+body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.4);
+}
+
+/* ---------- Aurora (optional body class) ---------- */
+body.aurora {
+  background: linear-gradient(180deg, rgba(7,10,15,.7), rgba(7,10,15,.4));
+  animation: mm-float 3s ease-in-out infinite;
+}
+body.aurora::before {
+  content: ""; position: fixed; inset: -20% -20% auto -20%; height: 120%;
+  background: conic-gradient(from 180deg at 55% 45%, rgba(0,255,170,.12), rgba(139,211,255,.1), rgba(217,167,255,.1), rgba(0,255,170,.12));
+  filter: blur(80px); pointer-events: none; opacity: .55; z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.aurora::before { opacity: .35; }
+}
+
+/* ---------- Floating Coach FAB animation ---------- */  
+
+@keyframes mm-float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button[aria-label="Toggle AI Coach"] {
+    animation: none !important;
+  }
+}
+/* ---------- Floating Coach FAB styles ---------- */
+button[aria-label="Toggle AI Coach"] {
+  position: fixed; bottom: 20px; right: 20px;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  box-shadow: var(--shadow-soft);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; transition: transform .2s ease, box-shadow .2s ease;
+}
+
+button[aria-label="Toggle AI Coach"]:hover { transform: translateY(-3px); box-shadow: var(--shadow-hard); } 
+button[aria-label="Toggle AI Coach"]:active { transform: translateY(1px); box-shadow: var(--shadow-soft); }
+button[aria-label="Toggle AI Coach"]:focus-visible {
+  outline: none; box-shadow: var(--ring);
+  border-radius: 50%;
+}
+
+/* ---------- Aurora (optional body class) ---------- */
