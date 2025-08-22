@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 // pages/dashboard.tsx
 import React, { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Head from "next/head";
 import { User, type PostgrestError } from "@supabase/supabase-js";
@@ -13,25 +14,28 @@ import MyelinVisualizer from "@/components/MyelinVisualizer";
 import HabitAnalytics from "@/components/HabitAnalytics";
 import FloatingCoach from "@/components/FloatingCoach";
 import DashboardJournalWidget from "@/components/DashboardJournalWidget";
-
 // New magical UI components
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Tabs from "@/components/ui/Tabs";
-
 import styles from "@/styles/Dashboard.module.css";
 
-/** Tabs for the dashboard UI */
+// Lazy-load tree visualizer (your existing component from Home)
+const TreeVisualizer = dynamic(() => import("@/components/TreeVisualizer"), {
+  ssr: false,
+});
+
+/* Tabs for the dashboard UI */
 type Tab = "overview" | "visualizer" | "coach" | "history";
 
-/** Narrow row type for your existing totals table (user_reps) */
+/* Narrow row type for your existing totals table (user_reps) */
 type UserRepsRow = {
   user_id: string;
   reps: number;
   last_rep: string | null;
 };
 
-/** Row type for the new 'habits' table */
+/* Row type for the new 'habits' table */
 type HabitRow = {
   id: string;
   user_id: string;
@@ -41,7 +45,7 @@ type HabitRow = {
   created_at: string;
 };
 
-/** Typed realtime payload helper */
+/* Typed realtime payload helper (no 'any') */
 type UpdatePayload<T> = {
   eventType: "INSERT" | "UPDATE" | "DELETE" | "SELECT";
   new: T | null;
@@ -64,7 +68,12 @@ function Modal({
 }) {
   if (!open) return null;
   return (
-    <div role="dialog" aria-modal="true" className={styles.modalOverlay} onClick={onClose}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      className={styles.modalOverlay}
+      onClick={onClose}
+    >
       <Card
         variant="glass"
         className={styles.modalCard}
@@ -91,13 +100,18 @@ function Modal({
 export default function Dashboard() {
   /* --- Auth & core page state --- */
   const [user, setUser] = useState<User | null>(null);
-  const [userData, setUserData] = useState<UserRepsRow>({
+  const [userData, setUserData] = useState<{
+    reps: number;
+    last_rep: string | null;
+  }>({
     reps: 0,
     last_rep: null,
-    user_id: "",
   });
   const [loading, setLoading] = useState(false);
   const [active, setActive] = useState<Tab>("overview");
+
+  // visualizer mode
+  const [vizMode, setVizMode] = useState<"network" | "tree">("network");
 
   /* --- Lightweight counts from your original implementation (kept) --- */
   const [dailyCounts, setDailyCounts] = useState<number[]>(Array(7).fill(0));
@@ -149,11 +163,10 @@ export default function Dashboard() {
   /* Fetch user totals (user_reps) + subscribe to updates (kept, with better typing) */
   useEffect(() => {
     if (!user) return;
-
     const fetchUserData = async () => {
       const { data, error } = await supabase
         .from("user_reps")
-        .select("user_id,reps,last_rep")
+        .select("*")
         .eq("user_id", user.id)
         .single();
 
@@ -162,15 +175,13 @@ export default function Dashboard() {
         const { data: initialData, error: insertError } = await supabase
           .from("user_reps")
           .insert({ user_id: user.id, reps: 0, last_rep: null })
-          .select("user_id,reps,last_rep")
+          .select()
           .single();
-
         if (!insertError && initialData) setUserData(initialData as UserRepsRow);
       } else if (!error && data) {
         setUserData(data as UserRepsRow);
       }
     };
-
     fetchUserData();
 
     const subscription = supabase
@@ -221,15 +232,13 @@ export default function Dashboard() {
     const loadHabits = async () => {
       const { data, error } = await supabase
         .from("habits")
-        .select("id,user_id,name,goal_reps,wrap_size,created_at")
+        .select("id, user_id, name, goal_reps, wrap_size, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true });
-
       if (error) {
         console.error("Load habits error:", error);
         return;
       }
-
       if (!data || data.length === 0) {
         // create a gentle default so first-time users see something meaningful
         const { data: created, error: insErr } = await supabase
@@ -240,9 +249,8 @@ export default function Dashboard() {
             goal_reps: 21,
             wrap_size: 7,
           })
-          .select("id,user_id,name,goal_reps,wrap_size,created_at")
+          .select()
           .single();
-
         if (!insErr && created) {
           const row = created as HabitRow;
           setHabits([row]);
@@ -273,15 +281,14 @@ export default function Dashboard() {
         .eq("user_id", user.id)
         .gte("ts", since60.toISOString())
         .order("ts", { ascending: false });
-
       if (evErr) {
         console.error("rep_events streak error:", evErr);
       }
-
       const dayKeys = new Set(
-        (events ?? []).map((e) => new Date(e.ts as string).toISOString().slice(0, 10))
+        (events ?? []).map((e) =>
+          new Date(e.ts as string).toISOString().slice(0, 10)
+        )
       );
-
       // streak: walk backward from today while dates exist
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -319,9 +326,8 @@ export default function Dashboard() {
       if (!activeHabitId) return;
       const { count, error: cntErr } = await supabase
         .from("rep_events")
-        .select("*", { count: "exact", head: true })
+        .select("id", { count: "exact", head: true })
         .eq("habit_id", activeHabitId);
-
       if (cntErr) {
         console.error("rep_events count error:", cntErr);
         return;
@@ -341,12 +347,10 @@ export default function Dashboard() {
   const logRep = async () => {
     if (!user || !activeHabitId) return;
     setLoading(true);
-
     // 1) write event for analytics/streaks
     const { error: evErr } = await supabase
       .from("rep_events")
       .insert({ user_id: user.id, habit_id: activeHabitId });
-
     if (evErr) {
       console.error("Error inserting rep_event:", evErr);
       setLoading(false);
@@ -374,14 +378,13 @@ export default function Dashboard() {
       .from("user_reps")
       .update({ reps: newRepCount, last_rep: now.toISOString() })
       .eq("user_id", user.id);
-
     setLoading(false);
     if (updErr) {
       console.error("Error updating user_reps:", updErr);
       return;
     }
 
-    // gentle implementation-intention nudges
+    // nudges
     const nudges = [
       "Nice. When will you do the next one? Pick a time.",
       "Stack it to a trigger you already do (coffee? doorway?).",
@@ -396,7 +399,6 @@ export default function Dashboard() {
       reps: newRepCount,
       last_rep: now.toISOString(),
     }));
-
     // optimistically bump progress for active habit
     setHabitRepCount((c) => c + 1);
   };
@@ -408,13 +410,11 @@ export default function Dashboard() {
     const goal = clampInt(newGoal, 1, 9999);
     const wrap = clampInt(newWrap, 1, 9999);
     if (!name) return;
-
     const { data, error } = await supabase
       .from("habits")
       .insert({ user_id: user.id, name, goal_reps: goal, wrap_size: wrap })
-      .select("id,user_id,name,goal_reps,wrap_size,created_at")
+      .select()
       .single();
-
     if (error) {
       console.error("create habit error:", error);
       return;
@@ -441,14 +441,12 @@ export default function Dashboard() {
     const name = editName.trim().slice(0, 80);
     const goal = clampInt(editGoal, 1, 9999);
     const wrap = clampInt(editWrap, 1, 9999);
-
     const { data, error } = await supabase
       .from("habits")
       .update({ name, goal_reps: goal, wrap_size: wrap })
       .eq("id", activeHabitId)
-      .select("id,user_id,name,goal_reps,wrap_size,created_at")
+      .select()
       .single();
-
     if (error) {
       console.error("update habit error:", error);
       return;
@@ -462,7 +460,7 @@ export default function Dashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
-    setUserData({ reps: 0, last_rep: null, user_id: "" });
+    setUserData({ reps: 0, last_rep: null });
   };
 
   const tabsData = [
@@ -491,7 +489,12 @@ export default function Dashboard() {
                 onTabChange={(tabId) => setActive(tabId as Tab)}
                 variant="magical"
               />
-              <Button variant="ghost" size="sm" onClick={handleLogout} className={styles.signOutButton}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className={styles.signOutButton}
+              >
                 Sign Out
               </Button>
             </div>
@@ -585,7 +588,14 @@ export default function Dashboard() {
                                 </feMerge>
                               </filter>
                             </defs>
-                            <circle cx="36" cy="36" r="30" stroke="#1f2937" strokeWidth="8" fill="none" />
+                            <circle
+                              cx="36"
+                              cy="36"
+                              r="30"
+                              stroke="#1f2937"
+                              strokeWidth="8"
+                              fill="none"
+                            />
                             {(() => {
                               const cap = 30;
                               const pct = Math.min(1, streak / cap);
@@ -623,7 +633,10 @@ export default function Dashboard() {
                   </Card>
 
                   {/* Coach card (right) */}
-                  <Card variant="default" className={`${styles.coachCard} ${styles.coachSection}`}>
+                  <Card
+                    variant="default"
+                    className={[styles.coachCard, styles.coachSection].join(" ")}
+                  >
                     <h2 className={styles.coachTitle}>Coach & Quick Rep</h2>
                     <p className={styles.coachSubtitle}>
                       Private coach plus a one-tap rep. Gentle, practical, always on your side.
@@ -679,9 +692,18 @@ export default function Dashboard() {
                 </div>
 
                 {/* 7-day sparkline (full width) */}
-                <Card variant="default" className={`${styles.fullWidthCard} ${styles.sparklineContainer}`}>
+                <Card
+                  variant="default"
+                  className={[styles.fullWidthCard, styles.sparklineContainer].join(" ")}
+                >
                   <h3 className={styles.sparklineTitle}>Last 7 Days</h3>
-                  <svg width="100%" height="48" viewBox="0 0 140 48" preserveAspectRatio="none" className={styles.sparklineSvg}>
+                  <svg
+                    width="100%"
+                    height="48"
+                    viewBox="0 0 140 48"
+                    preserveAspectRatio="none"
+                    className={styles.sparklineSvg}
+                  >
                     {(() => {
                       const max = Math.max(1, ...dailyCounts);
                       const stepX = 140 / 6;
@@ -690,7 +712,12 @@ export default function Dashboard() {
                         .join(" ");
                       return (
                         <>
-                          <polyline points={pts} fill="none" stroke="#10b981" strokeWidth="2" />
+                          <polyline
+                            points={pts}
+                            fill="none"
+                            stroke="#10b981"
+                            strokeWidth="2"
+                          />
                           {dailyCounts.map((v, i) => (
                             <circle
                               key={i}
@@ -710,7 +737,10 @@ export default function Dashboard() {
                 </Card>
 
                 {/* 30-day calendar (full width) */}
-                <Card variant="default" className={`${styles.fullWidthCard} ${styles.calendarContainer}`}>
+                <Card
+                  variant="default"
+                  className={[styles.fullWidthCard, styles.calendarContainer].join(" ")}
+                >
                   <h3 className={styles.calendarTitle}>Last 30 Days</h3>
                   <div className={styles.calendarGrid}>
                     {monthlyCounts.map((hasActivity, i) => {
@@ -719,20 +749,17 @@ export default function Dashboard() {
                       date.setDate(today.getDate() - (29 - i));
                       const dayOfMonth = date.getDate();
                       const isToday = i === 29;
-
-                      const dayClass = [
-                        styles.calendarDay,
-                        hasActivity ? styles.calendarDayActive : styles.calendarDayInactive,
-                        isToday ? styles.calendarDayToday : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
-
                       return (
                         <div
                           key={i}
-                          className={dayClass}
-                          title={`${date.toLocaleDateString()} - ${hasActivity ? "Active" : "No activity"}`}
+                          className={[
+                            styles.calendarDay,
+                            hasActivity ? styles.calendarDayActive : styles.calendarDayInactive,
+                            isToday ? styles.calendarDayToday : "",
+                          ].join(" ")}
+                          title={`${date.toLocaleDateString()} - ${
+                            hasActivity ? "Active" : "No activity"
+                          }`}
                         >
                           <span className={styles.calendarDayNumber}>{dayOfMonth}</span>
                           {hasActivity && <div className={styles.calendarDayDot} />}
@@ -741,7 +768,8 @@ export default function Dashboard() {
                     })}
                   </div>
                   <small className={styles.calendarNote}>
-                    Your habit journey over the past month. Each dot represents a day with activity.
+                    Your habit journey over the past month. Each dot represents a day with
+                    activity.
                   </small>
                 </Card>
 
@@ -759,51 +787,101 @@ export default function Dashboard() {
 
             {active === "visualizer" && (
               <div className={styles.visualizerGrid}>
-                {/* Enhanced Myelin Visualizer */}
-                {(() => {
-                  const h = habits.find((x) => x.id === activeHabitId);
-                  if (!h)
-                    return (
-                      <Card variant="default" className={styles.placeholderSection}>
-                        <h2 className={styles.placeholderTitle}>Select a Habit</h2>
-                        <p className={styles.placeholderText}>
-                          Choose an active habit to see your neural network visualization.
-                        </p>
-                      </Card>
-                    );
-                  return (
-                    <MyelinVisualizer
-                      repCount={habitRepCount}
-                      wrapSize={Math.max(1, h.wrap_size)}
-                      pulseKey={loopPulse}
-                      height={400}
-                      title={`${h.name} — Advanced Myelin Network`}
-                    />
-                  );
-                })()}
+                {/* toggle */}
+                <Card variant="default" className={styles.placeholderSection}>
+                  <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+                    <button
+                      onClick={() => setVizMode("network")}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(148,163,184,0.25)",
+                        background: vizMode === "network" ? "rgba(16,185,129,0.15)" : "transparent",
+                        color: "#e5e7eb",
+                        cursor: "pointer",
+                      }}
+                      aria-pressed={vizMode === "network"}
+                    >
+                      🧬 Network
+                    </button>
+                    <button
+                      onClick={() => setVizMode("tree")}
+                      style={{
+                        padding: "8px 12px",
+                        borderRadius: 10,
+                        border: "1px solid rgba(148,163,184,0.25)",
+                        background: vizMode === "tree" ? "rgba(16,185,129,0.15)" : "transparent",
+                        color: "#e5e7eb",
+                        cursor: "pointer",
+                      }}
+                      aria-pressed={vizMode === "tree"}
+                    >
+                      🌱 Tree
+                    </button>
+                  </div>
 
-                {/* Original Neural Field for comparison */}
-                {(() => {
-                  const h = habits.find((x) => x.id === activeHabitId);
-                  if (!h) return null;
-                  return (
-                    <div style={{ marginTop: 20 }}>
-                      <Card variant="default">
-                        <div style={{ padding: 16 }}>
-                          <h3 style={{ color: "#94a3b8", marginBottom: 12, fontSize: 14 }}>
-                            Classic Neural Field View
-                          </h3>
-                          <NeuralField
-                            repCount={habitRepCount}
-                            wrapSize={Math.max(1, h.wrap_size)}
-                            pulseKey={loopPulse}
-                            height={260}
-                          />
+                  {(() => {
+                    const h = habits.find((x) => x.id === activeHabitId);
+                    if (!h) {
+                      return (
+                        <div>
+                          <h2 className={styles.placeholderTitle}>Select a Habit</h2>
+                          <p className={styles.placeholderText}>
+                            Choose an active habit to see your visualization.
+                          </p>
                         </div>
-                      </Card>
-                    </div>
-                  );
-                })()}
+                      );
+                    }
+
+                    if (vizMode === "tree") {
+                      // Uses your existing component from Home
+                      return (
+                        <div style={{ marginTop: 8 }}>
+                          <TreeVisualizer />
+                          <p style={{ color: "#94a3b8", marginTop: 8, fontSize: 13 }}>
+                            Tip: log a rep to celebrate growth moments. We can wire the tree to react
+                            to reps next.
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    // Network visualizer (existing)
+                    return (
+                      <>
+                        <MyelinVisualizer
+                          repCount={habitRepCount}
+                          wrapSize={Math.max(1, h.wrap_size)}
+                          pulseKey={loopPulse}
+                          height={400}
+                          title={`${h.name} — Advanced Myelin Network`}
+                        />
+                        {/* Original Neural Field for comparison */}
+                        <div style={{ marginTop: 20 }}>
+                          <Card variant="default">
+                            <div style={{ padding: 16 }}>
+                              <h3
+                                style={{
+                                  color: "#94a3b8",
+                                  marginBottom: 12,
+                                  fontSize: 14,
+                                }}
+                              >
+                                Classic Neural Field View
+                              </h3>
+                              <NeuralField
+                                repCount={habitRepCount}
+                                wrapSize={Math.max(1, h.wrap_size)}
+                                pulseKey={loopPulse}
+                                height={260}
+                              />
+                            </div>
+                          </Card>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </Card>
               </div>
             )}
 
@@ -811,7 +889,8 @@ export default function Dashboard() {
               <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>Your Personal Coach 🧠</h2>
                 <p className={styles.placeholderText}>
-                  The public FloatingCoach stays on all pages. This private space can reflect your data and goals.
+                  The public FloatingCoach stays on all pages. This private space can reflect your
+                  data and goals.
                 </p>
                 <Card variant="glass">
                   <p>
@@ -819,7 +898,8 @@ export default function Dashboard() {
                     <strong>
                       {userData.last_rep ? new Date(userData.last_rep).toLocaleDateString() : "—"}
                     </strong>
-                    , here's a micro-win for today: <em>2-minute breath reset + 1 tiny rep after coffee.</em>
+                    , here's a micro-win for today:{" "}
+                    <em>2-minute breath reset + 1 tiny rep after coffee.</em>
                   </p>
                 </Card>
               </Card>
@@ -829,7 +909,8 @@ export default function Dashboard() {
               <Card variant="default" className={styles.placeholderSection}>
                 <h2 className={styles.placeholderTitle}>History & Insights</h2>
                 <p className={styles.placeholderText}>
-                  We'll populate this with daily reps, weekly trends, and milestones once we add the events table.
+                  We'll populate this with daily reps, weekly trends, and milestones once we add the
+                  events table.
                 </p>
                 <ul>
                   <li>Milestones (3, 7, 21, 42, 66 days)</li>
@@ -908,7 +989,14 @@ export default function Dashboard() {
               }}
             />
           </label>
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
             <Button variant="secondary" onClick={() => setCreateOpen(false)}>
               Cancel
             </Button>
@@ -973,7 +1061,14 @@ export default function Dashboard() {
               }}
             />
           </label>
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              justifyContent: "flex-end",
+              marginTop: 8,
+            }}
+          >
             <Button variant="secondary" onClick={() => setEditOpen(false)}>
               Cancel
             </Button>
