@@ -1,8 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 // pages/coach/index.tsx — Magical & Classy Redesign (Module styles)
 
+import React, { useState, useEffect, useRef } from "react";
 import styles from "./Coach.module.css";
-import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,7 +24,11 @@ export default function Coach() {
   // ===== UI / Chat state =====
   const [userInput, setUserInput] = useState("");
   const [chatLog, setChatLog] = useState<ChatMsg[]>([
-    { role: "assistant", content: "Welcome to your sanctuary of growth. How does your heart feel today?" },
+    {
+      role: "assistant",
+      content:
+        "Welcome to your sanctuary of growth. How does your heart feel today?",
+    },
   ]);
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -39,21 +43,29 @@ export default function Coach() {
   const [justCelebrated, setJustCelebrated] = useState(false);
 
   // ===== Helpers =====
-  const scrollToBottom = () => chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = () =>
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   const focusInput = () => setTimeout(() => inputRef.current?.focus(), 50);
 
   // Persist chat locally
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("coach_chatlog");
+      const saved =
+        typeof window !== "undefined"
+          ? localStorage.getItem("coach_chatlog")
+          : null;
       if (saved) setChatLog(JSON.parse(saved));
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, []);
 
   useEffect(() => {
     try {
       localStorage.setItem("coach_chatlog", JSON.stringify(chatLog));
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, [chatLog]);
 
   useEffect(() => {
@@ -65,9 +77,11 @@ export default function Coach() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_e, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
     return () => listener?.subscription.unsubscribe();
   }, []);
 
@@ -87,7 +101,12 @@ export default function Coach() {
         // create a gentle default
         const { data: created, error: insErr } = await supabase
           .from("habits")
-          .insert({ user_id: user.id, name: "Breath reset", goal_reps: 21, wrap_size: 7 })
+          .insert({
+            user_id: user.id,
+            name: "Breath reset",
+            goal_reps: 21,
+            wrap_size: 7,
+          })
           .select()
           .single();
         if (!insErr && created) {
@@ -146,15 +165,22 @@ export default function Coach() {
     setLoading(true);
 
     try {
-      const payload: ChatMsg[] = [{ role: "system", content: systemContext }, ...withUser];
+      const payload: ChatMsg[] = [
+        { role: "system", content: systemContext },
+        ...withUser,
+      ];
       const res = await fetch("/api/chat", {
         method: "POST",
         body: JSON.stringify({ messages: payload }),
         headers: { "Content-Type": "application/json" },
       });
       const data = await res.json();
-      if (!res.ok || !data?.message) throw new Error("Invalid response from AI");
-      setChatLog([...withUser, { role: "assistant", content: data.message as string }]);
+      if (!res.ok || !data?.message)
+        throw new Error("Invalid response from AI");
+      setChatLog([
+        ...withUser,
+        { role: "assistant", content: data.message as string },
+      ]);
     } catch (error) {
       console.error("Chat error:", error);
       setChatLog([
@@ -183,13 +209,21 @@ export default function Coach() {
   };
 
   const clearChat = () => {
-    setChatLog([{ role: "assistant", content: "Reset complete. What would be supportive right now?" }]);
+    setChatLog([
+      {
+        role: "assistant",
+        content:
+          "Reset complete. What would be supportive right now?",
+      },
+    ]);
     setUserInput("");
     focusInput();
   };
 
   const copyTranscript = async () => {
-    const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
+    const text = chatLog
+      .map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`)
+      .join("\n");
     try {
       await navigator.clipboard.writeText(text);
       alert("Transcript copied to clipboard.");
@@ -199,7 +233,9 @@ export default function Coach() {
   };
 
   const downloadTranscript = () => {
-    const text = chatLog.map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`).join("\n");
+    const text = chatLog
+      .map((m) => `${m.role === "user" ? "You" : "Coach"}: ${m.content}`)
+      .join("\n");
     const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -241,8 +277,9 @@ export default function Coach() {
     }
   };
 
+  // ====== SINGLE ROOT WRAPPER ======
   return (
-    <>
+    <div className={styles.pageRoot}>
       <Head>
         <title>Coach | Myelin Map</title>
         <meta
@@ -251,13 +288,24 @@ export default function Coach() {
         />
       </Head>
 
-      <Header title="Mental Health Coach 🤝" subtitle="Always in your corner — kind, practical, here." />
+      <Header
+        title="Mental Health Coach 🤝"
+        subtitle="Always in your corner — kind, practical, here."
+      />
 
       {/* Magical background with subtle animations */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-emerald-900/20 pointer-events-none">
+      <div
+        className="pointer-events-none"
+        style={{ position: "fixed", inset: 0 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-emerald-900/20" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent_50%)] animate-pulse" />
-        <div className={`absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl ${styles.animateFloat}`} />
-        <div className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl ${styles.animateFloatDelayed}`} />
+        <div
+          className={`absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl ${styles.animateFloat}`}
+        />
+        <div
+          className={`absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl ${styles.animateFloatDelayed}`}
+        />
       </div>
 
       <main className="relative z-10 text-white px-4 sm:px-6 py-8 sm:py-16 min-h-screen">
@@ -270,16 +318,20 @@ export default function Coach() {
               <section className="group rounded-2xl border border-white/10 bg-gradient-to-br from-black/40 to-black/20 p-6 backdrop-blur-sm hover:border-emerald-400/30 transition-all duration-300">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">🌟</div>
-                  <h2 className="text-xl font-semibold text-emerald-300">What the Coach is</h2>
+                  <h2 className="text-xl font-semibold text-emerald-300">
+                    What the Coach is
+                  </h2>
                 </div>
                 <p className="text-gray-300 leading-relaxed mb-4">
-                  Your Coach is a steady, shame-free companion. A place to tell the truth, practice kindness,
-                  and turn hard moments into one tiny, doable rep. You don't have to be "okay" to show up.
+                  Your Coach is a steady, shame-free companion. A place to tell
+                  the truth, practice kindness, and turn hard moments into one
+                  tiny, doable rep. You don't have to be "okay" to show up.
                 </p>
                 <div className="bg-amber-500/10 border border-amber-400/20 rounded-lg p-3">
                   <p className="text-amber-200 text-sm">
-                    💡 This space is supportive, not diagnostic. If you're in crisis or unsafe, please contact local
-                    emergency services or a licensed professional.
+                    💡 This space is supportive, not diagnostic. If you're in
+                    crisis or unsafe, please contact local emergency services or
+                    a licensed professional.
                   </p>
                 </div>
               </section>
@@ -288,18 +340,23 @@ export default function Coach() {
               <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-blue-900/20 to-black/20 p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">🎯</div>
-                  <h3 className="font-semibold text-blue-300">How the Coach helps</h3>
+                  <h3 className="font-semibold text-blue-300">
+                    How the Coach helps
+                  </h3>
                 </div>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-3">
                     <span className="text-emerald-400 mt-1">•</span>
                     <span>
-                      Transform cues & cravings into <em className="text-emerald-300">tiny reps</em>
+                      Transform cues & cravings into{" "}
+                      <em className="text-emerald-300">tiny reps</em>
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-emerald-400 mt-1">•</span>
-                    <span>Rehearse a simple cue → action → reward plan</span>
+                    <span>
+                      Rehearse a simple cue → action → reward plan
+                    </span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-emerald-400 mt-1">•</span>
@@ -316,7 +373,9 @@ export default function Coach() {
               <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-900/20 to-black/20 p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">💭</div>
-                  <h3 className="font-semibold text-violet-300">Quick prompts</h3>
+                  <h3 className="font-semibold text-violet-300">
+                    Quick prompts
+                  </h3>
                 </div>
                 <div className="grid gap-3">
                   {[
@@ -341,21 +400,26 @@ export default function Coach() {
               <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-900/20 to-black/20 p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">🎭</div>
-                  <h3 className="font-semibold text-amber-300">Mood check-in</h3>
+                  <h3 className="font-semibold text-amber-300">
+                    Mood check-in
+                  </h3>
                 </div>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {["anxious", "tired", "hopeful", "stuck", "proud", "craving"].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => addMood(m)}
-                      className="rounded-full px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 hover:border-amber-300/50 text-amber-200 text-sm transition-all duration-200 hover:scale-105 hover:shadow-md hover:shadow-amber-500/20"
-                    >
-                      {m}
-                    </button>
-                  ))}
+                  {["anxious", "tired", "hopeful", "stuck", "proud", "craving"].map(
+                    (m) => (
+                      <button
+                        key={m}
+                        onClick={() => addMood(m)}
+                        className="rounded-full px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/30 hover:border-amber-300/50 text-amber-200 text-sm transition-all duration-200 hover:scale-105 hover:shadow-md hover:shadow-amber-500/20"
+                      >
+                        {m}
+                      </button>
+                    )
+                  )}
                 </div>
                 <p className="text-sm text-gray-400">
-                  💡 Naming a feeling can ease it and bring your prefrontal cortex back online.
+                  💡 Naming a feeling can ease it and bring your prefrontal
+                  cortex back online.
                 </p>
               </section>
 
@@ -363,11 +427,15 @@ export default function Coach() {
               <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-900/20 to-black/20 p-6 backdrop-blur-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">🌱</div>
-                  <h3 className="font-semibold text-emerald-300">Active habit</h3>
+                  <h3 className="font-semibold text-emerald-300">
+                    Active habit
+                  </h3>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm text-gray-400 block mb-2">Choose your focus:</label>
+                    <label className="text-sm text-gray-400 block mb-2">
+                      Choose your focus:
+                    </label>
                     <select
                       value={activeHabitId ?? ""}
                       onChange={(e) => setActiveHabitId(e.target.value)}
@@ -384,8 +452,12 @@ export default function Coach() {
                   </div>
 
                   <div className="bg-emerald-500/10 border border-emerald-400/20 rounded-xl p-4">
-                    <div className="text-gray-300 text-sm mb-3">Total reps logged for this habit:</div>
-                    <div className="text-3xl font-bold text-emerald-300 mb-4">{habitRepCount}</div>
+                    <div className="text-gray-300 text-sm mb-3">
+                      Total reps logged for this habit:
+                    </div>
+                    <div className="text-3xl font-bold text-emerald-300 mb-4">
+                      {habitRepCount}
+                    </div>
                     <button
                       onClick={logTinyRep}
                       disabled={!activeHabit || loading}
@@ -396,8 +468,12 @@ export default function Coach() {
                   </div>
 
                   {justCelebrated && (
-                    <div className={`bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-xl p-4 ${styles.animateFadeIn}`}>
-                      <div className="text-emerald-300 text-center font-medium">🎉 Beautiful! You're wiring change. 🌱</div>
+                    <div
+                      className={`bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 rounded-xl p-4 ${styles.animateFadeIn}`}
+                    >
+                      <div className="text-emerald-300 text-center font-medium">
+                        🎉 Beautiful! You're wiring change. 🌱
+                      </div>
                     </div>
                   )}
                 </div>
@@ -408,9 +484,14 @@ export default function Coach() {
                 <div className="text-center">
                   <div className="text-4xl mb-3">🤝</div>
                   <p className="text-gray-200 leading-relaxed">
-                    <span className="font-bold text-emerald-300 text-lg">K.I.N.D.</span>
+                    <span className="font-bold text-emerald-300 text-lg">
+                      K.I.N.D.
+                    </span>
                     <br />
-                    <span className="text-sm text-emerald-200">Knowledge • Identification • Neural Rewiring • Daily Kindness</span>
+                    <span className="text-sm text-emerald-200">
+                      Knowledge • Identification • Neural Rewiring • Daily
+                      Kindness
+                    </span>
                   </p>
                   <div className="mt-4 text-sm text-gray-300 italic">
                     The magic is in the reps, not perfection.
@@ -434,7 +515,11 @@ export default function Coach() {
                   {chatLog.map((msg, i) => (
                     <div
                       key={i}
-                      className={`mb-6 ${styles.animateFadeIn} ${msg.role === "user" ? "flex justify-end" : "flex justify-start"}`}
+                      className={`mb-6 ${styles.animateFadeIn} ${
+                        msg.role === "user"
+                          ? "flex justify-end"
+                          : "flex justify-start"
+                      }`}
                     >
                       <div
                         className={`max-w-[85%] rounded-2xl px-4 py-3 ${
@@ -444,10 +529,16 @@ export default function Coach() {
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="text-lg shrink-0">{msg.role === "user" ? "👤" : "🧘"}</div>
+                          <div className="text-lg shrink-0">
+                            {msg.role === "user" ? "👤" : "🧘"}
+                          </div>
                           <div>
-                            <div className="font-medium text-sm mb-1 opacity-80">{msg.role === "user" ? "You" : "Coach"}</div>
-                            <div className="leading-relaxed">{msg.content}</div>
+                            <div className="font-medium text-sm mb-1 opacity-80">
+                              {msg.role === "user" ? "You" : "Coach"}
+                            </div>
+                            <div className="leading-relaxed">
+                              {msg.content}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -460,13 +551,21 @@ export default function Coach() {
                         <div className="flex items-start gap-3">
                           <div className="text-lg">🧘</div>
                           <div>
-                            <div className="font-medium text-sm mb-1 opacity-80">Coach</div>
+                            <div className="font-medium text-sm mb-1 opacity-80">
+                              Coach
+                            </div>
                             <div className="flex items-center gap-1">
                               <span>Thinking</span>
                               <div className="flex gap-1 ml-2">
                                 <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400" />
-                                <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400" style={{ animationDelay: "0.1s" }} />
-                                <div className="w-2 h-2 rounded-full animate-bounce bg-emerald-400" style={{ animationDelay: "0.2s" }} />
+                                <div
+                                  className="w-2 h-2 rounded-full animate-bounce bg-emerald-400"
+                                  style={{ animationDelay: "0.1s" }}
+                                />
+                                <div
+                                  className="w-2 h-2 rounded-full animate-bounce bg-emerald-400"
+                                  style={{ animationDelay: "0.2s" }}
+                                />
                               </div>
                             </div>
                           </div>
@@ -486,7 +585,10 @@ export default function Coach() {
               >
                 {/* Floating Coach Emoji */}
                 <div className="flex justify-center mb-4">
-                  <div className={`text-6xl drop-shadow-lg select-none ${styles.animateFloat}`} aria-hidden="true">
+                  <div
+                    className={`text-6xl drop-shadow-lg select-none ${styles.animateFloat}`}
+                    aria-hidden="true"
+                  >
                     🧘
                   </div>
                 </div>
@@ -518,7 +620,9 @@ export default function Coach() {
                       {loading ? "✨" : "Send"}
                     </button>
                   </div>
-                  <p className="text-xs text-emerald-100/80 text-center">Enter to send • Shift+Enter for newline</p>
+                  <p className="text-xs text-emerald-100/80 text-center">
+                    Enter to send • Shift+Enter for newline
+                  </p>
                 </div>
               </section>
 
@@ -548,7 +652,10 @@ export default function Coach() {
               <div className="text-center">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-400/20 text-amber-200 text-xs">
                   <span>⚠️</span>
-                  <span>Supportive guidance, not medical advice. Crisis? Contact emergency services.</span>
+                  <span>
+                    Supportive guidance, not medical advice. Crisis? Contact
+                    emergency services.
+                  </span>
                 </div>
               </div>
             </div>
@@ -557,6 +664,6 @@ export default function Coach() {
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
