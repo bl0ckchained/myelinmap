@@ -28,6 +28,14 @@ type Props = {
   title?: string;
 };
 
+/** API response shape */
+type ChatAPIResponse = { message: string };
+const isChatAPIResponse = (x: unknown): x is ChatAPIResponse => {
+  if (!x || typeof x !== "object") return false;
+  const rec = x as Record<string, unknown>;
+  return typeof rec.message === "string";
+};
+
 export default function FloatingCoach({
   variant = "floating",
   startOpen = false,
@@ -122,15 +130,18 @@ export default function FloatingCoach({
         body: JSON.stringify({ messages }),
       });
 
-      let data: any = null;
+      let data: unknown = null;
       try {
         data = await res.json();
       } catch {
         // fall through to error path
       }
 
-      if (!res.ok || !data?.message) throw new Error("Invalid AI response");
-      setChatLog([...newLog, { role: "assistant", content: String(data.message) }]);
+      if (!res.ok || !isChatAPIResponse(data)) {
+        throw new Error("Invalid AI response");
+      }
+
+      setChatLog([...newLog, { role: "assistant", content: data.message }]);
     } catch (err) {
       console.error("Coach error:", err);
       setChatLog([
@@ -181,7 +192,6 @@ export default function FloatingCoach({
         <span style={{ fontSize: 20 }} aria-hidden={true}>🧘</span>
         <strong aria-live="polite">{title?.trim() || "Coach"}</strong>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          {/* Optional: Log Rep button if provided */}
           {onLogRep && (
             <button
               onClick={() => void onLogRep()}
@@ -192,8 +202,6 @@ export default function FloatingCoach({
               ⚡ Log rep
             </button>
           )}
-
-          {/* Quick prompts (compact) */}
           <button
             onClick={() => quickInsert("I'm overwhelmed. Help me find one tiny step.")}
             title="Tiny step"
@@ -385,7 +393,6 @@ export default function FloatingCoach({
         {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
       </div>
 
-      {/* minimal keyframes */}
       <style jsx global>{`
         @keyframes mm-float {
           0% { transform: translateY(0); }
@@ -429,3 +436,4 @@ const utilBtnStyle: React.CSSProperties = {
   color: "#94a3b8",
   cursor: "pointer",
 };
+// End of components/FloatingCoach.tsx
