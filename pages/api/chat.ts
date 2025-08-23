@@ -51,7 +51,7 @@ export default async function handler(
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // keep as-is for now
+      model: "gpt-3.5-turbo",
       messages: body.messages,
       temperature: 0.7,
     });
@@ -60,11 +60,9 @@ export default async function handler(
     res.status(200).json({ message });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    // eslint-disable-next-line no-console
     console.error("OpenAI API error:", msg);
     res.status(500).json({
       error: "There was an error communicating with the AI. Please try again.",
     });
   }
 }
-// pages/api/chat.ts
