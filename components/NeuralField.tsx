@@ -1,7 +1,8 @@
 // components/NeuralField.tsx
 import React, { useEffect, useMemo, useRef } from "react";
 
-type Node = { x: number; y: number; vx: number; vy: number; charge: number };
+type FieldNode = { x: number; y: number; vx: number; vy: number; charge: number };
+
 type NeuralFieldProps = {
   /** total reps for the active habit — drives density/energy */
   repCount: number;
@@ -25,10 +26,7 @@ export default function NeuralField({
   const tRef = useRef<number>(0);
 
   // derive node count and range from reps (gentle growth)
-  const nodesCount = useMemo(() => {
-    // base 14 nodes, +1 node per 4 reps up to 60 nodes
-    return Math.min(60, 14 + Math.floor(repCount / 4));
-  }, [repCount]);
+  const nodesCount = useMemo(() => Math.min(60, 14 + Math.floor(repCount / 4)), [repCount]);
 
   // show a small wrap “burst” in the network
   const wrapBursts = useMemo(() => {
@@ -47,22 +45,28 @@ export default function NeuralField({
     const ctx = cvs.getContext("2d");
     if (!ctx) return;
 
-    let width = cvs.clientWidth;
-    let heightPx = cvs.clientHeight;
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+
+    let width = cvs.clientWidth || 600;
+    let heightPx = cvs.clientHeight || Math.max(220, height);
+    const dpr = Math.max(1, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
+
     const resize = () => {
-      width = cvs.clientWidth;
-      heightPx = cvs.clientHeight;
+      width = cvs.clientWidth || width;
+      heightPx = cvs.clientHeight || heightPx;
       cvs.width = Math.floor(width * dpr);
       cvs.height = Math.floor(heightPx * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
+
     const onResize = () => resize();
     window.addEventListener("resize", onResize);
 
     // init nodes
-    const nodes: Node[] = new Array(nodesCount).fill(0).map(() => ({
+    const nodes: FieldNode[] = new Array(nodesCount).fill(0).map(() => ({
       x: Math.random() * width,
       y: Math.random() * heightPx,
       vx: (Math.random() - 0.5) * 0.25,
@@ -72,6 +76,7 @@ export default function NeuralField({
 
     const linksThreshold = 110; // max distance for linking
     const maxLinks = 3; // keep it readable
+    ctx.lineCap = "round";
 
     const draw = () => {
       tRef.current += 0.016;
@@ -129,8 +134,7 @@ export default function NeuralField({
           const dy = a.y - b.y;
           const d = Math.hypot(dx, dy);
           if (d < linksThreshold && linksDrawn < maxLinks) {
-            const alpha =
-              0.05 + 0.35 * (1 - d / linksThreshold) + pulseRef.current * 0.08;
+            const alpha = 0.05 + 0.35 * (1 - d / linksThreshold) + pulseRef.current * 0.08;
             ctx.strokeStyle = `rgba(52, 211, 153, ${alpha})`;
             ctx.beginPath();
             ctx.moveTo(a.x, a.y);
@@ -167,7 +171,6 @@ export default function NeuralField({
         ctx.fillStyle = "rgba(11,18,32,0.7)";
         ctx.strokeStyle = "rgba(35,49,71,1)";
         ctx.lineWidth = 1;
-        ctx.beginPath();
         roundRect(ctx, bx, by, bw, bh, 10);
         ctx.fill();
         ctx.stroke();
@@ -176,16 +179,23 @@ export default function NeuralField({
         ctx.textBaseline = "middle";
         ctx.fillText(`wraps ${badge}`, bx + 10, by + bh / 2);
       }
-
-      rafRef.current = requestAnimationFrame(draw);
     };
 
-    rafRef.current = requestAnimationFrame(draw);
+    const loop = () => {
+      draw();
+      if (!prefersReducedMotion) {
+        rafRef.current = requestAnimationFrame(loop);
+      }
+    };
+
+    // kick off
+    loop();
+
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", onResize);
     };
-  }, [nodesCount, repCount, wrapBursts]);
+  }, [nodesCount, repCount, wrapBursts, height]);
 
   return (
     <div

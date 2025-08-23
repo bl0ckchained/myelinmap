@@ -1,86 +1,94 @@
 // hooks/useHabits.ts
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { HabitRow } from "../types/habit";
 
-type NewHabit = Pick<HabitRow, "name" | "goal_reps" | "wrap_size">;
-type HabitUpdate = Partial<NewHabit>;
+interface HabitsData {
+  habits: HabitRow[];
+  loading: boolean;
+  error: string | null;
+}
 
-export const useHabits = (userId: string) => {
-  const [habits, setHabits] = useState<HabitRow[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+const DEFAULT_STATE: HabitsData = {
+  habits: [],
+  loading: true,
+  error: null,
+};
 
-  const fetchHabits = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setLoading(true);
-      setError(null);
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, {
+    signal,
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const msg = await res.text().catch(() => "");
+    throw new Error(msg || `Request failed: ${res.status}`);
+  }
+  if (res.status === 204) return [] as unknown as T;
+  return (await res.json()) as T;
+}
 
-      const { data, error } = await supabase
-        .from("habits")
-        .select("id, user_id, name, goal_reps, wrap_size, created_at")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+export const useHabits = (
+  userId: string
+): HabitsData & { refreshHabits: () => Promise<void> } => {
+  const [state, setState] = useState<HabitsData>(DEFAULT_STATE);
 
-      if (error) throw error;
-      setHabits((data as HabitRow[]) ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch habits");
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
+  // abort + race guards
+  const inflightRef = useRef<AbortController | null>(null);
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    void fetchHabits();
-  }, [fetchHabits]);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!userId) {
+        setState({ habits: [], loading: false, error: "Missing userId" });
+        return;
+      }
 
-  const addHabit = useCallback(
-    async (habit: NewHabit) => {
-      if (!userId) throw new Error("Missing userId");
+      const myReqId = ++requestIdRef.current;
+      setState((s) => ({ ...s, loading: true, error: null }));
 
-      const { data, error } = await supabase
-        .from("habits")
-        .insert([{ ...habit, user_id: userId }])
-        .select("id, user_id, name, goal_reps, wrap_size, created_at")
-        .single();
+      try {
+        const habits = await fetchJson<HabitRow[]>(
+          `/api/habits?user_id=${encodeURIComponent(userId)}`,
+          signal
+        );
 
-      if (error) throw error;
-      const row = data as HabitRow;
-      setHabits((prev) => [row, ...prev]);
-      return row;
+        if (myReqId !== requestIdRef.current) return; // stale response
+
+        setState({
+          habits: Array.isArray(habits) ? habits : [],
+          loading: false,
+          error: null,
+        });
+      } catch (err) {
+        if ((err as { name?: string })?.name === "AbortError") return;
+        if (requestIdRef.current !== myReqId) return;
+        setState((s) => ({
+          ...s,
+          loading: false,
+          error: err instanceof Error ? err.message : "Failed to load habits",
+        }));
+      }
     },
     [userId]
   );
 
-  const updateHabit = useCallback(async (id: string, updates: HabitUpdate) => {
-    const { data, error } = await supabase
-      .from("habits")
-      .update(updates)
-      .eq("id", id)
-      .select("id, user_id, name, goal_reps, wrap_size, created_at")
-      .single();
+  useEffect(() => {
+    inflightRef.current?.abort();
+    const controller = new AbortController();
+    inflightRef.current = controller;
 
-    if (error) throw error;
-    const row = data as HabitRow;
-    setHabits((prev) => prev.map((h) => (h.id === id ? row : h)));
-    return row;
-  }, []);
+    void load(controller.signal);
 
-  const deleteHabit = useCallback(async (id: string) => {
-    const { error } = await supabase.from("habits").delete().eq("id", id);
-    if (error) throw error;
-    setHabits((prev) => prev.filter((h) => h.id !== id));
-  }, []);
+    return () => controller.abort();
+  }, [load]);
 
-  return {
-    habits: useMemo(() => habits, [habits]),
-    loading,
-    error,
-    addHabit,
-    updateHabit,
-    deleteHabit,
-    refetch: fetchHabits,
-  };
+  const refreshHabits = useCallback(async () => {
+    inflightRef.current?.abort();
+    const controller = new AbortController();
+    inflightRef.current = controller;
+    await load(controller.signal);
+  }, [load]);
+
+  return { ...state, refreshHabits };
 };

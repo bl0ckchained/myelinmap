@@ -1,37 +1,68 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
+// pages/api/chat.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Make sure this is in your `.env` file
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
+// You can override this in .env as OPENAI_MODEL
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+// Hard limit to keep token usage reasonable
+const MAX_MESSAGES = 40;
+
+type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
-  const { messages } = req.body;
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(500).json({ message: "Missing OPENAI_API_KEY" });
+  }
 
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ message: 'Missing or invalid messages array in request body' });
+  // Validate & sanitize request body
+  const body = req.body ?? {};
+  const incoming = Array.isArray(body.messages) ? body.messages : [];
+
+  const messages: ChatMsg[] = incoming
+    .map((m: any) => ({
+      role: m?.role,
+      content: typeof m?.content === "string" ? m.content : String(m?.content ?? ""),
+    }))
+    .filter(
+      (m: any): m is ChatMsg =>
+        (m.role === "system" || m.role === "user" || m.role === "assistant") &&
+        m.content.trim().length > 0
+    )
+    .slice(-MAX_MESSAGES);
+
+  if (messages.length === 0) {
+    return res.status(400).json({ message: "No valid messages provided." });
   }
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // or 'gpt-4' if available and you want to use it
+      model: MODEL,
       messages,
       temperature: 0.7,
+      max_tokens: 400,
     });
 
-    const message = completion.choices[0]?.message?.content?.trim();
+    const message = completion.choices?.[0]?.message?.content?.trim() || "";
+    if (!message) {
+      return res.status(502).json({ message: "Empty response from model." });
+    }
 
-    res.status(200).json({ message });
-  } catch (error) {
-    console.error('OpenAI API error:', error);
-    res.status(500).json({
-      message: 'There was an error communicating with the AI. Please try again.',
-    });
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ message });
+  } catch (error: any) {
+    // Log detailed error server-side only
+    console.error("OpenAI API error:", error?.response?.data ?? error);
+    const status = Number(error?.status) || 500;
+    return res
+      .status(status)
+      .json({ message: "There was an error communicating with the AI. Please try again." });
   }
 }
-// Ensure you have the OpenAI package installed
-// npm install openai

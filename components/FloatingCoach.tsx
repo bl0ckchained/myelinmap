@@ -30,11 +30,10 @@ type Props = {
 
 /** API response shape */
 type ChatAPIResponse = { message: string };
-const isChatAPIResponse = (x: unknown): x is ChatAPIResponse => {
-  if (!x || typeof x !== "object") return false;
-  const rec = x as Record<string, unknown>;
-  return typeof rec.message === "string";
-};
+const isChatAPIResponse = (x: unknown): x is ChatAPIResponse =>
+  !!x && typeof (x as Record<string, unknown>).message === "string";
+
+const MAX_LOG_LEN = 100; // keep storage small
 
 export default function FloatingCoach({
   variant = "floating",
@@ -52,7 +51,8 @@ export default function FloatingCoach({
   const [chatLog, setChatLog] = useState<ChatMsg[]>([
     {
       role: "assistant",
-      content: "Welcome. I'm here and on your side. What's present for you right now?",
+      content:
+        "Welcome. I'm here and on your side. What's present for you right now?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -60,6 +60,7 @@ export default function FloatingCoach({
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const scrollBoxRef = useRef<HTMLDivElement>(null);
+  const inflight = useRef<AbortController | null>(null);
 
   // Build system context dynamically from habit data
   const systemContext = useMemo(() => {
@@ -84,14 +85,17 @@ export default function FloatingCoach({
   // Load persistent chat
   useEffect(() => {
     try {
-      const saved = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      const saved =
+        typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
       if (saved) {
         const parsed = JSON.parse(saved) as ChatMsg[];
         if (
           Array.isArray(parsed) &&
-          parsed.every((m) => typeof m?.role === "string" && typeof m?.content === "string")
+          parsed.every(
+            (m) => typeof m?.role === "string" && typeof m?.content === "string",
+          )
         ) {
-          setChatLog(parsed);
+          setChatLog(parsed.slice(-MAX_LOG_LEN));
         }
       }
     } catch {
@@ -102,7 +106,7 @@ export default function FloatingCoach({
   // Persist chat
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(chatLog));
+      localStorage.setItem(storageKey, JSON.stringify(chatLog.slice(-MAX_LOG_LEN)));
     } catch {
       // ignore
     }
@@ -116,45 +120,63 @@ export default function FloatingCoach({
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [chatLog, loading, open, variant]);
 
+  // Cancel in-flight request on unmount
+  useEffect(() => {
+    return () => inflight.current?.abort();
+  }, []);
+
+  const appendAssistant = (content: string) =>
+    setChatLog((prev) =>
+      [...prev, { role: "assistant", content } as ChatMsg].slice(-MAX_LOG_LEN),
+    );
+
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
 
-    const newLog: ChatMsg[] = [...chatLog, { role: "user", content: text }];
+    const newLog: ChatMsg[] = [...chatLog, { role: "user", content: text }].slice(
+      -MAX_LOG_LEN,
+    );
     setChatLog(newLog);
     setInput("");
     setLoading(true);
 
+    inflight.current?.abort();
+    inflight.current = new AbortController();
+
     try {
-      const messages: ChatMsg[] = [{ role: "system", content: systemContext }, ...newLog];
+      const messages: ChatMsg[] = [
+        { role: "system", content: systemContext },
+        ...newLog,
+      ];
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages }),
+        signal: inflight.current.signal,
       });
 
       let data: unknown = null;
       try {
         data = await res.json();
       } catch {
-        // fall through to error path
+        /* noop */
       }
 
       if (!res.ok || !isChatAPIResponse(data)) {
         throw new Error("Invalid AI response");
       }
 
-      setChatLog([...newLog, { role: "assistant", content: data.message }]);
+      appendAssistant(data.message);
     } catch (err) {
-      console.error("Coach error:", err);
-      setChatLog([
-        ...newLog,
-        {
-          role: "assistant",
-          content:
-            "The Coach hit a hiccup and is taking a breath. Try again shortly — you didn't do anything wrong.",
-        },
-      ]);
+      if ((err as { name?: string })?.name === "AbortError") {
+        // silently ignore aborted requests
+      } else {
+        console.error("Coach error:", err);
+        appendAssistant(
+          "The Coach hit a hiccup and is taking a breath. Try again shortly — you didn't do anything wrong.",
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -208,14 +230,18 @@ export default function FloatingCoach({
             </button>
           )}
           <button
-            onClick={() => quickInsert("I'm overwhelmed. Help me find one tiny step.")}
+            onClick={() =>
+              quickInsert("I'm overwhelmed. Help me find one tiny step.")
+            }
             title="Tiny step"
             style={chipStyle}
           >
             Tiny step
           </button>
           <button
-            onClick={() => quickInsert("Can you help me plan a 2-minute habit after coffee?")}
+            onClick={() =>
+              quickInsert("Can you help me plan a 2-minute habit after coffee?")
+            }
             title="Plan after coffee"
             style={chipStyle}
           >
@@ -294,7 +320,7 @@ export default function FloatingCoach({
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              sendMessage();
+              void sendMessage();
             }
           }}
           rows={2}
@@ -351,6 +377,11 @@ export default function FloatingCoach({
                 content: "Reset complete. What feels supportive now?",
               },
             ]);
+            try {
+              localStorage.removeItem(storageKey);
+            } catch {
+              /* ignore */
+            }
           }}
           style={utilBtnStyle}
           aria-label="Clear conversation"
@@ -380,7 +411,8 @@ export default function FloatingCoach({
           borderRadius: "9999px",
           padding: "1.1rem",
           border: "2px solid #facc15",
-          boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
+          boxShadow:
+            "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
           transition: "transform 0.2s",
           cursor: "pointer",
           animation: "mm-float 3s ease-in-out infinite",
@@ -392,6 +424,18 @@ export default function FloatingCoach({
         </span>
       </button>
       {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
+
+      {/* ensure the floating animation exists everywhere */}
+      <style jsx global>{`
+        @keyframes mm-float {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          [aria-label="Toggle AI Coach"] { animation: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

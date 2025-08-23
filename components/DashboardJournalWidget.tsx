@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+// components/ui/DashboardJournalWidget.tsx
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import styles from "./DashboardJournalWidget.module.css";
@@ -20,34 +21,50 @@ export default function DashboardJournalWidget() {
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [loadingInitial, setLoadingInitial] = useState(true);
+
   const latestId = useRef<string | null>(null);
-  const mounted = useRef(false);
+  const mountedOnce = useRef(false);
+  const timeoutRef = useRef<number | null>(null);
+
+  // Cleanup any pending timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current != null) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Auth
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
-    return () => sub?.subscription.unsubscribe();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Load initial value ONCE (localStorage first, then DB if empty)
   useEffect(() => {
-    if (mounted.current) return;
-    mounted.current = true;
+    if (mountedOnce.current) return;
+    mountedOnce.current = true;
 
-    // Local cache wins
-    const cached = typeof window !== "undefined" ? localStorage.getItem(LOCAL_KEY) : null;
-    if (cached) {
-      setDraft(cached);
-      setLoadingInitial(false);
-      return;
+    try {
+      const cached =
+        typeof window !== "undefined" ? localStorage.getItem(LOCAL_KEY) : null;
+      if (cached) {
+        setDraft(cached);
+        setLoadingInitial(false);
+        return;
+      }
+    } catch {
+      // ignore
     }
 
-    // Otherwise, try to hydrate from last DB entry
     (async () => {
       try {
         const u = (await supabase.auth.getSession()).data.session?.user ?? null;
@@ -73,7 +90,7 @@ export default function DashboardJournalWidget() {
     })();
   }, []);
 
-  // Lightweight autosave to localStorage on every change (no interval!)
+  // Lightweight autosave to localStorage on every change
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -83,9 +100,15 @@ export default function DashboardJournalWidget() {
     }
   }, [draft]);
 
+  function setTransient(state: "saved" | "error", ms: number) {
+    setSaving(state);
+    if (timeoutRef.current != null) clearTimeout(timeoutRef.current);
+    timeoutRef.current = window.setTimeout(() => setSaving("idle"), ms);
+  }
+
   async function save() {
     const text = draft.trim();
-    if (!user || !text) return;
+    if (!user || !text || loadingInitial || saving === "saving") return;
 
     setSaving("saving");
     try {
@@ -94,7 +117,6 @@ export default function DashboardJournalWidget() {
           .from("journal_entries")
           .update({ entry_text: text })
           .eq("id", latestId.current);
-
         if (error) throw error;
       } else {
         const { data, error } = await supabase
@@ -102,18 +124,15 @@ export default function DashboardJournalWidget() {
           .insert({ user_id: user.id, entry_text: text })
           .select("id")
           .single();
-
         if (error) throw error;
         latestId.current = (data as { id: string }).id;
       }
 
-      setSaving("saved");
-      // clear local cache so the latest DB value is authoritative next visit
+      // clear local cache so DB is authoritative next visit
       if (typeof window !== "undefined") localStorage.removeItem(LOCAL_KEY);
-      setTimeout(() => setSaving("idle"), 1200);
+      setTransient("saved", 1200);
     } catch {
-      setSaving("error");
-      setTimeout(() => setSaving("idle"), 2000);
+      setTransient("error", 2000);
     }
   }
 
@@ -132,7 +151,9 @@ export default function DashboardJournalWidget() {
     <div className={styles.card} aria-label="Quick Journal">
       <div className={styles.header}>
         <h3>Quick Journal</h3>
-        <Link href="/journal" className={styles.link}>View all →</Link>
+        <Link href="/journal" className={styles.link}>
+          View all →
+        </Link>
       </div>
 
       <textarea
@@ -142,6 +163,7 @@ export default function DashboardJournalWidget() {
         value={draft}
         maxLength={MAX_LEN}
         disabled={loadingInitial}
+        aria-busy={loadingInitial || saving === "saving"}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -159,11 +181,13 @@ export default function DashboardJournalWidget() {
         >
           {saving === "saving" ? "Saving…" : "Save"}
         </button>
-        <span className={styles.hint}>
+
+        <span className={styles.hint} aria-live="polite">
           {saving === "error" && "Couldn’t save. Check connection."}
           {saving === "saved" && "Saved"}
           {saving === "idle" && "Ctrl/Cmd+Enter"}
         </span>
+
         <span className={styles.hint} aria-live="polite">
           {draft.length}/{MAX_LEN}
         </span>
@@ -175,3 +199,4 @@ export default function DashboardJournalWidget() {
     </div>
   );
 }
+// components/DashboardJournalWidget.module.css

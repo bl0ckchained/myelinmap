@@ -6,10 +6,11 @@ import styles from "../../styles/Dashboard.module.css";
 interface HabitCorrelationMatrixProps {
   habits: HabitRow[];
   progressData: Record<string, HabitProgress>;
-  dailyReps: {
-    [habitId: string]: { date: string; reps: number }[];
-  };
+  dailyReps: Record<string, { date: string; reps: number }[]>;
 }
+
+const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
+const abbr3 = (name: string): string => name.trim().slice(0, 3).toUpperCase();
 
 export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
   habits,
@@ -23,43 +24,35 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
   );
 
   const correlationMatrix = useMemo(() => {
-    if (habits.length < 2) return [];
+    if (habits.length < 2) return [] as number[][];
 
-    const matrix: number[][] = [];
+    const matrix: number[][] = Array.from({ length: habits.length }, () =>
+      Array(habits.length).fill(0),
+    );
 
     for (let i = 0; i < habits.length; i++) {
-      matrix[i] = [];
       for (let j = 0; j < habits.length; j++) {
-        if (i === j) {
-          matrix[i][j] = 1;
-        } else {
-          matrix[i][j] = calculateCorrelation(habits[i], habits[j], dailyReps);
-        }
+        matrix[i][j] = i === j ? 1 : calculateCorrelation(habits[i], habits[j], dailyReps);
       }
     }
-
     return matrix;
   }, [habits, dailyReps]);
 
   function calculateCorrelation(
     habit1: HabitRow,
     habit2: HabitRow,
-    repsByHabit: { [habitId: string]: { date: string; reps: number }[] }
+    repsByHabit: Record<string, { date: string; reps: number }[]>
   ): number {
-    const reps1 = repsByHabit[habit1.id] || [];
-    const reps2 = repsByHabit[habit2.id] || [];
-
+    const reps1 = repsByHabit[habit1.id] ?? [];
+    const reps2 = repsByHabit[habit2.id] ?? [];
     if (reps1.length === 0 || reps2.length === 0) return 0;
 
     // Build quick lookup maps for O(1) access by date
     const map1 = new Map<string, number>(reps1.map((r) => [r.date, r.reps]));
     const map2 = new Map<string, number>(reps2.map((r) => [r.date, r.reps]));
 
-    // Intersect dates
-    const dates =
-      reps1.length < reps2.length
-        ? reps1.map((r) => r.date)
-        : reps2.map((r) => r.date);
+    // Iterate the smaller set of dates
+    const dates = (reps1.length < reps2.length ? reps1 : reps2).map((r) => r.date);
 
     let common = 0;
     let matches = 0;
@@ -69,24 +62,20 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
       const b = map2.get(d);
       if (a == null || b == null) continue;
       common++;
-      // Simple co-occurrence score: both done (>0) or both skipped (===0)
+      // Co-occurrence: both >0 or both === 0
       if ((a > 0 && b > 0) || (a === 0 && b === 0)) matches++;
     }
 
     if (common === 0) return 0;
-    return matches / common;
+    return clamp01(matches / common);
   }
 
   function getCorrelationColor(value: number): string {
-    // Green-ish for positive, Red-ish for negative (value ∈ [0..1] in our scoring)
-    const intensity = Math.floor(Math.min(1, Math.max(0, Math.abs(value))) * 255);
-    if (value >= 0) {
-      // more green as it goes up
-      return `rgb(${255 - intensity}, 255, ${255 - intensity})`;
-    } else {
-      // more red as it goes down (we don't really produce negatives here, but keep logic consistent)
-      return `rgb(255, ${255 - intensity}, ${255 - intensity})`;
-    }
+    // value ∈ [0..1] → greener as it rises
+    const v = clamp01(Math.abs(value));
+    const intensity = Math.floor(v * 255);
+    // Positive “togetherness” scale
+    return `rgb(${255 - intensity}, 255, ${255 - intensity})`;
   }
 
   if (habits.length < 2) {
@@ -117,12 +106,15 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
           className={styles.correlationTable}
           aria-label="Habit correlation co-occurrence matrix"
         >
+          <caption className="sr-only">
+            Percentage of days two habits occur together (or both skipped).
+          </caption>
           <thead>
             <tr>
               <th scope="col" />
               {habits.map((habit) => (
                 <th key={habit.id} scope="col" title={habit.name}>
-                  {habit.name.substring(0, 3).toUpperCase()}
+                  {abbr3(habit.name)}
                 </th>
               ))}
             </tr>
@@ -131,9 +123,9 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
             {habits.map((habit, i) => (
               <tr key={habit.id}>
                 <th scope="row" title={habit.name}>
-                  {habit.name.substring(0, 3).toUpperCase()}
+                  {abbr3(habit.name)}
                 </th>
-                {correlationMatrix[i]?.map((value, j) => {
+                {(correlationMatrix[i] ?? []).map((value, j) => {
                   const bg = getCorrelationColor(value);
                   const highContrast = Math.abs(value) > 0.5;
                   return (
@@ -143,6 +135,7 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
                         backgroundColor: bg,
                         color: highContrast ? "#fff" : "#333",
                         textAlign: "center",
+                        fontVariantNumeric: "tabular-nums",
                       }}
                       title={`${habits[i].name} ↔ ${habits[j].name}: ${(value * 100).toFixed(0)}%`}
                     >
@@ -169,4 +162,3 @@ export const HabitCorrelationMatrix: React.FC<HabitCorrelationMatrixProps> = ({
     </div>
   );
 };
-

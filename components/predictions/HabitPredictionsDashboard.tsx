@@ -1,6 +1,6 @@
 // components/predictions/HabitPredictionsDashboard.tsx
 import React, { useMemo, useState, useCallback } from "react";
-import { HabitRow } from "../../types/habit";
+import type { HabitRow } from "../../types/habit";
 import { useHabitPredictions } from "../../hooks/useHabitPredictions";
 import { useHabits } from "../../hooks/useHabits";
 import { HabitPredictionCard } from "./HabitPredictionCard";
@@ -44,8 +44,7 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
     const entries = Object.entries(predictions ?? {});
     const filtered = entries.filter(([, prediction]) => {
       if (filter === "high-risk") return prediction.completionProbability < 60;
-      if (filter === "high-potential")
-        return prediction.completionProbability >= 80;
+      if (filter === "high-potential") return prediction.completionProbability >= 80;
       return true;
     });
     filtered.sort(([, a], [, b]) => b.completionProbability - a.completionProbability);
@@ -55,9 +54,9 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
   if (loading) {
     return (
       <div className={styles.predictionsDashboard}>
-        <div className={styles.loadingSpinner}>
+        <div className={styles.loadingSpinner} role="status" aria-live="polite">
           <div className={styles.spinner} />
-          <p>Loading habit predictions...</p>
+          <p>Loading habit predictions…</p>
         </div>
       </div>
     );
@@ -70,13 +69,9 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
         : (error as { message?: string })?.message ?? "Unknown error";
     return (
       <div className={styles.predictionsDashboard}>
-        <div className={styles.errorMessage}>
+        <div className={styles.errorMessage} role="alert">
           <p>Error loading predictions: {message}</p>
-          <button
-            type="button"
-            onClick={handleRetry}
-            className={styles.retryButton}
-          >
+          <button type="button" onClick={handleRetry} className={styles.retryButton}>
             Retry
           </button>
         </div>
@@ -84,8 +79,13 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
     );
   }
 
-  const hasAny =
-    filteredPredictions.length > 0 && (habits?.length ?? 0) > 0;
+  const hasAny = filteredPredictions.length > 0 && (habits?.length ?? 0) > 0;
+
+  // Resolve the currently selected prediction/insight for the modal (guarded)
+  const selectedPrediction =
+    selectedHabit && predictions ? predictions[selectedHabit.id] : undefined;
+  const selectedInsight =
+    selectedHabit && behavioralInsights ? behavioralInsights[selectedHabit.id] : undefined;
 
   return (
     <div className={styles.predictionsDashboard}>
@@ -94,7 +94,7 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
         <p>AI-powered insights into your habit formation journey</p>
       </div>
 
-      <div className={styles.filterControls}>
+      <div className={styles.filterControls} role="tablist" aria-label="Prediction filters">
         <button
           type="button"
           className={filter === "all" ? styles.activeFilter : ""}
@@ -141,13 +141,8 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
         ) : (
           <div className={styles.emptyState}>
             <p>
-              No predictions to show yet. Try adding a habit and logging a few
-              reps, then{" "}
-              <button
-                type="button"
-                onClick={handleRetry}
-                className={styles.linkButton}
-              >
+              No predictions to show yet. Try adding a habit and logging a few reps, then{" "}
+              <button type="button" onClick={handleRetry} className={styles.linkButton}>
                 refresh predictions
               </button>
               .
@@ -156,15 +151,15 @@ export const HabitPredictionsDashboard: React.FC<HabitPredictionsDashboardProps>
         )}
       </div>
 
-      {selectedHabit && (
+      {selectedHabit && selectedPrediction && selectedInsight && (
         <HabitPredictionDetailModal
           habit={selectedHabit}
-          prediction={predictions?.[selectedHabit.id]}
-          behavioralInsight={behavioralInsights?.[selectedHabit.id]}
+          prediction={selectedPrediction}
+          behavioralInsight={selectedInsight}
           onClose={() => setSelectedHabit(null)}
         />
       )}
     </div>
   );
 };
-// End of components/predictions/HabitPredictionsDashboard.tsx
+// HabitPredictionsDashboard.tsx

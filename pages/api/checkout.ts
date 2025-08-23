@@ -4,34 +4,44 @@ import Stripe from "stripe";
 
 const secret = process.env.STRIPE_SECRET_KEY;
 const priceId = process.env.STRIPE_COFFEE_PRICE_ID;
-const successUrl = process.env.STRIPE_SUCCESS_URL;
-const cancelUrl = process.env.STRIPE_CANCEL_URL;
+const successUrl = process.env.STRIPE_SUCCESS_URL; // use as-is if provided
+const cancelUrl = process.env.STRIPE_CANCEL_URL;   // use as-is if provided
 
 const stripe = secret
   ? new Stripe(secret, { apiVersion: "2024-06-20" as Stripe.LatestApiVersion })
   : null;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-  if (!stripe) return res.status(400).json({ error: "Stripe not configured (missing STRIPE_SECRET_KEY)" });
-  if (!priceId) return res.status(400).json({ error: "Stripe not configured (missing STRIPE_COFFEE_PRICE_ID)" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+  if (!stripe) {
+    return res.status(400).json({ error: "Stripe not configured (missing STRIPE_SECRET_KEY)" });
+  }
+  if (!priceId) {
+    return res.status(400).json({ error: "Stripe not configured (missing STRIPE_COFFEE_PRICE_ID)" });
+  }
 
   try {
     const origin = (req.headers.origin as string) || "https://myelinmap.com";
 
+    // If env URLs are not set, fall back to home with the `coffee` flag your Footer expects.
+    const fallbackSuccess = `${origin}/?coffee=success`;
+    const fallbackCancel = `${origin}/?coffee=cancelled`;
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl || `${origin}/thank-you`,
-      cancel_url: cancelUrl || `${origin}/`,
+      success_url: successUrl || fallbackSuccess,
+      cancel_url: cancelUrl || fallbackCancel,
       payment_method_types: ["card"],
       metadata: { purpose: "coffee" },
       payment_intent_data: { metadata: { purpose: "coffee" } },
     });
 
+    res.setHeader("Cache-Control", "no-store");
     return res.status(200).json({ url: session.url });
   } catch (err: unknown) {
-    // Narrow unknown safely without using `any`
     let message = "Stripe error";
     if (err && typeof err === "object" && "message" in err) {
       message = String((err as { message?: unknown }).message);

@@ -6,7 +6,7 @@ interface HabitAnalyticsProps {
   habits: HabitRow[];
   habitRepCount: number;
   streak: number;
-  dailyCounts: number[]; // expected length: 7 (Mon..Sun), but we guard anyway
+  dailyCounts: number[]; // ideally length 7 (Mon..Sun)
 }
 
 export default function HabitAnalytics({
@@ -15,125 +15,135 @@ export default function HabitAnalytics({
   streak,
   dailyCounts,
 }: HabitAnalyticsProps) {
-  // Use first habit as "active" for now; safe if list empty
   const activeHabit = habits?.[0];
 
-  // Prevent division by zero and cap at 100
   const goal = activeHabit?.goal_reps ?? 0;
   const completionRate =
     goal > 0 ? Math.min(100, Math.round((habitRepCount / goal) * 100)) : 0;
 
-  // Simple strength heuristic (cap 100)
   const habitStrength = Math.min(100, streak * 5 + completionRate);
 
-  // Label exactly as many days as we have data for
   const baseWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const labels =
     dailyCounts.length === 7 ? baseWeek : baseWeek.slice(0, dailyCounts.length);
 
+  const Card: React.FC<{ title: string; children: React.ReactNode }> = ({
+    title,
+    children,
+  }) => (
+    <div
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), var(--bg-1)",
+        border: "var(--card-border)",
+        borderRadius: "var(--radius-lg)",
+        padding: 20,
+        boxShadow: "var(--shadow-soft)",
+      }}
+      role="group"
+      aria-label={title}
+    >
+      <h3 style={{ margin: "0 0 12px 0", color: "var(--ink-0)" }}>{title}</h3>
+      {children}
+    </div>
+  );
+
   if (!activeHabit) {
     return (
       <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
-        <h2>Habit Analytics</h2>
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: 12,
-            padding: 20,
-          }}
-        >
-          <p style={{ margin: 0, color: "#374151" }}>
-            No habits yet. Create a habit and log a few reps to unlock analytics.
+        <h2 style={{ color: "var(--ink-0)" }}>Habit Analytics</h2>
+        <Card title="No habits yet">
+          <p style={{ margin: 0, color: "var(--ink-1)" }}>
+            Create a habit and log a few reps to unlock analytics.
           </p>
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
     <div style={{ padding: 20, maxWidth: 800, margin: "0 auto" }}>
-      <h2>Habit Analytics</h2>
+      <h2 style={{ color: "var(--ink-0)" }}>Habit Analytics</h2>
 
       {/* Metrics */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
           gap: 20,
           marginBottom: 30,
         }}
       >
-        {/* Completion Rate Card */}
+        {/* Completion Rate */}
         <div
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            background:
+              "linear-gradient(135deg, rgba(0,255,170,.28) 0%, rgba(139,211,255,.18) 100%)",
+            color: "var(--ink-0)",
             padding: 20,
             borderRadius: 12,
             textAlign: "center",
+            border: "1px solid rgba(255,255,255,.08)",
           }}
+          role="group"
+          aria-label="Completion rate"
         >
           <h3 style={{ margin: "0 0 10px 0" }}>Completion Rate</h3>
-          <div style={{ fontSize: "2em", fontWeight: "bold" }}>
-            {completionRate}%
-          </div>
-          <div style={{ fontSize: "0.9em", opacity: 0.8 }}>
+          <div style={{ fontSize: "2em", fontWeight: 800 }}>{completionRate}%</div>
+          <div style={{ fontSize: ".9em", opacity: 0.85 }}>
             {habitRepCount} / {goal} reps
           </div>
         </div>
 
-        {/* Habit Strength Card */}
+        {/* Habit Strength */}
         <div
           style={{
-            background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-            color: "white",
+            background:
+              "linear-gradient(135deg, rgba(217,167,255,.28) 0%, rgba(255,107,107,.20) 100%)",
+            color: "var(--ink-0)",
             padding: 20,
             borderRadius: 12,
             textAlign: "center",
+            border: "1px solid rgba(255,255,255,.08)",
           }}
+          role="group"
+          aria-label="Habit strength"
         >
           <h3 style={{ margin: "0 0 10px 0" }}>Habit Strength</h3>
-          <div style={{ fontSize: "2em", fontWeight: "bold" }}>
-            {habitStrength}%
-          </div>
-          <div style={{ fontSize: "0.9em", opacity: 0.8 }}>
+          <div style={{ fontSize: "2em", fontWeight: 800 }}>{habitStrength}%</div>
+          <div style={{ fontSize: ".9em", opacity: 0.85 }}>
             Based on streak &amp; consistency
           </div>
         </div>
 
-        {/* Streak Card */}
+        {/* Streak */}
         <div
           style={{
-            background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-            color: "white",
+            background:
+              "linear-gradient(135deg, rgba(139,211,255,.24) 0%, rgba(0,242,254,.18) 100%)",
+            color: "var(--ink-0)",
             padding: 20,
             borderRadius: 12,
             textAlign: "center",
+            border: "1px solid rgba(255,255,255,.08)",
           }}
+          role="group"
+          aria-label="Current streak"
         >
           <h3 style={{ margin: "0 0 10px 0" }}>Current Streak</h3>
-          <div style={{ fontSize: "2em", fontWeight: "bold" }}>{streak}</div>
-          <div style={{ fontSize: "0.9em", opacity: 0.8 }}>
+          <div style={{ fontSize: "2em", fontWeight: 800 }}>{streak}</div>
+          <div style={{ fontSize: ".9em", opacity: 0.85 }}>
             {streak === 1 ? "day" : "days"} in a row
           </div>
         </div>
       </div>
 
-      {/* Weekly Progress Chart */}
-      <div
-        style={{
-          background: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: 12,
-          padding: 20,
-          marginBottom: 20,
-        }}
-      >
-        <h3 style={{ margin: "0 0 15px 0" }}>Weekly Progress</h3>
+      {/* Weekly Progress */}
+      <Card title="Weekly Progress">
         <div
-          style={{ display: "flex", alignItems: "end", height: 100, gap: 10 }}
+          style={{ display: "flex", alignItems: "end", height: 110, gap: 10 }}
           aria-label="Weekly progress bar chart"
+          role="img"
         >
           {dailyCounts.map((count, index) => (
             <div
@@ -148,9 +158,12 @@ export default function HabitAnalytics({
               <div
                 style={{
                   width: "100%",
-                  background: count > 0 ? "#10b981" : "#e5e7eb",
+                  background:
+                    count > 0
+                      ? "linear-gradient(180deg, rgba(0,255,170,.7), rgba(0,255,170,.45))"
+                      : "rgba(255,255,255,.12)",
                   height: `${Math.max(10, count * 40)}px`,
-                  borderRadius: "4px 4px 0 0",
+                  borderRadius: "6px 6px 0 0",
                   minHeight: 10,
                   transition: "height 160ms ease",
                 }}
@@ -158,72 +171,40 @@ export default function HabitAnalytics({
                   count === 1 ? "" : "s"
                 }`}
               />
-              <div
-                style={{
-                  fontSize: "0.8em",
-                  marginTop: 5,
-                  color: "#6b7280",
-                }}
-              >
+              <div style={{ fontSize: ".8em", marginTop: 6, color: "var(--ink-2)" }}>
                 {labels[index % labels.length]}
               </div>
             </div>
           ))}
         </div>
-      </div>
+      </Card>
 
       {/* Progress Timeline (placeholder milestones) */}
-      <div
-        style={{
-          background: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: 12,
-          padding: 20,
-        }}
-      >
-        <h3 style={{ margin: "0 0 15px 0" }}>Progress Timeline</h3>
-
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}
-        >
+      <Card title="Progress Timeline">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: "50%",
-              background: "#10b981",
-            }}
+            style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--ok)" }}
+            aria-hidden
           />
-          <span>Started habit</span>
+          <span style={{ color: "var(--ink-1)" }}>Started habit</span>
         </div>
 
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
           <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: "50%",
-              background: "#fbbf24",
-            }}
+            style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--warn)" }}
+            aria-hidden
           />
-          <span>First week completed</span>
+          <span style={{ color: "var(--ink-1)" }}>First week completed</span>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div
-            style={{
-              width: 20,
-              height: 20,
-              borderRadius: "50%",
-              background: "#ef4444",
-            }}
+            style={{ width: 20, height: 20, borderRadius: "50%", background: "var(--danger)" }}
+            aria-hidden
           />
-          <span>Current progress</span>
+          <span style={{ color: "var(--ink-1)" }}>Current progress</span>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
-// End of components/HabitAnalytics.tsx

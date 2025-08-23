@@ -1,12 +1,73 @@
-/* Existing styles (e.g., .header, .title, .subtitle, .nav, .navLink) remain unchanged */
+/* Header + Footer shared container */
+.section {
+  width: 100%;
+  padding: 1.75rem 1rem;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(180deg, rgba(7,10,15,0.7), rgba(7,10,15,0.4));
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
 
-/* Footer styles, merged from HeaderFooter.module.css */
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Header specifics */
+.title {
+  margin: 0 0 .35rem 0;
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 800;
+  letter-spacing: .2px;
+  background: linear-gradient(90deg, #00ffaa, #8bd3ff, #d9a7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 6px 30px rgba(0,255,170,.08);
+}
+
+.subtitle {
+  margin: 0 0 1rem 0;
+  color: #b7c5d6;
+  font-size: 1rem;
+}
+
+.nav {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .55rem .9rem;
+  border-radius: 999px;
+  background: #1f2937; /* base (overridden by inline JS on hover) */
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.12);
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
+  will-change: transform;
+}
+
+.navLink:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,255,170,.25);
+}
+
+/* ===== Footer (fancy) =====
+   If you want the footer to use this look,
+   switch <footer className={styles.section}> to styles.footer,
+   and inner wrapper to styles.container. */
 .footer {
   width: 100%;
-  background: radial-gradient(circle at bottom, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.1));
+  background: radial-gradient(circle at bottom, rgba(16,185,129,0.2), rgba(52,211,153,0.1));
   color: #ffffff;
   padding: 3rem 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
   text-align: center;
   font-size: 0.875rem;
   backdrop-filter: blur(10px);
@@ -42,18 +103,10 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.noticeSuccess {
-  background: rgba(16, 185, 129, 0.15);
-}
+.noticeSuccess { background: rgba(16,185,129,0.15); }
+.noticeCancel  { background: rgba(239,68,68,0.12); }
 
-.noticeCancel {
-  background: rgba(239, 68, 68, 0.12);
-}
-
-.footerLinks {
-  margin-bottom: 1.5rem;
-  color: #ffffff;
-}
+.footerLinks { margin-bottom: 1.5rem; color: #ffffff; }
 
 .footerCopyright {
   background: linear-gradient(90deg, #7ee0c3, #10b981);
@@ -68,10 +121,7 @@
   color: #bfdbfe;
   transition: color 0.3s ease;
 }
-
-.footerLink:hover {
-  color: #10b981;
-}
+.footerLink:hover { color: #10b981; }
 
 .footerSocial {
   display: flex;
@@ -84,28 +134,21 @@
 .coffeeButton {
   padding: 0.6rem 1.1rem;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255,255,255,0.15);
   background: #f59e0b;
   color: #111827;
   font-weight: 800;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-
 .coffeeButton:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 6px 10px rgba(16,185,129,0.3);
 }
+.coffeeButton:disabled { opacity: .7; cursor: not-allowed; }
 
-.coffeeButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.footerJoin {
-  color: #9ca3af;
-}
+.footerJoin { color: #9ca3af; }
 
 .youtubeLink {
   color: #ef4444;
@@ -114,45 +157,29 @@
   gap: 0.35rem;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.youtubeLink:hover { opacity: .9; transform: scale(1.05); }
+.youtubeIcon { fill: currentColor; }
 
-.youtubeLink:hover {
-  opacity: 0.9;
-  transform: scale(1.05);
-}
-
-.youtubeIcon {
-  fill: currentColor;
-}
-
-/* Responsive design */
+/* Responsive touches */
 @media (max-width: 768px) {
+  .nav {
+    justify-content: center;
+  }
   .footerSocial {
     flex-direction: column;
   }
   .footerNotice {
     max-width: 100%;
   }
-  .nav {
-    flex-direction: column;
-    align-items: center;
-  }
   .navLink {
     width: fit-content;
   }
 }
 
-/* Animations */
-.fadeIn {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
+/* Small fade-in utility */
+.fadeIn { animation: fadeIn .5s ease-in-out; }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+/* End of Footer */
