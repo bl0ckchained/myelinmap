@@ -31,8 +31,7 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
           fontSize: "2.5rem",
           fontWeight: 800,
           margin: 0,
-          background:
-            "linear-gradient(90deg, #00ffaa, #8bd3ff, #d9a7ff)",
+          background: "linear-gradient(90deg, #00ffaa, #8bd3ff, #d9a7ff)",
           WebkitBackgroundClip: "text",
           backgroundClip: "text",
           color: "transparent",
@@ -66,42 +65,42 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
         }}
       >
         {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href} legacyBehavior>
-            <a
-              style={{
-                padding: "0.55rem 1rem",
-                borderRadius: "9999px",
-                color: "#ffffff",
-                backgroundColor: "#1f2937",
-                textDecoration: "none",
-                border: "1px solid rgba(255,255,255,.08)",
-                boxShadow: "0 10px 30px rgba(0,0,0,.25)",
-                transition: "all 200ms ease",
-              }}
-              onMouseOver={(e) => {
-                const colorMap: { [k: string]: string } = {
-                  "hover:bg-emerald-500": "#10b981",
-                  "hover:bg-amber-400": "#fbbf24",
-                  "hover:bg-lime-400": "#a3e635",
-                  "hover:bg-cyan-500": "#06b6d4",
-                  "hover:bg-pink-400": "#f472b6",
-                  "hover:bg-rose-400": "#fb7185",
-                  "hover:bg-blue-400": "#60a5fa",
-                };
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.backgroundColor = colorMap[hoverColor] || "#10b981";
-                el.style.color = "#000";
-                el.style.transform = "translateY(-3px) scale(1.03)";
-              }}
-              onMouseOut={(e) => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.backgroundColor = "#1f2937";
-                el.style.color = "#fff";
-                el.style.transform = "translateY(0) scale(1)";
-              }}
-            >
-              {label}
-            </a>
+          <Link
+            key={href}
+            href={href}
+            style={{
+              padding: "0.55rem 1rem",
+              borderRadius: "9999px",
+              color: "#ffffff",
+              backgroundColor: "#1f2937",
+              textDecoration: "none",
+              border: "1px solid rgba(255,255,255,.08)",
+              boxShadow: "0 10px 30px rgba(0,0,0,.25)",
+              transition: "all 200ms ease",
+            }}
+            onMouseEnter={(e) => {
+              const colorMap: { [k: string]: string } = {
+                "hover:bg-emerald-500": "#10b981",
+                "hover:bg-amber-400": "#fbbf24",
+                "hover:bg-lime-400": "#a3e635",
+                "hover:bg-cyan-500": "#06b6d4",
+                "hover:bg-pink-400": "#f472b6",
+                "hover:bg-rose-400": "#fb7185",
+                "hover:bg-blue-400": "#60a5fa",
+              };
+              const el = e.currentTarget as HTMLAnchorElement;
+              el.style.backgroundColor = colorMap[hoverColor] || "#10b981";
+              el.style.color = "#000";
+              el.style.transform = "translateY(-3px) scale(1.03)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement;
+              el.style.backgroundColor = "#1f2937";
+              el.style.color = "#fff";
+              el.style.transform = "translateY(0) scale(1)";
+            }}
+          >
+            {label}
           </Link>
         ))}
       </nav>
@@ -117,8 +116,7 @@ const Footer = () => {
       style={{
         textAlign: "center",
         padding: "2rem",
-        background:
-          "linear-gradient(180deg, rgba(7,10,15,.4), rgba(7,10,15,.75))",
+        background: "linear-gradient(180deg, rgba(7,10,15,.4), rgba(7,10,15,.75))",
         color: "#b7c5d6",
         fontSize: "0.95rem",
         borderTop: "1px solid rgba(255,255,255,.08)",
@@ -134,14 +132,12 @@ const Footer = () => {
 
       <div style={{ marginBottom: "1.2rem", color: "#eaf2ff" }}>
         <p>
-          &copy; {new Date().getFullYear()} MyelinMap.com — Made with 💙 in
-          Michigan · Powered by Quantum Step Consultants LLC
+          &copy; {new Date().getFullYear()} MyelinMap.com — Made with 💙 in Michigan · Powered by
+          Quantum Step Consultants LLC
         </p>
         <p>
-          <Link href="/legalpage" legacyBehavior>
-            <a style={{ textDecoration: "underline", color: "#8bd3ff" }}>
-              Privacy Policy &amp; Terms
-            </a>
+          <Link href="/legalpage" style={{ textDecoration: "underline", color: "#8bd3ff" }}>
+            Privacy Policy &amp; Terms
           </Link>
         </p>
       </div>
@@ -187,15 +183,20 @@ const Footer = () => {
 
 /* ---------------- Accordion (Tailwind-free) ---------------- */
 
-interface AccordionContent { title: string; description: string; }
-interface AccordionProps { title: string; content: AccordionContent[]; }
+interface AccordionContent {
+  title: string;
+  description: string;
+}
+interface AccordionProps {
+  title: string;
+  content: AccordionContent[];
+}
 
 const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
   const [isOpen, setIsOpen] = useState(false);
   const innerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
-  // Recompute height when opening or on resize so animation fits content
   useEffect(() => {
     const measure = () => {
       if (innerRef.current) setHeight(innerRef.current.scrollHeight);
@@ -262,9 +263,7 @@ const Accordion: React.FC<AccordionProps> = ({ title, content }) => {
         <div ref={innerRef} style={{ paddingTop: 6 }}>
           {content.map((item, i) => (
             <div key={i} style={{ marginBottom: 12 }}>
-              <h3 style={{ margin: 0, color: "#56ffa3", fontWeight: 700 }}>
-                {item.title}
-              </h3>
+              <h3 style={{ margin: 0, color: "#56ffa3", fontWeight: 700 }}>{item.title}</h3>
               <p style={{ margin: "6px 0 0", color: "#b7c5d6", lineHeight: 1.7 }}>
                 {item.description}
               </p>
@@ -315,12 +314,12 @@ const ResourceLink = ({
           boxShadow: "0 10px 20px rgba(0,0,0,.35)",
           transition: "transform .15s ease, border-color .2s ease",
         }}
-        onMouseOver={(e) => {
+        onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLAnchorElement;
           el.style.transform = "translateX(6px)";
           el.style.borderColor = "rgba(139,211,255,.35)";
         }}
-        onMouseOut={(e) => {
+        onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLAnchorElement;
           el.style.transform = "translateX(0)";
           el.style.borderColor = "rgba(255,255,255,.08)";
@@ -348,26 +347,94 @@ const ResourceLink = ({
 
 export default function Resources() {
   const selfLoveContent = [
-    { title: "Forgive Yourself", description: "Acknowledge past behaviors as an outgrowth of illness, not a moral failing. Focus on staying well and moving forward without dwelling on past mistakes." },
-    { title: "Develop Self-Compassion", description: "Practice treating oneself as a best friend—with gentler language and objective self-assessment. Challenge negative self-talk by asking how one would advise a loved one in the same situation." },
-    { title: "Set Humble Goals", description: "Begin with achievable, narrow recovery goals (e.g., one day sober). Break larger goals into small, manageable action steps to build a sense of accomplishment and positive momentum." },
-    { title: "Engage in Daily Reflection/Introspection", description: "Prioritize activities like meditating, taking walks, journaling, or writing daily gratitude lists. These practices focus thoughts, foster positive self-regard, process emotions, and help identify and replace negative self-talk." },
-    { title: "Embrace Self-Care", description: "Prioritize physical health (healthy eating, regular exercise, adequate sleep) and mental well-being (engaging in enjoyable activities, relaxation). Self-care can include simple pleasures like sharing meals with friends or engaging in creative arts." },
-    { title: "Be Mindful of Thoughts and Emotions", description: "Practice mindfulness to pay attention to the present moment without judgment, observing thoughts and feelings with kindness and understanding." },
-    { title: "Focus on Strengths", description: "Consciously shift focus from past mistakes and shortcomings to current achievements and inherent strengths." },
-    { title: "Practice Gratitude", description: "Regularly identify and appreciate the positive aspects of one's life, fostering a more positive mindset and self-compassionate outlook." },
-    { title: "Connect with Others", description: "Actively combat isolation by connecting with supportive individuals through group therapy, discussions with a therapist or counselor, or spending time with friends and family." },
-    { title: "Spend Time in Nature", description: "Engage with natural environments (e.g., walking in the woods, watching a sunset) to promote a sense of connection, calmness, and self-compassion during recovery." },
+    {
+      title: "Forgive Yourself",
+      description:
+        "Acknowledge past behaviors as an outgrowth of illness, not a moral failing. Focus on staying well and moving forward without dwelling on past mistakes.",
+    },
+    {
+      title: "Develop Self-Compassion",
+      description:
+        "Practice treating oneself as a best friend—with gentler language and objective self-assessment. Challenge negative self-talk by asking how one would advise a loved one in the same situation.",
+    },
+    {
+      title: "Set Humble Goals",
+      description:
+        "Begin with achievable, narrow recovery goals (e.g., one day sober). Break larger goals into small, manageable action steps to build a sense of accomplishment and positive momentum.",
+    },
+    {
+      title: "Engage in Daily Reflection/Introspection",
+      description:
+        "Prioritize activities like meditating, taking walks, journaling, or writing daily gratitude lists. These practices focus thoughts, foster positive self-regard, process emotions, and help identify and replace negative self-talk.",
+    },
+    {
+      title: "Embrace Self-Care",
+      description:
+        "Prioritize physical health (healthy eating, regular exercise, adequate sleep) and mental well-being (engaging in enjoyable activities, relaxation). Self-care can include simple pleasures like sharing meals with friends or engaging in creative arts.",
+    },
+    {
+      title: "Be Mindful of Thoughts and Emotions",
+      description:
+        "Practice mindfulness to pay attention to the present moment without judgment, observing thoughts and feelings with kindness and understanding.",
+    },
+    {
+      title: "Focus on Strengths",
+      description:
+        "Consciously shift focus from past mistakes and shortcomings to current achievements and inherent strengths.",
+    },
+    {
+      title: "Practice Gratitude",
+      description:
+        "Regularly identify and appreciate the positive aspects of one's life, fostering a more positive mindset and self-compassionate outlook.",
+    },
+    {
+      title: "Connect with Others",
+      description:
+        "Actively combat isolation by connecting with supportive individuals through group therapy, discussions with a therapist or counselor, or spending time with friends and family.",
+    },
+    {
+      title: "Spend Time in Nature",
+      description:
+        "Engage with natural environments (e.g., walking in the woods, watching a sunset) to promote a sense of connection, calmness, and self-compassion during recovery.",
+    },
   ];
 
   const essentialAdviceContent = [
-    { title: "Seeking and Accepting Help", description: "Open and honest communication with loved ones is vital; individuals should not be afraid to ask for their support. It is important to understand that overcoming addiction often requires support and the development of new coping skills; expecting to change without help is often unrealistic. Furthermore, it is advisable to avoid approaches involving lectures, threats, or emotional appeals, as these can exacerbate feelings of shame and lead to isolation." },
-    { title: "Developing a Personalized Recovery Plan", description: "Setting realistic, specific, and measurable goals is a cornerstone of recovery. This includes establishing a start date for abstinence or setting limits on substance use. Identifying personal reasons for wanting to change and outlining concrete steps to take are also crucial elements of this plan. Reflecting on what worked and what did not work in past attempts can provide valuable insights for future strategies." },
-    { title: "Practicing Self-Care and Healthy Habits", description: "Prioritizing physical health is essential. This involves maintaining a healthy diet rich in fruits, vegetables, and whole grains, while limiting processed and sugary foods and ensuring adequate hydration. Regular exercise, starting with low-intensity activities and setting realistic goals, is beneficial, with rest days incorporated for recovery. Sufficient sleep is also fundamental for both physical and mental well-being. Actively finding enjoyable activities, such as hobbies, sports, or volunteering, to replace addictive behaviors can create a fulfilling, substance-free life." },
-    { title: "Managing Triggers and Cravings", description: "Identifying and actively avoiding triggers—people, places, or situations that provoke substance use—is a key strategy. Removing reminders of addiction from one's environment can also be highly effective. Keeping a detailed log of substance use patterns helps in identifying specific triggers. Learning and practicing various coping skills for cravings is paramount. Techniques include \"Urge Surfing,\" which involves mindfully observing the craving's sensations without acting on them. Mindfulness-based tools, such as deep breathing and progressive muscle relaxation, can also provide immediate relief. The SMART Recovery \"DENTS\" tool—Deny or Delay, Escape, Neutralize, Tasks, Swap—offers a structured approach to managing urges. \"Personify and Disarm\" encourages viewing urges as separate from oneself, making them more manageable. An \"Urge Log\" helps individuals identify when and why urges occur, allowing for pattern recognition and assessment of coping effectiveness." },
-    { title: "Building a Strong Support System", description: "Leaning on close friends and family members provides invaluable support; relationship counseling may be beneficial if needed. Building a sober social network by connecting with new, supportive individuals is crucial. Regularly attending 12-step recovery support groups (AA, NA) or SMART Recovery meetings allows individuals to benefit from shared experiences and a sense of community." },
-    { title: "Coping with Stress", description: "Developing healthy stress coping mechanisms is vital. This includes engaging in physical movement (e.g., brisk walks, yoga), practicing meditation, spending time in nature, or interacting with pets. Defining personal values and exploring new pursuits and passions can also help bring pleasure and meaning back into one's life." },
-    { title: "Navigating Relapse", description: "It is important to understand that relapse can be a part of the recovery process, and it should not be a reason to abandon efforts. Continuously monitoring substance use and learning from any lapses is essential for long-term recovery." },
+    {
+      title: "Seeking and Accepting Help",
+      description:
+        "Open and honest communication with loved ones is vital; individuals should not be afraid to ask for their support. It is important to understand that overcoming addiction often requires support and the development of new coping skills; expecting to change without help is often unrealistic. Furthermore, it is advisable to avoid approaches involving lectures, threats, or emotional appeals, as these can exacerbate feelings of shame and lead to isolation.",
+    },
+    {
+      title: "Developing a Personalized Recovery Plan",
+      description:
+        "Setting realistic, specific, and measurable goals is a cornerstone of recovery. This includes establishing a start date for abstinence or setting limits on substance use. Identifying personal reasons for wanting to change and outlining concrete steps to take are also crucial elements of this plan. Reflecting on what worked and what did not work in past attempts can provide valuable insights for future strategies.",
+    },
+    {
+      title: "Practicing Self-Care and Healthy Habits",
+      description:
+        "Prioritizing physical health is essential. This involves maintaining a healthy diet rich in fruits, vegetables, and whole grains, while limiting processed and sugary foods and ensuring adequate hydration. Regular exercise, starting with low-intensity activities and setting realistic goals, is beneficial, with rest days incorporated for recovery. Sufficient sleep is also fundamental for both physical and mental well-being. Actively finding enjoyable activities, such as hobbies, sports, or volunteering, to replace addictive behaviors can create a fulfilling, substance-free life.",
+    },
+    {
+      title: "Managing Triggers and Cravings",
+      description:
+        'Identifying and actively avoiding triggers—people, places, or situations that provoke substance use—is a key strategy. Removing reminders of addiction from one\'s environment can also be highly effective. Keeping a detailed log of substance use patterns helps in identifying specific triggers. Learning and practicing various coping skills for cravings is paramount. Techniques include "Urge Surfing," which involves mindfully observing the craving\'s sensations without acting on them. Mindfulness-based tools, such as deep breathing and progressive muscle relaxation, can also provide immediate relief. The SMART Recovery "DENTS" tool—Deny or Delay, Escape, Neutralize, Tasks, Swap—offers a structured approach to managing urges. "Personify and Disarm" encourages viewing urges as separate from oneself, making them more manageable. An "Urge Log" helps individuals identify when and why urges occur, allowing for pattern recognition and assessment of coping effectiveness.',
+    },
+    {
+      title: "Building a Strong Support System",
+      description:
+        "Leaning on close friends and family members provides invaluable support; relationship counseling may be beneficial if needed. Building a sober social network by connecting with new, supportive individuals is crucial. Regularly attending 12-step recovery support groups (AA, NA) or SMART Recovery meetings allows individuals to benefit from shared experiences and a sense of community.",
+    },
+    {
+      title: "Coping with Stress",
+      description:
+        "Developing healthy stress coping mechanisms is vital. This includes engaging in physical movement (e.g., brisk walks, yoga), practicing meditation, spending time in nature, or interacting with pets. Defining personal values and exploring new pursuits and passions can also help bring pleasure and meaning back into one's life.",
+    },
+    {
+      title: "Navigating Relapse",
+      description:
+        "It is important to understand that relapse can be a part of the recovery process, and it should not be a reason to abandon efforts. Continuously monitoring substance use and learning from any lapses is essential for long-term recovery.",
+    },
   ];
 
   const recoveryLinks = [
@@ -376,40 +443,43 @@ export default function Resources() {
     { href: "https://www.aa.org/", title: "Alcoholics Anonymous", description: "Find meetings and support tools for alcohol addiction." },
     { href: "https://www.na.org/", title: "Narcotics Anonymous", description: "A non-profit fellowship for those recovering from drug addiction." },
     { href: "https://www.nami.org/Home", title: "National Alliance on Mental Illness (NAMI)", description: "A leading mental health advocacy organization." },
-    { href: "https://smartrecovery.org/", title: "SMART Recovery", description: "A self-empowering addiction recovery support group." }
+    { href: "https://smartrecovery.org/", title: "SMART Recovery", description: "A self-empowering addiction recovery support group." },
   ];
 
   const scienceLinks = [
     { href: "https://www.brainfacts.org/", title: "BrainFacts.org", description: "Explore how the brain works, builds skills, and heals itself." },
     { href: "https://charlesduhigg.com/the-power-of-habit/", title: "The Power of Habit", description: "Book and resources on how habits are formed and how to change them." },
     { href: "https://danielcoyle.com/the-talent-code/", title: "The Talent Code", description: "Daniel Coyle reveals how deep practice and myelin growth unlock skill mastery." },
-    { href: "https://www.amazon.com/dp/1250223180", title: "What Happened to You?", description: "Oprah and Dr. Perry's groundbreaking book on understanding trauma and healing." }
+    { href: "https://www.amazon.com/dp/1250223180", title: "What Happened to You?", description: "Oprah and Dr. Perry's groundbreaking book on understanding trauma and healing." },
   ];
 
   const educationLinks = [
     { href: "https://www.baycollege.edu/", title: "Bay de Noc Community College", description: "The place where my journey began to change. A beacon of hope, growth, and transformation." },
     { href: "https://www.khanacademy.org/", title: "Khan Academy", description: "Free, world-class education in math, science, and more." },
     { href: "https://www.coursera.org/", title: "Coursera", description: "Online courses from top universities and companies." },
-    { href: "https://www.edx.org/", title: "edX", description: "High-quality online courses and programs from universities worldwide." }
+    { href: "https://www.edx.org/", title: "edX", description: "High-quality online courses and programs from universities worldwide." },
   ];
 
   const supportLinks = [
     { href: "https://brenebrown.com", title: "Brené Brown", description: "Resources and research on shame, vulnerability, and courage." },
     { href: "https://insighttimer.com", title: "Insight Timer", description: "A free meditation app with thousands of guided meditations and talks." },
-    { href: "https://www.mindful.org/", title: "Mindful.org", description: "Practical, helpful, and inspiring articles on mindfulness and well-being." }
+    { href: "https://www.mindful.org/", title: "Mindful.org", description: "Practical, helpful, and inspiring articles on mindfulness and well-being." },
   ];
 
   return (
     <>
       <Head>
         <title>Resources — Myelin Map</title>
-        <meta name="description" content="A curated collection of support tools and resources for your growth journey." />
+        <meta
+          name="description"
+          content="A curated collection of support tools and resources for your growth journey."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <Header
         title="Support for the Whole Journey 💡"
-        subtitle="Whether you're rewiring your brain, battling addiction, or building discipline, you're not alone."
+        subtitle="Whether you&apos;re rewiring your brain, battling addiction, or building discipline, you&apos;re not alone."
       />
 
       <main
@@ -563,3 +633,5 @@ export default function Resources() {
 }
 // --- IGNORE ---
 // This file defines the Resources page for Myelin Map.
+// It includes a header, footer, accordions for advice, and resource links.
+// The design avoids Tailwind CSS, using inline styles for a custom look. 

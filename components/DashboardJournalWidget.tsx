@@ -132,7 +132,10 @@ export default function DashboardJournalWidget() {
     <div className={styles.card} aria-label="Quick Journal">
       <div className={styles.header}>
         <h3>Quick Journal</h3>
-        <Link href="/journal" className={styles.link}>View all →</Link>
+        <Link href="/journal" className={styles.link}>
+  <span>View all →</span>
+</Link>
+
       </div>
 
       <textarea

@@ -1,4 +1,3 @@
-import React from "react";
 import Link from "next/link";
 
 // This is a self-contained version of the Legal page, combining the main
@@ -20,17 +19,17 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
       {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
       <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
         {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href} legacyBehavior>
-            <a
-              className={`
-                px-4 py-2 rounded-full bg-gray-800 text-white
-                ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md
-                transform hover:-translate-y-1 hover:scale-105
-              `}
-            >
-              {label}
-            </a>
+          <Link
+            key={href}
+            href={href}
+            className={`
+              px-4 py-2 rounded-full bg-gray-800 text-white
+              ${hoverColor} hover:text-black
+              transition-all duration-300 shadow-md
+              transform hover:-translate-y-1 hover:scale-105
+            `}
+          >
+            {label}
           </Link>
         ))}
       </nav>
@@ -47,19 +46,19 @@ const Footer = () => {
           Special thanks to Matt Stewart &mdash; your belief helped light this path.
         </p>
         <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
+          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day{" "}
+          <span role="img" aria-label="brain emoji">🧠</span>
         </p>
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          &copy; 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
+          &copy; {new Date().getFullYear()} MyelinMap.com Made with{" "}
+          <span role="img" aria-label="blue heart emoji">💙</span> in Michigan &middot; Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
-          <Link href="/legalpage" legacyBehavior>
-            <a className="underline hover:text-blue-300">
-              Privacy Policy & Terms
-            </a>
+          <Link href="/legalpage" className="underline hover:text-blue-300">
+            Privacy Policy &amp; Terms
           </Link>
         </p>
       </div>
@@ -99,10 +98,8 @@ export default function LegalPage() {
 
       <main className="max-w-4xl mx-auto p-6 bg-white text-gray-800 space-y-10">
         <p className="text-sm text-right">
-          <Link href="/" legacyBehavior>
-            <a className="text-blue-600 hover:underline">
-              ← Back to Home
-            </a>
+          <Link href="/" className="text-blue-600 hover:underline">
+            &larr; Back to Home
           </Link>
         </p>
 

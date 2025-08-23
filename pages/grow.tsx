@@ -1,7 +1,6 @@
 import Head from "next/head";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import React from 'react';
 
 // This is a self-contained version of the Grow page, combining the main
 // page logic with the Header and Footer components to resolve import issues.
@@ -24,17 +23,17 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
       {subtitle && <p className="text-lg mt-2 max-w-xl mx-auto">{subtitle}</p>}
       <nav className="mt-6 flex flex-wrap justify-center gap-4 text-sm">
         {navLinks.map(({ href, label, hoverColor }) => (
-          <Link key={href} href={href} legacyBehavior>
-            <a
-              className={`
-                px-4 py-2 rounded-full bg-gray-800 text-white
-                ${hoverColor} hover:text-black
-                transition-all duration-300 shadow-md
-                transform hover:-translate-y-1 hover:scale-105
-              `}
-            >
-              {label}
-            </a>
+          <Link
+            key={href}
+            href={href}
+            className={`
+              px-4 py-2 rounded-full bg-gray-800 text-white
+              ${hoverColor} hover:text-black
+              transition-all duration-300 shadow-md
+              transform hover:-translate-y-1 hover:scale-105
+            `}
+          >
+            {label}
           </Link>
         ))}
       </nav>
@@ -51,19 +50,19 @@ const Footer = () => {
           Special thanks to Matt Stewart — your belief helped light this path.
         </p>
         <p>
-          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day <span role="img" aria-label="brain emoji">🧠</span>
+          <span role="img" aria-label="brain emoji">🧠</span> Designed to wire greatness into your day{" "}
+          <span role="img" aria-label="brain emoji">🧠</span>
         </p>
       </div>
       <div className="space-y-2 mb-4">
         <p>
-          © 2025 MyelinMap.com Made with <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
+          © {new Date().getFullYear()} MyelinMap.com Made with{" "}
+          <span role="img" aria-label="blue heart emoji">💙</span> in Michigan · Powered by Quantum Step
           Consultants LLC
         </p>
         <p>
-          <Link href="/legalpage" legacyBehavior>
-            <a className="underline hover:text-blue-300">
-              Privacy Policy & Terms
-            </a>
+          <Link href="/legalpage" className="underline hover:text-blue-300">
+            Privacy Policy &amp; Terms
           </Link>
         </p>
       </div>
@@ -104,7 +103,10 @@ const RepCounter = ({ count, onRep }: { count: number; onRep: () => void }) => (
   <div className="bg-emerald-600 text-center p-6 rounded-xl shadow-lg">
     <h3 className="text-xl font-bold mb-2 text-white">Rep Counter</h3>
     <p className="text-2xl font-extrabold text-white">{count}</p>
-    <button onClick={onRep} className="mt-4 bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
+    <button
+      onClick={onRep}
+      className="mt-4 bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
+    >
       Log Rep
     </button>
   </div>
@@ -123,7 +125,7 @@ export default function GrowPage() {
     depth: number;
     width: number;
   }
-  
+
   interface Particle {
     x: number;
     y: number;
@@ -150,15 +152,15 @@ export default function GrowPage() {
 
     const ivyColor = "hsl(140, 100%, 65%)";
     const magicGlow = "rgba(131, 255, 184, 0.4)";
-    const particles: Particle[] = []; // Corrected the type here
-    let branchQueue: Branch[] = []; // Corrected the type here
+    const particles: Particle[] = [];
+    let branchQueue: Branch[] = [];
     let animationFrame: number;
 
     const createParticles = (x: number, y: number) => {
       for (let i = 0; i < 10; i++) {
         particles.push({
-          x: x,
-          y: y,
+          x,
+          y,
           vx: (Math.random() - 0.5) * 2,
           vy: (Math.random() - 0.5) * 2 - 1,
           life: 50,
@@ -177,7 +179,7 @@ export default function GrowPage() {
       ctx.lineWidth = width;
       ctx.shadowBlur = 15;
       ctx.shadowColor = magicGlow;
-      ctx.lineCap = 'round';
+      ctx.lineCap = "round";
       ctx.moveTo(x, y);
       ctx.lineTo(x2, y2);
       ctx.stroke();
@@ -224,7 +226,7 @@ export default function GrowPage() {
 
       if (branchQueue.length > 0) {
         const nextBranchesToDraw = branchQueue.splice(0, 2);
-        nextBranchesToDraw.forEach(b => {
+        nextBranchesToDraw.forEach((b) => {
           drawBranch(b.x, b.y, b.angle, b.depth, b.width);
         });
       }
@@ -248,7 +250,7 @@ export default function GrowPage() {
       cancelAnimationFrame(animationFrame);
       window.removeEventListener("resize", resizeCanvas);
     };
-  }, [repCount]); // The repCount dependency is correct because the tree's growth depends on it
+  }, [repCount]);
 
   return (
     <>
@@ -283,8 +285,7 @@ export default function GrowPage() {
         {/* 📘 Explanation */}
         <section className="max-w-3xl space-y-6 text-center text-slate-200">
           <p>
-            Every time you log a rep, your mystical Tree of Life grows stronger
-            — more branches, more light, more magic.
+            Every time you log a rep, your mystical Tree of Life grows stronger — more branches, more light, more magic.
           </p>
           <h2 className="text-2xl font-semibold text-white">This Is Only the Beginning</h2>
           <p>
