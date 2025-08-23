@@ -25,29 +25,29 @@ export default function Header({
       <div className={styles.inner}>
         <h1 className={styles.title}>{title}</h1>
         {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-        <nav className={styles.nav} aria-label="Primary navigation">
-          {navLinks.map(({ href, label, bgColor }) => (
-            <Link key={href} href={href} legacyBehavior>
-              <a
-                className={styles.navLink}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.backgroundColor = bgColor;
-                  el.style.color = "#000000";
-                  el.style.transform = "scale(1.05)";
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLAnchorElement;
-                  el.style.backgroundColor = "#1f2937";
-                  el.style.color = "#ffffff";
-                  el.style.transform = "scale(1)";
-                }}
-              >
-                {label}
-              </a>
-            </Link>
-          ))}
-        </nav>
+        <nav className={styles.nav} aria-label="Primary navigation">
+          {navLinks.map(({ href, label, bgColor }) => (
+            <Link
+              key={href}
+              href={href}
+              className={styles.navLink}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.backgroundColor = bgColor;
+                el.style.color = "#000000";
+                el.style.transform = "scale(1.05)";
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget as HTMLAnchorElement;
+                el.style.backgroundColor = "#1f2937";
+                el.style.color = "#ffffff";
+                el.style.transform = "scale(1)";
+              }}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );
