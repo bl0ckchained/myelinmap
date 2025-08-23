@@ -1,5 +1,66 @@
 /* Existing styles (e.g., .header, .title, .subtitle, .nav, .navLink) remain unchanged */
 
+/* ==== Header (center + tidy) ==== */
+.section {
+  position: sticky;          /* keep visible on scroll (optional) */
+  top: 0;
+  z-index: 500;
+  width: 100%;
+  background: #0f1115;
+  border-bottom: 1px solid #1f2937;
+}
+
+.inner {
+  max-width: 1100px;         /* <-- constrains width */
+  margin-inline: auto;       /* <-- centers the header content */
+  padding: 14px 20px 18px;
+}
+
+.title {
+  margin: 0 0 4px 0;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: #eaeaf0;
+  letter-spacing: 0.2px;
+}
+
+.subtitle {
+  margin: 0 0 12px 0;
+  color: #c7c9d3;
+  font-size: 0.98rem;
+}
+
+/* Nav row (desktop/tablet baseline) */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* Base pill style; hover colors are set inline in Header.tsx */
+.navLink {
+  background: #1f2937;       /* default dark pill */
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease;
+  will-change: transform;
+}
+
+/* Keep your existing mobile tweaks */
+@media (max-width: 768px) {
+  .nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  .navLink {
+    width: fit-content;
+  }
+}
+
 /* Footer styles, merged from HeaderFooter.module.css */
 .footer {
   width: 100%;

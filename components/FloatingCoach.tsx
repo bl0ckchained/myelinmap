@@ -1,5 +1,6 @@
 // components/FloatingCoach.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 /** Chat message shape (prevents literal -> string widening) */
 type ChatMsg = { role: "user" | "assistant" | "system"; content: string };
@@ -52,7 +53,8 @@ export default function FloatingCoach({
   const [chatLog, setChatLog] = useState<ChatMsg[]>([
     {
       role: "assistant",
-      content: "Welcome. I'm here and on your side. What's present for you right now?",
+      content:
+        "Welcome. I'm here and on your side. What's present for you right now?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -84,12 +86,17 @@ export default function FloatingCoach({
   // Load persistent chat
   useEffect(() => {
     try {
-      const saved = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      const saved =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem(storageKey)
+          : null;
       if (saved) {
         const parsed = JSON.parse(saved) as ChatMsg[];
         if (
           Array.isArray(parsed) &&
-          parsed.every((m) => typeof m?.role === "string" && typeof m?.content === "string")
+          parsed.every(
+            (m) => typeof m?.role === "string" && typeof m?.content === "string",
+          )
         ) {
           setChatLog(parsed);
         }
@@ -102,7 +109,7 @@ export default function FloatingCoach({
   // Persist chat
   useEffect(() => {
     try {
-      localStorage.setItem(storageKey, JSON.stringify(chatLog));
+      window.localStorage.setItem(storageKey, JSON.stringify(chatLog));
     } catch {
       // ignore
     }
@@ -169,19 +176,24 @@ export default function FloatingCoach({
       style={{
         display: "flex",
         flexDirection: "column",
-        width: variant === "floating" ? 320 : "100%",
-        height: variant === "floating" ? 460 : "auto",
+        width: variant === "floating" ? 340 : "100%",
+        height: variant === "floating" ? 480 : "auto",
         background:
           variant === "floating"
-            ? "#0b1020"
-            : "linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.9))",
+            ? "linear-gradient(180deg, rgba(14,23,42,0.98), rgba(2,6,23,0.98))"
+            : "linear-gradient(180deg, rgba(14,23,42,0.95), rgba(2,6,23,0.95))",
         color: "#e5e7eb",
-        borderRadius: 16,
+        borderRadius: 18,
         border: "1px solid rgba(148,163,184,0.18)",
-        boxShadow: "0 12px 28px rgba(0,0,0,0.35)",
+        boxShadow:
+          "0 12px 28px rgba(0,0,0,0.35), inset 0 0 24px rgba(99,102,241,0.08)",
         padding: 12,
+        backdropFilter: "blur(6px)",
       }}
       className={className}
+      role={variant === "floating" ? "dialog" : "group"}
+      aria-label={title?.trim() || "Coach"}
+      aria-modal={variant === "floating" ? false : undefined}
     >
       {/* Header */}
       <div
@@ -192,8 +204,8 @@ export default function FloatingCoach({
           marginBottom: 8,
         }}
       >
-        <span style={{ fontSize: 20 }} aria-hidden={true}>
-          🧘
+        <span style={{ fontSize: 20 }} aria-hidden>
+          🧠
         </span>
         <strong aria-live="polite">{title?.trim() || "Coach"}</strong>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
@@ -208,14 +220,18 @@ export default function FloatingCoach({
             </button>
           )}
           <button
-            onClick={() => quickInsert("I'm overwhelmed. Help me find one tiny step.")}
+            onClick={() =>
+              quickInsert("I'm overwhelmed. Help me find one tiny step.")
+            }
             title="Tiny step"
             style={chipStyle}
           >
             Tiny step
           </button>
           <button
-            onClick={() => quickInsert("Can you help me plan a 2-minute habit after coffee?")}
+            onClick={() =>
+              quickInsert("Can you help me plan a 2-minute habit after coffee?")
+            }
             title="Plan after coffee"
             style={chipStyle}
           >
@@ -234,7 +250,8 @@ export default function FloatingCoach({
           border: "1px solid rgba(148,163,184,0.15)",
           borderRadius: 12,
           padding: 12,
-          background: "#0b1020",
+          background:
+            "radial-gradient(120% 120% at 0% 0%, rgba(99,102,241,0.08), transparent 60%), #0b1020",
         }}
         role="log"
         aria-live="polite"
@@ -265,9 +282,13 @@ export default function FloatingCoach({
                   m.role === "user"
                     ? "1px solid rgba(37,99,235,.7)"
                     : "1px solid rgba(16,185,129,.25)",
+                boxShadow:
+                  m.role === "user"
+                    ? "0 6px 16px rgba(37, 99, 235, .25)"
+                    : "0 6px 16px rgba(16, 185, 129, .18)",
               }}
             >
-              <div style={{ opacity: 0.75, fontSize: 12, marginBottom: 4 }}>
+              <div style={{ opacity: 0.7, fontSize: 12, marginBottom: 4 }}>
                 {m.role === "user" ? "You" : "Coach"}
               </div>
               {m.content}
@@ -278,7 +299,7 @@ export default function FloatingCoach({
         {loading && (
           <div style={{ textAlign: "left", color: "#a7f3d0" }}>
             <span style={{ opacity: 0.8 }}>Coach is thinking</span>
-            <span aria-hidden={true} style={{ marginLeft: 6 }}>
+            <span aria-hidden style={{ marginLeft: 6 }}>
               ···
             </span>
           </div>
@@ -309,11 +330,13 @@ export default function FloatingCoach({
           style={{
             padding: "10px 14px",
             borderRadius: 12,
-            background: "#10b981",
+            background:
+              "linear-gradient(135deg, #10b981 0%, #34d399 100%)",
             color: "#062019",
-            fontWeight: 700,
+            fontWeight: 800,
             cursor: loading || !input.trim() ? "not-allowed" : "pointer",
             opacity: loading || !input.trim() ? 0.6 : 1,
+            boxShadow: "0 6px 14px rgba(16,185,129,0.35)",
           }}
           aria-label="Send message"
         >
@@ -363,37 +386,66 @@ export default function FloatingCoach({
 
   // === RETURN A SINGLE ROOT ELEMENT ALWAYS ===
   if (variant === "embedded") {
-    return <div>{ChatWindow}</div>;
+    return (
+      <>
+        {ChatWindow}
+        {/* Minimal animation + a11y helpers available globally */}
+        <StyleBooster />
+      </>
+    );
   }
 
-  return (
-    <div
-      // single root, contains both the FAB and (conditionally) the chat
-      style={{ position: "fixed", bottom: "1.25rem", right: "1.25rem", zIndex: 9999 }}
-    >
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label="Toggle AI Coach"
+  // Floating: render at <body> so transforms/overflow can't trap it
+  const floatingNode = (
+    <>
+      <div
         style={{
-          backgroundColor: "#059669",
-          color: "#fff",
-          borderRadius: "9999px",
-          padding: "1.1rem",
-          border: "2px solid #facc15",
-          boxShadow: "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
-          transition: "transform 0.2s",
-          cursor: "pointer",
-          animation: "mm-float 3s ease-in-out infinite",
-          willChange: "transform",
+          position: "fixed",
+          right: "16px",
+          bottom: "max(16px, env(safe-area-inset-bottom))",
+          zIndex: 10000,
+          pointerEvents: "none", // let clicks pass through except on children
         }}
       >
-        <span style={{ fontSize: "1.6rem" }} aria-hidden={true}>
-          🧘
-        </span>
-      </button>
-      {open && <div style={{ marginTop: "0.5rem" }}>{ChatWindow}</div>}
-    </div>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-label="Toggle AI Coach"
+          style={{
+            background:
+              "radial-gradient(120% 120% at 0% 0%, #22c55e, #059669)",
+            color: "#fff",
+            borderRadius: "9999px",
+            padding: "1.1rem",
+            border: "2px solid #facc15",
+            boxShadow:
+              "0 0 0 3px rgba(250, 204, 21, 0.35), 0 10px 20px rgba(0,0,0,0.25)",
+            transition: "transform 0.2s",
+            cursor: "pointer",
+            animation: "mm-float 3s ease-in-out infinite",
+            willChange: "transform",
+            pointerEvents: "auto", // clickable
+          }}
+          title={open ? "Close coach" : "Open coach"}
+        >
+          <span style={{ fontSize: "1.6rem" }} aria-hidden>
+            🧘
+          </span>
+        </button>
+
+        {open && (
+          <div style={{ marginTop: "0.5rem", pointerEvents: "auto" }}>
+            {ChatWindow}
+          </div>
+        )}
+      </div>
+      <StyleBooster />
+    </>
   );
+
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
+    return createPortal(floatingNode, document.body);
+  }
+  return floatingNode; // SSR fallback
 }
 
 /* ---------- tiny style helpers ---------- */
@@ -415,6 +467,7 @@ const inputStyle: React.CSSProperties = {
   background: "#0f172a",
   color: "#e5e7eb",
   resize: "none",
+  outline: "none",
 };
 
 const utilBtnStyle: React.CSSProperties = {
@@ -423,3 +476,22 @@ const utilBtnStyle: React.CSSProperties = {
   color: "#94a3b8",
   cursor: "pointer",
 };
+
+/**
+ * Injects global keyframes + reduced motion guard so the FAB has a subtle float.
+ * Keeping this here avoids needing extra CSS files.
+ */
+function StyleBooster() {
+  return (
+    <style jsx global>{`
+      @keyframes mm-float {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+        100% { transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mm-reduce { animation: none !important; }
+      }
+    `}</style>
+  );
+}
