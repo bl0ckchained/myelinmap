@@ -1,41 +1,76 @@
-import React from 'react';
-import styles from './Card.module.css';
+// components/ui/Card.tsx
+import React from "react";
+import styles from "./Card.module.css";
 
-interface CardProps {
+type Variant = "default" | "glass" | "magical" | "premium";
+
+export interface CardProps {
   children: React.ReactNode;
   className?: string;
-  variant?: 'default' | 'glass' | 'magical' | 'premium';
+  variant?: Variant;
   glow?: boolean;
   hover?: boolean;
-  onClick?: (e: React.MouseEvent) => void;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-export default function Card({ 
-  children, 
-  className = '', 
-  variant = 'default',
-  glow = false,
-  hover = true,
-  onClick
-}: CardProps) {
-  const cardClasses = [
-    styles.card,
-    styles[variant],
-    glow ? styles.glow : '',
-    hover ? styles.hover : '',
-    className
-  ].filter(Boolean).join(' ');
+/**
+ * Elegant glassy card with optional shimmer (when variant="magical").
+ * - Adds role+keyboard activation when onClick is provided
+ * - Forwards ref for parent measurement/focus if needed
+ */
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  (
+    {
+      children,
+      className = "",
+      variant = "default",
+      glow = false,
+      hover = true,
+      onClick,
+      ...rest
+    },
+    ref
+  ) => {
+    const cardClasses = [
+      styles.card,
+      styles[variant],
+      glow ? styles.glow : "",
+      hover ? styles.hover : "",
+      className,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-  return (
-    <div className={cardClasses} onClick={onClick}>
-      {variant === 'magical' && (
-        <div className={styles.magicalOverlay}>
-          <div className={styles.shimmer}></div>
-        </div>
-      )}
-      <div className={styles.content}>
-        {children}
+    // Enable keyboard activation when clickable
+    const isClickable = typeof onClick === "function";
+    const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+      if (!isClickable) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        (e.currentTarget as HTMLDivElement).click();
+      }
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={cardClasses}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        role={isClickable ? "button" : undefined}
+        tabIndex={isClickable ? 0 : undefined}
+        {...rest}
+      >
+        {variant === "magical" && (
+          <div className={styles.magicalOverlay} aria-hidden>
+            <div className={styles.shimmer} />
+          </div>
+        )}
+        <div className={styles.content}>{children}</div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+Card.displayName = "Card";
+export default Card;
