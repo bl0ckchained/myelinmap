@@ -5,7 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-/** ---------- Starfield (subtle, low-alpha, no deps) ---------- */
+/** ---------- Starfield (HiDPI-sharp, subtle, no deps) ---------- */
 function StarfieldCanvas() {
   const ref = useRef<HTMLCanvasElement | null>(null);
   const animRef = useRef<number | null>(null);
@@ -17,24 +17,43 @@ function StarfieldCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = 0;
+    let height = 0;
+    let dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
 
-    const numStars = Math.min(140, Math.floor((width * height) / 18000));
-    starsRef.current = Array.from({ length: numStars }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      z: Math.random() * 0.7 + 0.3,
-    }));
-
-    const onResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+    const seedStars = () => {
+      const numStars = Math.min(140, Math.floor((width * height) / 18000));
+      starsRef.current = Array.from({ length: numStars }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: Math.random() * 0.7 + 0.3,
+      }));
     };
-    window.addEventListener("resize", onResize);
+
+    const resize = () => {
+      dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      // CSS pixels (layout size)
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
+
+      // Device pixels (backing store)
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+
+      // Draw in CSS pixel coordinates
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      width = w;
+      height = h;
+      seedStars();
+    };
 
     const tick = () => {
       ctx.clearRect(0, 0, width, height);
+
       const g = ctx.createRadialGradient(
         width / 2,
         height * 0.35,
@@ -63,20 +82,24 @@ function StarfieldCanvas() {
         ctx.fill();
       }
       ctx.globalAlpha = 1;
+
       animRef.current = requestAnimationFrame(tick);
     };
 
+    resize();
+    window.addEventListener("resize", resize);
     tick();
+
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
   return (
     <canvas
       ref={ref}
-      aria-hidden
+      aria-hidden={true}
       style={{
         position: "fixed",
         inset: 0,
@@ -118,12 +141,20 @@ function BackToTop() {
         transition: "transform 160ms ease, box-shadow 220ms ease",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
-        (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 14px 30px rgba(245,158,11,0.38)";
+        e.currentTarget.style.transform = "translateY(-1px)";
+        e.currentTarget.style.boxShadow = "0 14px 30px rgba(245,158,11,0.38)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 24px rgba(245,158,11,0.28)";
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 10px 24px rgba(245,158,11,0.28)";
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.transform = "translateY(-1px)";
+        e.currentTarget.style.boxShadow = "0 14px 30px rgba(245,158,11,0.38)";
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 10px 24px rgba(245,158,11,0.28)";
       }}
     >
       ↑ Top
@@ -186,7 +217,7 @@ export default function Science() {
         <section id="rewiring" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>You Are Wired to Heal</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -207,7 +238,7 @@ export default function Science() {
         <section id="brain" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Trauma and Addiction in the Brain</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -241,7 +272,7 @@ export default function Science() {
         <section id="myelin" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Myelination: Paving New Neural Highways</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -266,7 +297,7 @@ export default function Science() {
         <section id="loop" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Cue &rarr; Action &rarr; Reward &rarr; Rep</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -286,7 +317,10 @@ export default function Science() {
             Keep the bar low enough for your hardest day. The job is not to never miss; it&apos;s to return.
           </p>
           <p style={{ marginTop: 10 }}>
-            <Link href="/dashboard" style={{ color: "#fbbf24", textDecoration: "underline" }}>
+            <Link
+              href="/dashboard"
+              style={{ color: "#fbbf24", textDecoration: "underline" }}
+            >
               Try one tiny rep now &rarr;
             </Link>
           </p>
@@ -296,7 +330,7 @@ export default function Science() {
         <section id="practices" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Practical Steps to Rewire</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -336,7 +370,10 @@ export default function Science() {
             control; movement lowers cortisol and boosts BDNF, the growth fertilizer for circuits.
           </p>
           <p style={{ marginTop: 10 }}>
-            <Link href="/dashboard" style={{ color: "#fbbf24", textDecoration: "underline" }}>
+            <Link
+              href="/dashboard"
+              style={{ color: "#fbbf24", textDecoration: "underline" }}
+            >
               Set a 2-minute daily rep &rarr;
             </Link>
           </p>
@@ -346,7 +383,7 @@ export default function Science() {
         <section id="kind" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>The K.I.N.D. Method</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -368,7 +405,7 @@ export default function Science() {
         <section id="safety" style={{ marginBottom: "2rem" }}>
           <h2 style={{ color: "#93c5fd" }}>Trauma-Aware Notes</h2>
           <div
-            aria-hidden
+            aria-hidden={true}
             style={{
               height: 2,
               width: 84,
@@ -404,21 +441,24 @@ export default function Science() {
               borderRadius: "999px",
               fontWeight: 700,
               textDecoration: "none",
-              transition:
-                "transform 160ms ease, box-shadow 220ms ease, background-color 220ms ease",
+              transition: "transform 160ms ease, box-shadow 220ms ease, background-color 220ms ease",
               boxShadow: "0 8px 20px rgba(245,158,11,0.25)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                "0 12px 28px rgba(245,158,11,0.35)";
-              (e.currentTarget as HTMLAnchorElement).style.transform =
-                "translateY(-1px)";
+              e.currentTarget.style.boxShadow = "0 12px 28px rgba(245,158,11,0.35)";
+              e.currentTarget.style.transform = "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.boxShadow =
-                "0 8px 20px rgba(245,158,11,0.25)";
-              (e.currentTarget as HTMLAnchorElement).style.transform =
-                "translateY(0)";
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(245,158,11,0.25)";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.boxShadow = "0 12px 28px rgba(245,158,11,0.35)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.boxShadow = "0 8px 20px rgba(245,158,11,0.25)";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
             Start My Healing Journey &rarr;
@@ -431,7 +471,3 @@ export default function Science() {
     </>
   );
 }
-// This page blends a trauma-aware narrative, clear neuroscience, and actionable steps.
-// Quotes are HTML-escaped to satisfy react/no-unescaped-entities.
-// The StarfieldCanvas is a subtle, low-alpha background effect without external dependencies.
-// The BackToTop button appears after scrolling down 320px and smoothly scrolls to top

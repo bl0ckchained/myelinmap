@@ -1,5 +1,5 @@
 // pages/community.tsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -8,16 +8,16 @@ import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 
 type DBPost = {
-  id?: string | number | null;     // be defensive
+  id?: string | number | null; // be defensive
   user_id?: string | null;
   content?: string | null;
   created_at?: string | null;
 };
 
 type Post = {
-  id: string;         // normalized
-  user_id: string;    // normalized
-  content: string;    // normalized
+  id: string; // normalized
+  user_id: string; // normalized
+  content: string; // normalized
   created_at: string; // normalized ISO
 };
 
@@ -31,9 +31,7 @@ function normalize(row: DBPost): Post | null {
   const user_id = typeof row.user_id === "string" ? row.user_id : "anon";
   const content = typeof row.content === "string" ? row.content : "";
   const created_at =
-    typeof row.created_at === "string"
-      ? row.created_at
-      : new Date().toISOString();
+    typeof row.created_at === "string" ? row.created_at : new Date().toISOString();
 
   if (!content.trim()) return null; // skip empty/invalid rows
   return {
@@ -77,9 +75,7 @@ export default function CommunityPage() {
         console.error("load posts error:", error);
         return;
       }
-      const normalized = (data as DBPost[])
-        .map(normalize)
-        .filter((x): x is Post => !!x);
+      const normalized = (data as DBPost[]).map(normalize).filter((x): x is Post => !!x);
       setPosts(normalized);
     };
     load();
@@ -107,7 +103,7 @@ export default function CommunityPage() {
   }, []);
 
   // --- Helpers ---
-  const timeAgo = (iso: string) => {
+  const timeAgo = useCallback((iso: string) => {
     const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
     if (s < 60) return `${s}s ago`;
     const m = Math.floor(s / 60);
@@ -117,10 +113,10 @@ export default function CommunityPage() {
     const d = Math.floor(h / 24);
     if (d < 7) return `${d}d ago`;
     return new Date(iso).toLocaleString();
-  };
+  }, []);
 
   // --- Post submit (optimistic) ---
-  const handlePostSubmit = async (e: React.FormEvent) => {
+  const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!trimmed || !user || loading) return;
 
@@ -195,11 +191,14 @@ export default function CommunityPage() {
                   <textarea
                     value={postContent}
                     onChange={(e) => {
-                      if (e.target.value.length <= MAX_LEN)
-                        setPostContent(e.target.value);
+                      // keep existing logic; also hard-limit via maxLength
+                      if (e.target.value.length <= MAX_LEN) setPostContent(e.target.value);
                     }}
                     placeholder="Share a rep, a realization, a tiny win… your words might be someone else’s spark."
                     rows={4}
+                    maxLength={MAX_LEN}
+                    aria-label="Write a community post"
+                    aria-invalid={remaining < 0}
                     className="flex-1 px-4 py-3 rounded-xl bg-emerald-800/30 text-emerald-50 placeholder-emerald-100/60 border border-emerald-400/30 focus:outline-none focus:ring-2 focus:ring-emerald-400/60 focus:border-emerald-300/60"
                     disabled={loading}
                   />
@@ -210,6 +209,7 @@ export default function CommunityPage() {
                     type="submit"
                     className="bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-xl font-medium disabled:opacity-50"
                     disabled={!trimmed || loading}
+                    aria-disabled={!trimmed || loading}
                   >
                     {loading ? "Sharing…" : "Share with Myelin Nation"}
                   </button>
@@ -217,6 +217,7 @@ export default function CommunityPage() {
                     className={`ml-auto text-sm ${
                       remaining < 0 ? "text-rose-300" : "text-emerald-100/80"
                     }`}
+                    aria-live="polite"
                   >
                     {remaining} characters
                   </span>
@@ -240,9 +241,7 @@ export default function CommunityPage() {
           {/* Feed */}
           <section aria-live="polite" aria-relevant="additions">
             <div ref={feedTopRef} />
-            <h2 className="text-2xl font-semibold mb-4 text-white">
-              Community Feed
-            </h2>
+            <h2 className="text-2xl font-semibold mb-4 text-white">Community Feed</h2>
 
             {posts.length === 0 ? (
               <p className="text-gray-500 italic">
@@ -276,9 +275,7 @@ export default function CommunityPage() {
 
                         <div className="flex-1">
                           <div className="flex items-center gap-2 text-xs text-gray-400">
-                            <span className="font-mono truncate max-w-[160px]">
-                              {displayId}
-                            </span>
+                            <span className="font-mono truncate max-w-[160px]">{displayId}</span>
                             <span>•</span>
                             <time dateTime={post.created_at}>{when}</time>
                             {isTemp && (
